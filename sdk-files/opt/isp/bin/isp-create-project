@@ -1,0 +1,5 @@
+#!/bin/bash
+
+project_dir=$1
+
+cp -r /opt/isp/project_skeleton $project_dir

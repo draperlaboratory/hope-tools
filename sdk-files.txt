@@ -1,0 +1,11 @@
+OUTPUT bin/ /opt/isp/bin
+OUTPUT lib/ /opt/isp/lib
+OUTPUT libexec/ /opt/isp/libexec
+OUTPUT riscv64-unknown-elf/ /opt/isp/riscv64-unknown-elf
+REPO dover-os/ /opt/isp/project_skeleton/dover-os
+REPO isp-headers/ /opt/isp/project_skeleton/isp-headers
+OUTPUT pex/bin/ /opt/isp/pex/bin
+OUTPUT riscv-tinycrypt/ /opt/isp/riscv-tinycrypt
+OUTPUT tinycrypt/ /opt/isp/tinycrypt
+OUTPUT policies/policytool /opt/isp/bin/
+REPO dover-policies/policy-tool/*Policy.hs /opt/isp/project_skeleton/policies/

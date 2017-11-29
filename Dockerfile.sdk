@@ -1,0 +1,20 @@
+FROM ubuntu:xenial-20171114
+
+RUN apt-get update && \
+    apt-get install -yq \
+            less \
+            emacs \
+            vim \
+            nano \
+            apt-utils
+
+
+
+ARG SDK_VERSION
+ARG SDK_PACKAGE=isp-sdk_${SDK_VERSION}_amd64.deb
+
+COPY ${SDK_PACKAGE} .
+
+RUN apt-get install -yq ./${SDK_PACKAGE}
+
+RUN rm ./${SDK_PACKAGE}

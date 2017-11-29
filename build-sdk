@@ -1,0 +1,68 @@
+#!/bin/bash
+
+set -ex
+
+while getopts ":o:s:f" opt; do
+    case $opt in
+        o)
+            output_dir=$OPTARG
+            ;;
+        s)
+            sdk_version=$OPTARG
+            ;;
+        f)
+            dpkg_options=-z0
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            exit 1
+            ;;
+        : )
+            echo "Invalid option: $OPTARG requires an argument" >&2
+            ;;
+    esac
+done
+
+if [ -z "$output_dir" ]; then
+    echo "Build output directory must be specified via -o"
+    exit 1
+fi
+
+if [ -z "$sdk_version" ]; then
+    echo "SDK version must be specified via -s"
+    exit 1
+fi
+
+sdk_output=$output_dir/sdk_$sdk_version
+
+find sdk-files -name "*~" -delete
+
+rm -rf $sdk_output
+mkdir -p $sdk_output
+cp -r sdk-files/* $sdk_output
+
+mkdir -p $sdk_output/DEBIAN
+m4 --define=SDKVERSION=$sdk_version control.m4 > $sdk_output/DEBIAN/control
+
+while read line; do
+    array=($line)
+    location=${array[0]}
+    src=${array[1]}
+    dest=${array[2]}
+    mkdir -p $(dirname $sdk_output/$dest)
+    case $location in
+        OUTPUT)
+            src_dir=$output_dir
+            ;;
+        REPO)
+            src_dir=".."
+            ;;
+        *)
+            echo "Invalid source location: $location" >&2
+            exit 1
+            ;;
+    esac
+    rsync -av --exclude="*~" --exclude=.git $src_dir/$src $sdk_output/$dest
+done < sdk-files.txt
+
+dpkg-deb $dpkg_options --build $sdk_output .

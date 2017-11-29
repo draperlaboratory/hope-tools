@@ -1,0 +1,6 @@
+sdk-files
+sdk-files.txt
+build-sdk.sh
+*~
+control.m4
+Makefile
