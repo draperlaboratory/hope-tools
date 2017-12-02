@@ -49,6 +49,14 @@ while read line; do
     location=${array[0]}
     src=${array[1]}
     dest=${array[2]}
+    exclusions=("${array[@]:3}")
+
+    exclusion_arg=""
+    for e in "${exclusions[@]}"
+    do
+        exclusion_arg+="--exclude $e "
+    done
+
     mkdir -p $(dirname $sdk_output/$dest)
     case $location in
         OUTPUT)
@@ -62,7 +70,7 @@ while read line; do
             exit 1
             ;;
     esac
-    rsync -av --exclude="*~" --exclude=.git $src_dir/$src $sdk_output/$dest
+    rsync -av --exclude="*~" $exclusion_arg --exclude=.git --exclude=build $src_dir/$src $sdk_output/$dest
 done < sdk-files.txt
 
 dpkg-deb $dpkg_options --build $sdk_output .

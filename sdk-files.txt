@@ -9,3 +9,9 @@ OUTPUT riscv-tinycrypt/ /opt/isp/riscv-tinycrypt
 OUTPUT tinycrypt/ /opt/isp/tinycrypt
 OUTPUT policies/policytool /opt/isp/bin/
 REPO dover-policies/policy-tool/*Policy.hs /opt/isp/project_skeleton/policies/
+OUTPUT dover-spike/ /opt/isp/dover-spike
+REPO dover-sdk-documentation/samples/ /opt/isp/project_skeleton/samples
+OUTPUT empty.fs /opt/isp/
+REPO FreeRTOS-RISCV/ /opt/isp/project_skeleton/FreeRTOS-RISCV samples/cpt_test build_lib
+REPO FreeRTOS-RISCV/build/libfree-rtos.a /opt/isp/project_skeleton/FreeRTOS-RISCV/lib/libfree-rtos.a
+REPO FreeRTOS-RISCV/build_lib/libfree-rtos-support.a /opt/isp/project_skeleton/FreeRTOS-RISCV/lib/libfree-rtos-support.a

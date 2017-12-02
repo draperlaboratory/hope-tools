@@ -9,7 +9,6 @@ RUN apt-get update && \
             apt-utils
 
 
-
 ARG SDK_VERSION
 ARG SDK_PACKAGE=isp-sdk_${SDK_VERSION}_amd64.deb
 

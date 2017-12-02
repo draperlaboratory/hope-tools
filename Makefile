@@ -2,12 +2,14 @@
 .PHONY: toolchain
 .PHONY: sdk
 .PHONY: docker-sdk
+.PHONY: run-docker-sdk
 .PHONY: policy-tool
 .PHONY: fesvr
 .PHONY: tinycrypt
 .PHONY: dover-spike
 .PHONY: free-rtos
 .PHONY: opcodes
+.PHONY: emptyfs
 .PHONY: clean
 .PHONY: cleanall
 
@@ -33,6 +35,7 @@ all:
 	$(MAKE) toolchain
 	$(MAKE) policy-tool tinycrypt dover-spike
 	$(MAKE) dover-os
+	$(MAKE) emptyfs
 	$(MAKE) free-rtos
 
 toolchain:
@@ -48,6 +51,9 @@ sdk: all
 docker-sdk: sdk
 	docker build $(DOCKER_BUILD_ARGS) -t isp-sdk:latest \
 		--build-arg SDK_VERSION=$(SDK_VERSION) -f Dockerfile.sdk .
+
+run-docker-sdk: docker-sdk
+	./run-docker-sdk
 
 policy-tool:
 	$(MAKE) -C ../dover-policies
@@ -78,6 +84,9 @@ dover-os:
 opcodes:
 	cd ../riscv-opcodes && touch opcodes-custom
 	$(MAKE) -C ../riscv-opcodes install | tee -a build.log
+
+emptyfs:
+	../dover-os/build/utils/fs_create $(DOVER)/empty.fs
 
 clean:
 	$(MAKE) -C ../dover-policies clean
