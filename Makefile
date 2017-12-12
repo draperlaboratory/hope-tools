@@ -10,6 +10,7 @@
 .PHONY: free-rtos
 .PHONY: opcodes
 .PHONY: emptyfs
+.PHONY: documentation
 .PHONY: clean
 .PHONY: cleanall
 
@@ -41,7 +42,7 @@ all:
 toolchain:
 	$(MAKE) -C ../riscv-gnu-toolchain
 
-sdk: all
+sdk: all documentation
 	./build-sdk -o $(DOVER) -s $(SDK_VERSION)
 
 # DOCKER_BUILD_ARGS is to allow passing additional parameters to build such as
@@ -88,6 +89,9 @@ opcodes:
 emptyfs:
 	../dover-os/build/utils/fs_create $(DOVER)/empty.fs
 
+documentation:
+	$(MAKE) -C documentation
+
 clean:
 	$(MAKE) -C ../dover-policies clean
 	$(MAKE) -C ../riscv-fesvr clean
@@ -97,4 +101,5 @@ clean:
 
 cleanall: clean
 	$(MAKE) -C ../riscv-gnu-toolchain clean
+	$(MAKE) -C documentation clean
 	rm -rf $(DOVER)

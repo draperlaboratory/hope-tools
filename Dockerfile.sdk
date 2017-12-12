@@ -6,7 +6,8 @@ RUN apt-get update && \
             emacs \
             vim \
             nano \
-            apt-utils
+            apt-utils && \
+    rm -rf /var/lib/apt/lists/*
 
 
 ARG SDK_VERSION
@@ -14,6 +15,7 @@ ARG SDK_PACKAGE=isp-sdk_${SDK_VERSION}_amd64.deb
 
 COPY ${SDK_PACKAGE} .
 
-RUN apt-get install -yq ./${SDK_PACKAGE}
-
-RUN rm ./${SDK_PACKAGE}
+RUN apt-get update && \
+    apt-get install -yq ./${SDK_PACKAGE} && \
+    rm ./${SDK_PACKAGE}  && \
+    rm -rf /var/lib/apt/lists/*

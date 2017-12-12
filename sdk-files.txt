@@ -15,3 +15,4 @@ OUTPUT empty.fs /opt/isp/
 REPO FreeRTOS-RISCV/ /opt/isp/project_skeleton/FreeRTOS-RISCV samples/cpt_test build_lib
 REPO FreeRTOS-RISCV/build/libfree-rtos.a /opt/isp/project_skeleton/FreeRTOS-RISCV/lib/libfree-rtos.a
 REPO FreeRTOS-RISCV/build_lib/libfree-rtos-support.a /opt/isp/project_skeleton/FreeRTOS-RISCV/lib/libfree-rtos-support.a
+REPO isp-tools/documentation/user/ /opt/isp/project_skeleton/documentation
