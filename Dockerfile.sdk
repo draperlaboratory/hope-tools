@@ -2,11 +2,12 @@ FROM ubuntu:xenial-20171114
 
 RUN apt-get update && \
     apt-get install -yq \
-            less \
+            apt-utils \
+            bats \
             emacs \
-            vim \
+            less \
             nano \
-            apt-utils && \
+            vim && \
     rm -rf /var/lib/apt/lists/*
 
 
