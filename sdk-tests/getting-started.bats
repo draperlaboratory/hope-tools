@@ -1,8 +1,8 @@
-@setup "Cleanup Before Test" {
+setup() {
        rm -rf /isp-project
 }
 
-@teardown "Cleanup After Test" {
+teardown() {
        rm -rf /isp-project
 }
 
