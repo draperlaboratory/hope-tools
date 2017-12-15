@@ -10,8 +10,8 @@
 .PHONY: free-rtos
 .PHONY: opcodes
 .PHONY: emptyfs
-.PHONY: sdk-test
-.PHONY: sdk-check
+.PHONY: test-sdk
+.PHONY: check-sdk
 .PHONY: documentation
 .PHONY: clean
 .PHONY: cleanall
@@ -44,16 +44,24 @@ all:
 toolchain:
 	$(MAKE) -C ../riscv-gnu-toolchain
 
-sdk: all documentation
-	./build-sdk -o $(DOVER) -s $(SDK_VERSION)
+sdk:
+ifndef SDK_DISTRO
+	$(error variable SDK_DISTRO not defined)
+endif
+	$(MAKE) all documentation
+	./build-sdk -f -o $(DOVER) -s $(SDK_VERSION) -d $(SDK_DISTRO)
 
 # DOCKER_BUILD_ARGS is to allow passing additional parameters to build such as
 # proxy settings without polluting the Makefile for those who do not need it.
 # For most this does not need to be set
 
 docker-sdk: sdk
-	docker build $(DOCKER_BUILD_ARGS) -t isp-sdk:latest \
-		--build-arg SDK_VERSION=$(SDK_VERSION) -f Dockerfile.sdk .
+ifndef SDK_DISTRO
+	$(error variable SDK_DISTRO not defined)
+endif
+	docker build $(DOCKER_BUILD_ARGS) -t isp-sdk-$(SDK_DISTRO):latest \
+		--build-arg SDK_VERSION=$(SDK_VERSION) \
+		-f distro-sdk/$(SDK_DISTRO)/Dockerfile .
 
 run-docker-sdk: docker-sdk
 	./run-docker-sdk
@@ -91,9 +99,13 @@ opcodes:
 emptyfs:
 	../dover-os/build/utils/fs_create $(DOVER)/empty.fs
 
-sdk-test sdk-check:
+test-sdk check-sdk:
+ifndef SDK_DISTRO
+	$(error variable SDK_DISTRO not defined)
+endif
 	find sdk-tests -name "*~" -delete
-	docker run --rm -i -v $(PWD)/sdk-tests:/sdk-tests -t isp-sdk:latest bats --tap sdk-tests/
+	docker run --rm -i -v $(PWD)/sdk-tests:/sdk-tests \
+		-t isp-sdk-$(SDK_DISTRO):latest bats --tap sdk-tests/
 
 documentation:
 	$(MAKE) -C documentation
