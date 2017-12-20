@@ -1,0 +1,28 @@
+FROM centos:centos7
+
+ENV BATS_SHA512SUM "6614bb9122fcdf76424d8e6ab6944cda34a20e159e4eafc9226b88d41312b03a1eaa40802524b603d760bf656cc6907a01fc914a682f3d19eb552dbb76db652c  bats-0.4.0-1.20141016git3b33a5a.el7.noarch.rpm"
+
+RUN yum install -y \
+            emacs \
+            less \
+            nano \
+            vim \
+            wget && \
+    yum clean all
+
+
+ARG SDK_VERSION
+ARG SDK_DISTRO
+ARG SDK_PACKAGE=isp-sdk-${SDK_VERSION}-0.x86_64.rpm
+
+RUN wget https://www.rpmfind.net/linux/epel/7/x86_64/Packages/b/bats-0.4.0-1.20141016git3b33a5a.el7.noarch.rpm && \
+    sha512sum -c <<< ${BATS_SHA512SUM} && \
+    yum install -y bats-0.4.0-1.20141016git3b33a5a.el7.noarch.rpm && \
+    yum clean all && \
+    rm -rf bats-0.4.0-1.20141016git3b33a5a.el7.noarch.rpm
+
+
+COPY packages/${SDK_DISTRO}/${SDK_PACKAGE} .
+
+RUN yum install -y ./${SDK_PACKAGE}  && \
+    yum clean all

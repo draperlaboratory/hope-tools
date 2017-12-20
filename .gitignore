@@ -1,3 +1,3 @@
 *~
-*.deb
+packages/
 documentation/user/*.pdf

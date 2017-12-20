@@ -1,0 +1,31 @@
+FROM ubuntu:xenial-20171114
+
+RUN apt-get update && \
+    apt-get install -yq \
+            apt-utils \
+            autoconf \
+            automake \
+            autotools-dev \
+            bison \
+            build-essential \
+            cmake \
+            curl \
+            expat \
+            flex \
+            gawk \
+            gperf \
+            haskell-platform \
+            iverilog \
+            libelf-dev \
+            libexpat1-dev \
+            libgmp-dev \
+            libmpc-dev \
+            libmpfr-dev \
+            pandoc \
+            python3 \
+            python3-setuptools \
+            rsync \
+            socat \
+            texinfo \
+            texlive-fonts-recommended && \
+    rm -rf /var/lib/apt/lists/*

@@ -2,23 +2,32 @@
 
 ## Installation
 
-The ISP SDK is delivered as a Debian package for Ubuntu 16.04.  The package can
-be installed via the follow command:
+The ISP SDK is delivered as a distribution package for Ubuntu 16.04 or CentOS 7.
+The package can be installed via the follow command for Ubuntu:
 
 ```
-$ sudo apt-get install apt-get install -y ./isp-sdk_X.X.X_amd64.deb
+$ sudo apt-get install -y ./isp-sdk_X.X.X_amd64.deb
+```
+
+or for CentOS 7
+
+```
+$ sudo yum install -y isp-sdk-X.X.X-0.x86_64.rpm
 ```
 
 Where `X.X.X` is the version of the ISP SDK you are installing.
 
-The ISP SDK is also delivered as a Docker image which can be used to build
-projects.  The docker image comes with the SDK package preinstalled.  When using
-the Docker image you will most likely want to mount part of your host filesystem
-to the docker image.  The following is a suitable command to run the docker
-image:
+The ISP SDK is also delivered as a various Docker images which can be used to
+build projects.  There is one docker image for each distribution supported by
+ISP.  While you can use any docker image on any Linux distribution you can use
+the image you are most familiar with.  The docker images come with the SDK
+package preinstalled.  When using a Docker image you will most likely want to
+mount part of your host file system to the docker image.  The following is a
+suitable command to run the Ubuntu 16 docker image:
 
 ```
-$ docker run --rm --user=`id -u`:`id -g` -i -v $PWD:/workdir -t isp-sdk:latest
+$ docker run --rm --user=`id -u`:`id -g` -i \
+$     -v $PWD:/workdir -t isp-sdk-ubuntu16:latest
 ```
 
 This will run the docker image so the current user will be the owner of any

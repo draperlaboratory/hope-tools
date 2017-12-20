@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+    echo "Missing distrobution" >&2
+    echo "usage: build-docker distro" >&2
+    exit 1
+fi
+
+
+docker build $DOCKER_BUILD_ARGS -t isp-build-$1:latest \
+       - < distro-sdk/$1/Dockerfile.build

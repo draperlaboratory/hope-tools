@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+if [ "$#" -lt 1 ]; then
+    echo "incorrect number of parameters" >&2
+    echo "usage: run-distro-docker distro [cmds]" >&2
+    exit 1
+fi
+
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+distro="$1"
+
+shift
+# -u `id -u`:`id -g` \
+docker run --rm -i -t \
+       -e PATH=$PATH \
+       -e DISTDIR=$DISTDIR \
+       -e DOWNLOAD_CACHE=$DOWNLOAD_CACHE \
+       -e DOVER=$DOVER \
+       -e RISCV=$DOVER \
+       -e http_proxy="172.17.0.1:3128" \
+       -e HTTP_PROXY="172.17.0.1:3128" \
+       -e https_proxy="172.17.0.1:3128" \
+       -e HTTPS_PROXY="172.17.0.1:3128" \
+       -v $script_dir/..:$script_dir/.. \
+       -v $DOVER:$DOVER \
+       -v $DOWNLOAD_CACHE:$DOWNLOAD_CACHE \
+       -w $script_dir/ \
+       isp-build-$distro:latest "$@"

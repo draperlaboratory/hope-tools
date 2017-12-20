@@ -5,7 +5,7 @@ PDF_FILES:=$(patsubst %.md,%.pdf, $(MARKDOWN_FILES))
 all: $(PDF_FILES)
 
 $(PDF_FILES): %.pdf: %.md
-	gimli -f $*.md -o $(dir $@)
+	pandoc $*.md -s -o $@
 
 clean:
 	rm -f $(PDF_FILES)

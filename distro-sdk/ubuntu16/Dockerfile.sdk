@@ -12,9 +12,10 @@ RUN apt-get update && \
 
 
 ARG SDK_VERSION
+ARG SDK_DISTRO
 ARG SDK_PACKAGE=isp-sdk_${SDK_VERSION}_amd64.deb
 
-COPY ${SDK_PACKAGE} .
+COPY packages/${SDK_DISTRO}/${SDK_PACKAGE} .
 
 RUN apt-get update && \
     apt-get install -yq ./${SDK_PACKAGE} && \

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-    echo "Illegal number of parameters" >&2
+    echo "incorrect number of parameters" >&2
     echo "usage: isp-create-project new-directory" >&2
     exit 1
 fi

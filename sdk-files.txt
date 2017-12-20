@@ -1,8 +1,8 @@
 OUTPUT bin/ /opt/isp/bin
 OUTPUT lib/ /opt/isp/lib
 OUTPUT libexec/ /opt/isp/libexec
-OUTPUT riscv64-unknown-elf/ /opt/isp/riscv64-unknown-elf
-REPO dover-os/ /opt/isp/project_skeleton/dover-os
+OUTPUT riscv64-unknown-elf/ /opt/isp/riscv64-unknown-elf *.pyc *.pyo
+REPO dover-os/ /opt/isp/project_skeleton/dover-os *.pyc *.pyo
 REPO isp-headers/ /opt/isp/project_skeleton/isp-headers
 OUTPUT pex/bin/ /opt/isp/pex/bin
 OUTPUT riscv-tinycrypt/ /opt/isp/riscv-tinycrypt

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+if [ "$#" -ne 1 ]; then
+    echo "incorrect number of parameters" >&2
+    echo "usage: run-sdk-docker distro" >&2
+    exit 1
+fi
+
+distro="$1"
+
+docker run --rm -i -t isp-sdk-$distro:latest

@@ -1,0 +1,49 @@
+FROM centos:centos7
+
+ENV RPMWAND_SHA512SUM "33518f8b084014795540314ace978c76a89c366ac7e468b584d134cd3ebe826dda13359d6b96dfb8c4dc2cff80bcc5523765fb7286639253822d8bccad1572b2  rpmwand-0.9.3.tar.gz"
+
+RUN yum update -y  && \
+    yum clean all
+
+RUN yum install -y epel-release && \
+    yum clean all
+
+RUN yum groupinstall -y "Development tools" && \
+    yum clean all
+
+RUN yum install -y \
+        autoconf \
+        automake \
+        bison \
+        cmake \
+        curl \
+        expat \
+        flex \
+        gawk \
+        gperf \
+        haskell-platform \
+        elfutils-libelf-devel \
+        expat-devel \
+        gmp-devel \
+        libmpc-devel \
+        mpfr-devel \
+        pandoc \
+        python34 \
+        python34-setuptools \
+        rsync \
+        sha512sum \
+        socat \
+        texinfo \
+        texlive \
+        texlive-collection-latexrecommended \
+        texlive-latex-bin-bin \
+        wget && \
+    yum clean all
+
+RUN wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/rpmwand/rpmwand-0.9.3.tar.gz && \
+    sha512sum -c <<< ${RPMWAND_SHA512SUM} && \
+    tar xf rpmwand-0.9.3.tar.gz && \
+    cp rpmwand-0.9.3/rpmwand /usr/local/bin/ && \
+    rm -rf rpmwand-0.9.3.tar.gz rpmwand-0.9.3
+
+RUN fmtutil-sys --all

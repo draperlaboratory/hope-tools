@@ -2,7 +2,6 @@
 .PHONY: toolchain
 .PHONY: sdk
 .PHONY: docker-sdk
-.PHONY: run-docker-sdk
 .PHONY: policy-tool
 .PHONY: fesvr
 .PHONY: tinycrypt
@@ -17,6 +16,8 @@
 .PHONY: cleanall
 
 SHELL:=/bin/bash
+BUILD_DISTRO_DOCKER:=./build-distro-docker $(SDK_DISTRO)
+RUN_DISTRO_DOCKER:=./run-distro-docker $(SDK_DISTRO)
 
 SDK_VERSION:=0.0.0
 
@@ -48,23 +49,26 @@ sdk:
 ifndef SDK_DISTRO
 	$(error variable SDK_DISTRO not defined)
 endif
-	$(MAKE) all documentation
-	./build-sdk -f -o $(DOVER) -s $(SDK_VERSION) -d $(SDK_DISTRO)
+	$(BUILD_DISTRO_DOCKER)
+	$(RUN_DISTRO_DOCKER) make all documentation
+	$(RUN_DISTRO_DOCKER) \
+		./build-sdk -o $(DOVER) -s $(SDK_VERSION) -d $(SDK_DISTRO)
 
 # DOCKER_BUILD_ARGS is to allow passing additional parameters to build such as
 # proxy settings without polluting the Makefile for those who do not need it.
 # For most this does not need to be set
 
-docker-sdk: sdk
+docker-sdk:
 ifndef SDK_DISTRO
 	$(error variable SDK_DISTRO not defined)
 endif
+ifndef SKIP_PACKAGE_BUILD
+	$(MAKE) sdk
+endif
 	docker build $(DOCKER_BUILD_ARGS) -t isp-sdk-$(SDK_DISTRO):latest \
 		--build-arg SDK_VERSION=$(SDK_VERSION) \
-		-f distro-sdk/$(SDK_DISTRO)/Dockerfile .
-
-run-docker-sdk: docker-sdk
-	./run-docker-sdk
+		--build-arg SDK_DISTRO=$(SDK_DISTRO) \
+		-f distro-sdk/$(SDK_DISTRO)/Dockerfile.sdk .
 
 policy-tool:
 	$(MAKE) -C ../dover-policies
@@ -120,4 +124,4 @@ clean:
 cleanall: clean
 	$(MAKE) -C ../riscv-gnu-toolchain clean
 	$(MAKE) -C documentation clean
-	rm -rf $(DOVER)
+	rm -rf $(DOVER)/*

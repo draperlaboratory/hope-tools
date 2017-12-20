@@ -12,17 +12,17 @@ while getopts ":o:s:d:f" opt; do
         s)
             sdk_version=$OPTARG
             ;;
-        f)
-            fast_build=true
-            ;;
         d)
             sdk_distro=$OPTARG
+            ;;
+        f)
+            fast_build=true
             ;;
         \?)
             echo "Invalid option: -$OPTARG" >&2
             exit 1
             ;;
-        : )
+        :)
             echo "Invalid option: $OPTARG requires an argument" >&2
             exit
             ;;
@@ -44,16 +44,16 @@ if [ -z "$sdk_distro" ]; then
     exit 1
 fi
 
-find sdk-files -name "*~" -delete
+package_dir=packages/$sdk_distro/
+rm -rf $package_dir
+mkdir -p $package_dir
 
 distro_specific=distro-sdk/$sdk_distro
-source $distro_specific/source.sh
-
-rm -rf $sdk_output
-mkdir -p $sdk_output
-cp -r sdk-files/* $sdk_output
+source $distro_specific/distro.sh
 
 copy_distro_specific
+cp -r sdk-files/* $sdk_output
+
 
 while read line; do
     array=($line)
@@ -62,10 +62,12 @@ while read line; do
     dest=${array[2]}
     exclusions=("${array[@]:3}")
 
-    exclusion_arg=""
+    exclusion_args=()
+    i=0
     for e in "${exclusions[@]}"
     do
-        exclusion_arg+="--exclude $e "
+        exclusion_args[$i]=--exclude=$e
+        ((++i))
     done
 
     mkdir -p $(dirname $sdk_output/$dest)
@@ -81,7 +83,7 @@ while read line; do
             exit 1
             ;;
     esac
-    rsync -av --exclude="*~" $exclusion_arg --exclude=.git --exclude=build \
+    rsync -av --exclude='*~' "${exclusion_args[@]}" --exclude=.git --exclude=build \
           $src_dir/$src $sdk_output/$dest
 
 done < sdk-files.txt
