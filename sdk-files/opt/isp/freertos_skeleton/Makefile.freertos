@@ -1,0 +1,95 @@
+ifndef FREE_RTOS_BASE
+  $(error Must set FREE_RTOS_BASE to point to FreeRTOS-RISCV directory)
+endif
+
+ifndef ISP_PROJECT_DIR
+  $(error Must set ISP_PROJECT_DIR, source the activate script in the pex directory)
+endif
+
+ifndef POLICIES
+  $(error Must set POLICIES)
+endif
+
+ifndef CFILES
+  $(error Must set CFILES)
+endif
+
+ifndef APP
+  $(error Must set APP)
+endif
+
+KERNEL_DIR := $(ISP_PROJECT_DIR)/kernels
+POLICIES_DIR := $(KERNEL_DIR)/$(POLICIES)
+PEX_ROM := $(POLICIES_DIR)/pex.rom
+
+ifeq ($(wildcard $(POLICIES_DIR)/.),)
+define POLICY_ERROR
+'$(POLICIES)' is not a valid policy selection for this SDK
+Valid policies for this SDK are:
+$(shell ls -1 $(KERNEL_DIR))
+endef
+$(error $(POLICY_ERROR))
+endif
+
+FREE_RTOS_LIB_DIR := $(FREE_RTOS_BASE)/lib
+FREE_RTOS_SUPPORT_LIB_DIR := $(FREE_RTOS_BASE)/lib
+
+OBJDUMP := riscv64-unknown-elf-objdump
+OBJCOPY := riscv64-unknown-elf-objcopy
+CC := riscv64-unknown-elf-gcc
+
+CFLAGS += -msoft-float
+CFLAGS += -O2
+CFLAGS += -m32
+CFLAGS += -I$(FREE_RTOS_BASE)/Demo/riscv-spike/conf/
+CFLAGS += -I$(FREE_RTOS_BASE)/Source/include
+CFLAGS += -I$(FREE_RTOS_BASE)/Source/portable/GCC/RISCV
+CFLAGS += -I$(FREE_RTOS_BASE)/lib/include
+
+LD_SCRIPT := $(FREE_RTOS_BASE)/Demo/riscv-spike/arch/link.ld
+
+LDFLAGS += -T $(LD_SCRIPT)
+LDFLAGS += -m32
+LDFLAGS += -msoft-float
+LDFLAGS += -static
+LDFLAGS += -nostartfiles
+LDFLAGS += -L $(FREE_RTOS_LIB_DIR)
+LDFLAGS += -L $(FREE_RTOS_SUPPORT_LIB_DIR)
+
+LIBS += -lfree-rtos
+LIBS += -lfree-rtos-support
+LIBS += -lc
+LIBS += $(POLICIES_DIR)/lib/kernel_meta.o
+
+POST_META := $(POLICIES_DIR)/post_meta
+GEN_ROM := gen_rom
+GEN_FLASH_INIT := gen_flash_init
+
+OBJ_FILES := $(patsubst %.c, %.o, $(CFILES))
+
+# Targets
+
+all: $(APP).rom
+
+$(OBJ_FILES): %.o: %.c
+	$(CC) -c $(CFLAGS) $*.c -o $*.o
+
+$(APP): $(OBJ_FILES)
+	$(CC) $(LDFLAGS) $(OBJ_FILES) -o $(APP) $(LIBS)
+
+$(APP).rom: $(APP)
+	$(OBJDUMP) -dS $(APP) > $(APP).text
+	$(OBJCOPY) -O binary $(APP) $(APP).bin
+	$(POST_META) $(APP) $(APP).taginfo $(APP).text
+	$(GEN_ROM) --mem_size=2 --tag_info $(APP).taginfo \
+		--load_addr=0 $(APP).bin $(APP).rom
+	hexdump -v -e'/4 "%08x""\n"' < $(APP).rom > $(APP).hex
+	$(GEN_FLASH_INIT) $(APP).riscv.init 0xc8000000 $(APP).rom
+	$(GEN_FLASH_INIT) $(APP).$(POLICIES).init 0xc8000000 $(PEX_ROM) \
+		0xc8030000 $(APP).rom
+	$(GEN_FLASH_INIT) $(APP).$(POLICIES).auto.init 0x00000000 \
+		$(PEX_ROM) 0x000C0000 $(APP).rom
+
+clean:
+	rm -rf *~ *.rom *.o *.taginfo *.text *.tagged *.hdr *.init *.hex *.bin
+	rm -rf $(APP)

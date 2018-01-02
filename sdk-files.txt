@@ -2,17 +2,20 @@ OUTPUT bin/ /opt/isp/bin
 OUTPUT lib/ /opt/isp/lib
 OUTPUT libexec/ /opt/isp/libexec
 OUTPUT riscv64-unknown-elf/ /opt/isp/riscv64-unknown-elf *.pyc *.pyo
-REPO dover-os/ /opt/isp/project_skeleton/dover-os *.pyc *.pyo
-REPO isp-headers/ /opt/isp/project_skeleton/isp-headers
+REPO dover-os/ /opt/isp/pex_skeleton/dover-os *.pyc *.pyo
+REPO isp-headers/ /opt/isp/pex_skeleton/isp-headers
 OUTPUT pex/bin/ /opt/isp/pex/bin
 OUTPUT riscv-tinycrypt/ /opt/isp/riscv-tinycrypt
 OUTPUT tinycrypt/ /opt/isp/tinycrypt
 OUTPUT policies/policytool /opt/isp/bin/
-REPO dover-policies/policy-tool/*Policy.hs /opt/isp/project_skeleton/policies/
+REPO dover-policies/policy-tool/*Policy.hs /opt/isp/pex_skeleton/policies/
 OUTPUT dover-spike/ /opt/isp/dover-spike
-REPO dover-sdk-documentation/samples/ /opt/isp/project_skeleton/samples
+REPO dover-sdk-documentation/samples/ /opt/isp/sample_projects/samples
 OUTPUT empty.fs /opt/isp/
-REPO FreeRTOS-RISCV/ /opt/isp/project_skeleton/FreeRTOS-RISCV samples/cpt_test build_lib
-REPO FreeRTOS-RISCV/build/libfree-rtos.a /opt/isp/project_skeleton/FreeRTOS-RISCV/lib/libfree-rtos.a
-REPO FreeRTOS-RISCV/build_lib/libfree-rtos-support.a /opt/isp/project_skeleton/FreeRTOS-RISCV/lib/libfree-rtos-support.a
-REPO isp-tools/documentation/user/ /opt/isp/project_skeleton/documentation
+REPO FreeRTOS-RISCV/ /opt/isp/sample_projects/FreeRTOS-RISCV samples/cpt_test build_lib
+REPO FreeRTOS-RISCV/build/libfree-rtos.a /opt/isp/sample_projects/FreeRTOS-RISCV/lib/libfree-rtos.a
+REPO FreeRTOS-RISCV/build_lib/libfree-rtos-support.a /opt/isp/sample_projects/FreeRTOS-RISCV/lib/libfree-rtos-support.a
+REPO isp-tools/documentation/user/ /opt/isp/sample_projects/documentation
+REPO FreeRTOS-RISCV/ /opt/isp/freertos_skeleton/FreeRTOS-RISCV samples
+REPO FreeRTOS-RISCV/build/libfree-rtos.a /opt/isp/freertos_skeleton/FreeRTOS-RISCV/lib/libfree-rtos.a
+REPO FreeRTOS-RISCV/build_lib/libfree-rtos-support.a /opt/isp/freertos_skeleton/FreeRTOS-RISCV/lib/libfree-rtos-support.a

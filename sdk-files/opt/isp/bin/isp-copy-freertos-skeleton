@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+PROJECT_DIR=`pwd`
+
+pushd /opt/isp/freertos_skeleton/ > /dev/null
+
+find -type f -exec bash -c "if [ -e $PROJECT_DIR/{} ]; then echo File {} exists not copying {}; fi" \;
+
+popd > /dev/null
+
+cp -rn /opt/isp/freertos_skeleton/* .

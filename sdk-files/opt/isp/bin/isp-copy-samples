@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cp -r /opt/isp/sample_projects/* .

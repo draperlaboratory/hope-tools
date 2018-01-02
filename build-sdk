@@ -52,6 +52,8 @@ distro_specific=distro-sdk/$sdk_distro
 source $distro_specific/distro.sh
 
 copy_distro_specific
+
+find sdk-files -name "*~" -delete
 cp -r sdk-files/* $sdk_output
 
 
@@ -83,7 +85,7 @@ while read line; do
             exit 1
             ;;
     esac
-    rsync -av --exclude='*~' "${exclusion_args[@]}" --exclude=.git --exclude=build \
+    rsync -av --exclude='*~' "${exclusion_args[@]}" --exclude=.git* --exclude=.git --exclude=build \
           $src_dir/$src $sdk_output/$dest
 
 done < sdk-files.txt

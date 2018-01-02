@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+PACKAGE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../packages/ubuntu16/
+
+pushd $PACKAGE_DIR
+
+num=$(ls -l *.deb | wc -l)
+
+if [ $num -ne 1 ]; then
+   echo "Found more than one debian package" >&2
+   exit 1
+fi
+
+sudo apt-get install -y ./*.deb
+
+popd

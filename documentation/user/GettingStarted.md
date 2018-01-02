@@ -54,22 +54,17 @@ using bash run the following:
 $ source activate
 ```
 
-
-Finally, you need to configure your project.  This can be done via the project
-root `Makefile`.
-
-```
-$ make configure
-```
-
 ## Building Policy-Specific Components
 
 The first step in building a project is building the policy specific components.
 These are derivered from the policy file and therefore must be specified when
 building.  In this example we will use the `rwx` policy located in `RWXPolicy`.
+The script `isp-build-policy` can be used to be the policy specific portion of
+components.  Note that this script is not available if you have not performed
+the previous `source activate` step.
 
 ```
-$ POLICY_FILES=RWXPolicy make policy
+$ isp-build-policy RWXPolicy
 ```
 
 ## Hello World

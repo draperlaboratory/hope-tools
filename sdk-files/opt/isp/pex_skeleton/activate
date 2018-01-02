@@ -1,5 +1,2 @@
 export ISP_PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source /opt/isp/activate
-
-echo "ISP project file sourced, you will need to do this"
-echo "every time you start a new shell"

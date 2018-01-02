@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+if [ -z "$ISP_PROJECT_DIR" ]; then
+    echo "ISP_PROJECT_DIR is not set" >&2
+    exit 1
+fi
+
+if [ ! -d "$ISP_PROJECT_DIR" ]; then
+    echo "ISP_PROJECT_DIR is set to $ISP_PROJECT_DIR" >&2
+    echo "which does not exist or is not a directory" >&2
+    exit 1
+fi
+
+pushd $ISP_PROJECT_DIR
+
+make configure
+POLICY_FILES="$@" make policy
+
+popd

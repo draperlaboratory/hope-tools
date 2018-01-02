@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+    echo "incorrect number of parameters" >&2
+    echo "usage: isp-create-project new-directory" >&2
+    exit 1
+fi
+
+pex_dir=$1
+
+if [ -e $pex_dir ]; then
+    echo "$pex_dir already exists" >&2
+    echo "usage: isp-create-pex-dir new-directory" >&2
+    exit 1
+fi
+
+cp -r /opt/isp/pex_skeleton $pex_dir

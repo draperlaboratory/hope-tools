@@ -120,6 +120,7 @@ clean:
 	$(MAKE) -C ../tinycrypt clean
 	$(MAKE) -C ../riscv-isa-sim clean
 	$(MAKE) -C ../FreeRTOS-RISCV clean
+	rm -rf packages
 
 cleanall: clean
 	$(MAKE) -C ../riscv-gnu-toolchain clean

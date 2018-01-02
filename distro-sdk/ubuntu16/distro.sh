@@ -15,6 +15,6 @@ build_package() {
     fi
 
     pushd $package_dir
-    dpkg-deb $dpkg_options --build $sdk_output .
+    fakeroot dpkg-deb $dpkg_options --build $sdk_output .
     popd
 }
