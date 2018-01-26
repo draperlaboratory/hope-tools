@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+if [ ! -v DOWNLOAD_CACHE ]; then
+    echo "Environmental variable DOWNLOAD_CACHE must be set" >&2
+    exit 1
+fi
+
+mkdir -p $DOWNLOAD_CACHE
+
+if [ "$(ls -A $DOWNLOAD_CACHE)" ]; then
+    echo "$DOWNLOAD_CACHE is not empty" >&2
+    echo "Cowardly refusing to do anything" >&2
+    echo "Perform the following if you don't care about" >&2
+    echo "anything in $DOWNLOAD_CACHE" >&2
+    echo "rm -r \$DOWNLOAD_CACHE" >&2
+    echo "After that rerun this script" >&2
+    exit 1
+fi
+
+pushd $DOWNLOAD_CACHE > /dev/null
+
+curl -O http://mirrors.kernel.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.gz
+curl -O http://mirrors.kernel.org/gnu/binutils/binutils-2.25.tar.gz
+curl -O http://mirrors.kernel.org/gnu/binutils/binutils-2.25.1.tar.gz
+curl -O http://mirrors.kernel.org/gnu/glibc/glibc-2.22.tar.gz
+curl -O http://sourceware.org/pub/newlib/newlib-2.2.0.tar.gz
+
+popd > /dev/null
