@@ -26,15 +26,6 @@ ifndef DOVER
   $(error variable DOVER not defined)
 endif
 
-NPROCS:=1
-OS:=$(shell uname -s)
-
-ifeq ($(OS),Linux)
-  NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
-endif
-
-MAKEFLAGS += -j$(NPROCS)
-
 all:
 	$(MAKE) toolchain
 	$(MAKE) policy-tool tinycrypt dover-spike
