@@ -59,7 +59,7 @@ LDFLAGS += -L $(FREE_RTOS_SUPPORT_LIB_DIR)
 LIBS += -lfree-rtos
 LIBS += -lfree-rtos-support
 LIBS += -lc
-LIBS += $(POLICIES_DIR)/lib/kernel_meta.o
+LIBS += $(POLICIES_DIR)/lib/frtos_meta.o
 
 POST_META := $(POLICIES_DIR)/post_meta
 GEN_ROM := gen_rom

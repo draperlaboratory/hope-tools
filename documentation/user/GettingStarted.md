@@ -15,7 +15,7 @@ or for CentOS 7
 $ sudo yum install -y isp-sdk-X.X.X-0.x86_64.rpm
 ```
 
-Where `X.X.X` is the version of the ISP SDK you are installing.
+where `X.X.X` is the version of the ISP SDK you are installing.
 
 The ISP SDK is also delivered as a various Docker images which can be used to
 build projects.  There is one docker image for each distribution supported by
@@ -36,55 +36,71 @@ the docker image.
 
 ## Creating A Project
 
-The SDK provides a tool to create an ISP project: `isp-create-project`.  Use
-this tool to create a directory containing all the necessary files for an ISP
+The SDK provides a tool to create an ISP project: `isp-init-project`.  Use this
+tool from within your project directory to copy some necessary files for an ISP
 project.  NOTE: If you are using the docker SDK make sure your current working
-directory is /workdir
+directory is `/workdir`.
 
 ```
-$ isp-create-project first-isp-project
-$ cd first-isp-project
+$ mkdir isp-project
+$ cd isp-project
+$ isp-init-project
 ```
 
-Within the new project directory is a file that must be sourced to include
-various environmental variables specific to this project.  Assuming you are
-using bash run the following:
+Within the `pex` directory is a file that must be sourced to include various
+environmental variables specific to this project.  Assuming you are using bash
+run the following:
 
 ```
-$ source activate
+$ source pex/activate
 ```
 
-## Building Policy-Specific Components
+## Copy Sample Applications
 
-The first step in building a project is building the policy specific components.
-These are derivered from the policy file and therefore must be specified when
-building.  In this example we will use the `rwx` policy located in `RWXPolicy`.
-The script `isp-build-policy` can be used to be the policy specific portion of
-components.  Note that this script is not available if you have not performed
-the previous `source activate` step.
+To copy the sample applications used in this getting started guide run the
+following:
 
 ```
-$ isp-build-policy RWXPolicy
+$ isp-copy-samples
 ```
 
-## Hello World
+## Building PEX Kernel
+
+The first step in building a project is building the PEX kernel.  The script
+`isp-build-pex` is used to build the PEX kernel.  When building the PEX kernel
+the policies that are being used must be specified.  Within the `policies`
+directory, created by `isp-init-project`, are various policies that have already
+been developed.  In this example we will use the RWX policy.  `isp-build-pex`
+takes two arguments, the first being the application kernel (either `dos` for
+Dover OS or `frtos` for FreeRTOS) and the policy.  Policy names have a directory
+hierarchy.  Since we will be using both Dover OS and FreeRTOS `isp-build-pex`
+must be invoked twice.
+
+Note that `isp-build-pex` is not available if you have not performed the
+previous `source activate` step.
+
+```
+$ isp-build-pex dos dover.dos.main.rwx
+$ isp-build-pex frtos dover.frtos.main.rwx
+```
+
+## Dover OS Hello World
 
 Within the `samples` directory of your ISP project directory are various samples
 that can be run, one of course being the obligatory `hello_world`.  This is a
 simple `hello_world` program that if inspected appears just like `hello_world`
-on Linux/Windows/OSX.  To build this program the policy must be specified.  When
-specifying the policy here it is in all lower case and the "Policy" part is
-omitted.
+on Linux/Windows/OSX.  To build this program the policy must be specified.  Here
+the policy is specified via the environment variable `POLICIES`.
 
 ```
 $ cd samples/hello_world
-$ POLICIES=rwx make
+$ POLICIES=dover.dos.main.rwx make
 ```
 
 To run the hello world program in the simulator use the `rundk` program
 
 ```
-$ rundk --policies=rwx hello_world
+$ rundk --policies=dover.dos.main.rwx hello_world
 ```
 
 A majority of the output will be related to initializing the process and the
@@ -100,7 +116,7 @@ following commands:
 
 ```
 $ cd <project-root>/FreeRTOS-RISCV/samples/hello_world
-$ POLICIES=rwx make
+$ POLICIES=dover.frtos.main.rwx make
 ```
 
 The FreeRTOS application does not use the Dover OS so the `runap` script is used
@@ -108,7 +124,7 @@ instead of `rundk`.  The hello world application can be run using the following
 command:
 
 ```
-$ runap --policies=rwx main.rom
+$ runap --policies=dover.frtos.main.rwx main.rom
 ```
 
 The FreeRTOS application does not terminate but instead runs in an infinite

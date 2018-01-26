@@ -13,9 +13,18 @@ if [ ! -d "$ISP_PROJECT_DIR" ]; then
     exit 1
 fi
 
-pushd $ISP_PROJECT_DIR
+if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then
+    echo "Illegal number of parameters" >&2
+    echo "usage: isp-build-pex os [policy]" >&2
+    exit 1
+fi
 
-make configure
-POLICY_FILES="$@" make policy
+if [ "$#" -ne 1 ]; then
+    export POLICIES="$2"
+fi
 
-popd
+export POLICY_OS="$1"
+export POLICY_DIR="$(ISP_PROJECT_DIR)../policies"
+
+make -C $ISP_PROJECT_DIR configure
+make -C $ISP_PROJECT_DIR policy

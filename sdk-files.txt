@@ -7,8 +7,7 @@ REPO isp-headers/ /opt/isp/pex_skeleton/isp-headers
 OUTPUT pex/bin/ /opt/isp/pex/bin
 OUTPUT riscv-tinycrypt/ /opt/isp/riscv-tinycrypt
 OUTPUT tinycrypt/ /opt/isp/tinycrypt
-OUTPUT policies/policytool /opt/isp/bin/
-REPO dover-policies/policy-tool/*Policy.hs /opt/isp/pex_skeleton/policies/
+OUTPUT policies/bin/policy-tool /opt/isp/bin/
 OUTPUT dover-spike/ /opt/isp/dover-spike
 REPO dover-sdk-documentation/samples/ /opt/isp/sample_projects/samples
 OUTPUT empty.fs /opt/isp/
@@ -19,3 +18,5 @@ REPO isp-tools/documentation/user/ /opt/isp/sample_projects/documentation
 REPO FreeRTOS-RISCV/ /opt/isp/freertos_skeleton/FreeRTOS-RISCV samples
 REPO FreeRTOS-RISCV/build/libfree-rtos.a /opt/isp/freertos_skeleton/FreeRTOS-RISCV/lib/libfree-rtos.a
 REPO FreeRTOS-RISCV/build_lib/libfree-rtos-support.a /opt/isp/freertos_skeleton/FreeRTOS-RISCV/lib/libfree-rtos-support.a
+REPO ISP-Tests/policy/unit_tests/dover/ /opt/isp/policies/dover
+REPO ISP-Tests/policy/unit_tests/*.xml /opt/isp/policies/

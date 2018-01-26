@@ -1,0 +1,40 @@
+#!/bin/bash
+
+prompt_input() {
+
+    while true; do
+        read -p "$1" yn
+        case $yn in
+            [Yy]* ) return 0;;
+            [Nn]* ) return 1;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
+}
+
+prompt_copy() {
+    destination=$1
+    source=$2
+
+    if [ -e $destination ]; then
+        echo "\"$source\" already exists"
+        prompt_input "Overwrite directory? [y/n] "
+        if [ $? == 0 ]; then
+            rm -rf $destination
+            cp -r $source $destination
+        fi
+    else
+        cp -r $source $destination
+    fi
+}
+
+
+prompt_copy "pex" "/opt/isp/pex_skeleton"
+
+if [ -e policies ]; then
+
+    find policies -type f -exec bash -c "if [ -e /opt/isp/{} ]; then echo File {} exists not overwriting; fi" \;
+
+fi
+
+cp -rn /opt/isp/policies/ policies
