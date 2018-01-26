@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -e
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+repo_file="$script_dir/repos.txt"
+repo_root_dir="$script_dir/../"
+
+while read repo; do
+    pushd "$repo_root_dir/$repo"
+    git "$@"
+    popd
+done < $repo_file

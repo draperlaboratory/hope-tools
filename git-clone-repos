@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+repo_file="$script_dir/repos.txt"
+repo_root_dir="$script_dir/../"
+
+pushd "$repo_root_dir" > /dev/null
+
+while read repo; do
+    if [ -d $repo ]; then
+        echo "Directory $repo already exists"
+    else
+        git clone https://github.com/draperlaboratory/$repo
+    fi
+done < $repo_file
+
+popd > /dev/null
