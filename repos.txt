@@ -1,5 +1,5 @@
 hope-os
-hope-policies
+hope-old-policy-tool
 hope-sdk-documentation
 hope-FreeRTOS-RISCV
 hope-headers

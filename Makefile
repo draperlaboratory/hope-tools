@@ -62,7 +62,7 @@ endif
 		-f distro-sdk/$(SDK_DISTRO)/Dockerfile.sdk .
 
 policy-tool:
-	$(MAKE) -C ../hope-policies
+	$(MAKE) -C ../hope-old-policy-tool
 
 fesvr: $(DOVER)/include/fesvr
 
