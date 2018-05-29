@@ -1,4 +1,5 @@
 .PHONY: all
+.PHONY: path_check
 .PHONY: documentation
 .PHONY: clean
 
@@ -19,10 +20,14 @@ CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 .PHONY: $(PROJECTS)
 .PHONY: $(CLEAN_PROJECTS)
 
-all: $(PROJECTS)
+all: path_check
+	$(MAKE) $(PROJECTS)
 
 policy-engine: policy-tool
 renode-plugins: renode
+
+path_check:
+	(grep -q $(ISP_PREFIX)bin <<< $(PATH)) || (echo "Need to add $(ISP_PREFIX)/bin to your PATH" && false)
 
 $(PROJECTS): $(ISP_PREFIX)
 	$(MAKE) -C ../$@
