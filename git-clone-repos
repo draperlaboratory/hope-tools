@@ -12,7 +12,7 @@ while read repo; do
     if [ -d $repo ]; then
         echo "Directory $repo already exists"
     else
-        git clone https://github.com/draperlaboratory/hope-$repo $repo
+        git clone --recurse-submodules https://github.com/draperlaboratory/hope-$repo $repo
     fi
 done < $repo_file
 
