@@ -2,6 +2,12 @@
 
 This is a step by step guide on how to build the HOPE software toolchain.
 
+By default everything is built in `/opt/isp/`.  This is also where the package
+installs everything.  You will need to add `/opt/isp/bin/` to your `PATH` before
+you build.  After you can change the install location by creating an
+environmental variable `ISP_PREFIX` and setting that to whatever you prefer.
+Note that `ISP_PREFIX` must end with a `/`.
+
 ## Installing Necessary Software
 
 On Ubuntu 16.04 run the following to install the necessary software.  Note that
@@ -9,9 +15,9 @@ if `ghc` and `cabal` are already installed and on your path, you can remove
 `haskell-platform` from the list below to avoid conflicting versions.
 
 ```
-sudo apt-get install python3-pip
+sudo apt-get install -y python3-pip
 sudo -H pip3 install pyelftools
-sudo apt-get install autoconf automake autotools-dev curl \
+sudo apt-get install -y autoconf automake autotools-dev curl \
     libmpc-dev libmpfr-dev libgmp-dev gawk build-essential \
     bison flex texinfo gperf iverilog libelf-dev socat \
     expat libexpat1-dev git python3 python3-setuptools \
@@ -21,7 +27,7 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \
 echo "deb http://download.mono-project.com/repo/ubuntu xenial main" | \
     sudo tee /etc/apt/sources.list.d/mono-xamarin.list
 sudo apt-get update
-sudo apt-get install git mono-complete automake autoconf libtool g++ realpath \
+sudo apt-get -y install git mono-complete automake autoconf libtool g++ realpath \
     gksu libgtk2.0-dev screen uml-utilities gtk-sharp2 python2.7
 
 ```
