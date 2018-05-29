@@ -14,6 +14,13 @@ On Ubuntu 16.04 run the following to install the necessary software.  Note that
 if `ghc` and `cabal` are already installed and on your path, you can remove
 `haskell-platform` from the list below to avoid conflicting versions.
 
+
+The policy tool uses `stack` to build.  If you don't have stack
+installed, you can find [installation instructions at the Stack
+website](https://docs.haskellstack.org/en/stable/README/).
+
+Everything else can be installed via the following:
+
 ```
 sudo apt-get install -y python3-pip
 sudo -H pip3 install pyelftools
@@ -29,6 +36,9 @@ echo "deb http://download.mono-project.com/repo/ubuntu xenial main" | \
 sudo apt-get update
 sudo apt-get -y install git mono-complete automake autoconf libtool g++ realpath \
     gksu libgtk2.0-dev screen uml-utilities gtk-sharp2 python2.7
+sudo apt-get -y install cmake libboost-dev libboost-program-options-dev \
+    libyaml-cpp-dev libgflags-dev
+
 
 ```
 
