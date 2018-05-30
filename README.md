@@ -2,16 +2,11 @@
 
 This is a step by step guide on how to build the HOPE software toolchain.
 
-To work with the HOPE toolchain, begin by creating a directory called
-"dover-repos" and placing this repository inside it.  This README assumes your
-working directory is this repository, so executing `pwd` should reveal a path
-that ends in `dover-repos/hope-tools`.
-
-The instructions in this README will create two other directories in the same
-directory as `dover-repos`.  In the remainder of the README, we will assume that
-this is your home directory.  If that is not the case, replace $HOME with the
-appropriate directory in the instructions below.
-
+By default everything is built in `/opt/isp/`.  This is also where the package
+installs everything.  You will need to add `/opt/isp/bin/` to your `PATH` before
+you build.  After you can change the install location by creating an
+environmental variable `ISP_PREFIX` and setting that to whatever you prefer.
+Note that `ISP_PREFIX` must end with a `/`.
 
 ## Installing Necessary Software
 
@@ -19,44 +14,32 @@ On Ubuntu 16.04 run the following to install the necessary software.  Note that
 if `ghc` and `cabal` are already installed and on your path, you can remove
 `haskell-platform` from the list below to avoid conflicting versions.
 
-```
-sudo apt-get install autoconf automake autotools-dev curl \
-   libmpc-dev libmpfr-dev libgmp-dev gawk build-essential \
-   bison flex texinfo gperf iverilog libelf-dev socat \
-   expat libexpat1-dev git python3 python3-setuptools \
-   cmake haskell-platform
-```
 
-## Setting Up Environmental Variables
+The policy tool uses `stack` to build.  If you don't have stack
+installed, you can find [installation instructions at the Stack
+website](https://docs.haskellstack.org/en/stable/README/).
 
-The first step is to ensure you have all the necessary environmental variables
-set up.  This can be accomplished by cutting and pasting the following into your
-`.bash_aliases` or `.bashrc` if you use `bash`.  If you are not using `bash` you
-will need to do the equivalent for your shell.
+Everything else can be installed via the following:
 
 ```
-export DISTDIR=$HOME/download_cache
-export DOWNLOAD_CACHE=$HOME/download_cache
+sudo apt-get install -y python3-pip
+sudo -H pip3 install pyelftools
+sudo apt-get install -y autoconf automake autotools-dev curl \
+    libmpc-dev libmpfr-dev libgmp-dev gawk build-essential \
+    bison flex texinfo gperf iverilog libelf-dev socat \
+    expat libexpat1-dev git python3 python3-setuptools \
+    cmake haskell-platform
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \
+    --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+echo "deb http://download.mono-project.com/repo/ubuntu xenial main" | \
+    sudo tee /etc/apt/sources.list.d/mono-xamarin.list
+sudo apt-get update
+sudo apt-get -y install git mono-complete automake autoconf libtool g++ realpath \
+    gksu libgtk2.0-dev screen uml-utilities gtk-sharp2 python2.7
+sudo apt-get -y install cmake libboost-dev libboost-program-options-dev \
+    libyaml-cpp-dev libgflags-dev
 
-export DOVER=$HOME/dover-install
-export RISCV=$DOVER
-export PATH=$DOVER/pex/bin:$DOVER/bin:${PATH}
-export DOVER_SOURCES=$HOME/dover-repos
-export FREE_RTOS_BASE=$HOME/dover-repos/FreeRTOS-RISCV
-```
 
-After setting these environmental variables in your shell init file your current
-shell(s) will not have the new environmental variables.  You can either launch a
-new shell from your current shell or exit from your current shell and launch a
-new shell.
-
-## Setting Up The Download Cache
-
-Assuming you have the appropriate environmental variables set the download cache
-can be set up by just running the following:
-
-```
-./download-cache
 ```
 
 ## Download The Other Repositories
@@ -84,6 +67,9 @@ depending on your machine).
 
 
 ## Getting started
+
+Read the README.md in the policy-engine repository for instructions on how to
+build and run a program under renode.
 
 You now have installed a variety of HOPE-related tools, including a custom
 version of the RISC-V Spike software simulator that has been enhanced with the
