@@ -8,6 +8,10 @@ you build.  After you can change the install location by creating an
 environmental variable `ISP_PREFIX` and setting that to whatever you prefer.
 Note that `ISP_PREFIX` must end with a `/`.
 
+## Uninstalling Old Software
+
+`rm ~/.local/bin/policy-tool`
+
 ## Installing Necessary Software
 
 On Ubuntu 16.04 run the following to install the necessary software.  Note that
@@ -77,7 +81,7 @@ PIPE and a tool for compiling micropolicies.  One good way to get started is to
 run our policy tests.
 
 ```
-cd dover-repos/hope-internal-tests/policy/unit_tests
+cd ../policies/policy_tests
 make install-kernels
 make
 ```
