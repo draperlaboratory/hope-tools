@@ -38,7 +38,7 @@ $(ISP_PREFIX):
 	sudo chown $(USER) $(ISP_PREFIX)
 
 $(CLEAN_PROJECTS):
-	$(MAKE) -C ../$(@:clean-%=%) clean
+	$(MAKE) -C ../$(@:clean-%=%) -f Makefile.isp clean
 
 documentation:
 	$(MAKE) -C documentation
