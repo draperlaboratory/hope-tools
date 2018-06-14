@@ -5,3 +5,5 @@ policy-tool
 renode
 policy-engine
 renode-plugins
+qemu
+llvm-riscv

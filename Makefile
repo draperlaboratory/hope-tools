@@ -14,6 +14,8 @@ PROJECTS += policy-tool
 PROJECTS += policy-engine
 PROJECTS += renode-plugins
 PROJECTS += renode
+PROJECTS += llvm-riscv
+PROJECTS += qemu
 
 CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 
@@ -25,6 +27,8 @@ all: path_check
 
 policy-engine: policy-tool
 renode-plugins: renode
+llvm-riscv: riscv-gnu-toolchain
+qemu: policy-engine
 
 path_check:
 	(grep -q $(ISP_PREFIX)bin <<< $(PATH)) || (echo "Need to add $(ISP_PREFIX)/bin to your PATH" && false)
