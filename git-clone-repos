@@ -9,10 +9,14 @@ repo_root_dir="$script_dir/../"
 pushd "$repo_root_dir" > /dev/null
 
 while read repo; do
-    if [ -d $repo ]; then
-        echo "Directory $repo already exists"
+    if [[ $repo == \#* ]]; then
+        echo "Skipping line" $repo
     else
-        git clone --recurse-submodules https://github.com/draperlaboratory/hope-$repo $repo
+        if [ -d $repo ]; then
+            echo "Directory $repo already exists"
+        else
+            git clone --recurse-submodules https://github.com/draperlaboratory/hope-$repo $repo
+        fi
     fi
 done < $repo_file
 

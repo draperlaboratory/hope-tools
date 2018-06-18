@@ -5,9 +5,13 @@ repo_file="$script_dir/repos.txt"
 repo_root_dir="$script_dir/../"
 
 while read repo; do
-    pushd "$repo_root_dir/$repo"  > /dev/null
-    echo In $repo
-    git "$@"
-    echo -e "\n"
-    popd > /dev/null
+    if [[ $repo == \#* ]]; then
+        echo "Skipping line" $repo
+    else
+        pushd "$repo_root_dir/$repo"  > /dev/null
+        echo In $repo
+        git "$@"
+        echo ""
+        popd > /dev/null
+    fi
 done < $repo_file
