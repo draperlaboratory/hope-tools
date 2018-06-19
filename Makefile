@@ -34,15 +34,15 @@ path_check:
 	(grep -q $(ISP_PREFIX)bin <<< $(PATH)) || (echo "Need to add $(ISP_PREFIX)/bin to your PATH" && false)
 
 $(PROJECTS): $(ISP_PREFIX)
-	$(MAKE) -C ../$@
-	$(MAKE) -C ../$@ install
+	$(MAKE) -f Makefile.isp -C ../$@
+	$(MAKE) -f Makefile.isp -C ../$@ install
 
 $(ISP_PREFIX):
 	sudo mkdir -p $(ISP_PREFIX)
 	sudo chown $(USER) $(ISP_PREFIX)
 
 $(CLEAN_PROJECTS):
-	$(MAKE) -C ../$(@:clean-%=%) clean
+	$(MAKE) -f Makefile.isp -C ../$(@:clean-%=%) clean
 
 documentation:
 	$(MAKE) -C documentation
