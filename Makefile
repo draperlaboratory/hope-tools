@@ -12,6 +12,7 @@ SDK_VERSION:=0.0.0
 PROJECTS := riscv-gnu-toolchain
 PROJECTS += policy-tool
 PROJECTS += policy-engine
+PROJECTS += FreeRTOS
 PROJECTS += renode-plugins
 PROJECTS += renode
 PROJECTS += llvm-riscv
