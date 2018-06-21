@@ -14,6 +14,29 @@ Note that `ISP_PREFIX` must end with a `/`.
 
 ## Installing Necessary Software
 
+### Ubuntu 18.04
+
+The dependencies can be installed via the following:
+
+```
+sudo apt-get install -y python3-pip
+sudo -H pip3 install pyelftools
+sudo apt-get install -y autoconf automake autotools-dev curl \
+    libmpc-dev libmpfr-dev libgmp-dev gawk build-essential \
+    bison flex texinfo gperf iverilog libelf-dev socat \
+    expat libexpat1-dev git python3 python3-setuptools \
+    cmake haskell-platform stack
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+sudo apt update
+sudo apt-get -y install git mono-complete automake autoconf libtool g++ realpath \
+    libgtk2.0-dev screen uml-utilities gtk-sharp2 python2.7
+sudo apt-get -y install cmake libboost-dev libboost-program-options-dev \
+    libyaml-cpp-dev libgflags-dev
+```
+
+### Ubuntu 16.04
+
 On Ubuntu 16.04 run the following to install the necessary software.  Note that
 if `ghc` and `cabal` are already installed and on your path, you can remove
 `haskell-platform` from the list below to avoid conflicting versions.
