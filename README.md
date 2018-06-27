@@ -33,7 +33,8 @@ sudo apt update
     libgtk2.0-dev screen uml-utilities gtk-sharp2 python2.7
 sudo apt-get -y install cmake libboost-dev libboost-program-options-dev \
     libyaml-cpp-dev libgflags-dev
-stack upgrade
+stack upgrade --binary
+echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc
 ```
 
 ### Ubuntu 16.04
