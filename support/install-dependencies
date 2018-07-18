@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+
+#!/bin/bash
+
+set -e
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+repo_file="$script_dir/../repos.txt"
+repo_root_dir="$script_dir/../../"
+
+pushd "$repo_root_dir" > /dev/null
+
+while read repo; do
+    if [[ $repo == \#* ]]; then
+        echo "Skipping line" $repo
+        continue
+    fi
+    if [ $repo = "hope-tools" ]; then
+        echo "Skipping hope-tools repo"
+        continue
+    fi
+    ./$repo/isp-support/install-dependencies
+done < $repo_file
+
+popd > /dev/null

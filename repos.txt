@@ -1,3 +1,4 @@
+hope-tools
 riscv-gnu-toolchain
 policies
 FreeRTOS
@@ -5,5 +6,3 @@ policy-tool
 renode
 policy-engine
 renode-plugins
-qemu
-llvm-riscv

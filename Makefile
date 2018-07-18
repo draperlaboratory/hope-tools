@@ -15,8 +15,6 @@ PROJECTS += policy-engine
 PROJECTS += FreeRTOS
 PROJECTS += renode-plugins
 PROJECTS += renode
-PROJECTS += llvm-riscv
-PROJECTS += qemu
 
 CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 
