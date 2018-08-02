@@ -7,3 +7,4 @@ renode
 policy-engine
 renode-plugins
 freedom-e-sdk
+riscv-newlib

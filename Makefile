@@ -16,6 +16,7 @@ PROJECTS += FreeRTOS
 PROJECTS += renode-plugins
 PROJECTS += renode
 PROJECTS += freedom-e-sdk
+PROJECTS += riscv-newlib
 
 CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 
@@ -29,6 +30,7 @@ policy-engine: policy-tool
 renode-plugins: renode
 llvm-riscv: riscv-gnu-toolchain
 qemu: policy-engine
+riscv-newlib: llvm-riscv
 
 path_check:
 	(grep -q $(ISP_PREFIX)bin <<< $(PATH)) || (echo "Need to add $(ISP_PREFIX)/bin to your PATH" && false)
