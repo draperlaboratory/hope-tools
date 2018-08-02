@@ -15,6 +15,7 @@ PROJECTS += policy-engine
 PROJECTS += FreeRTOS
 PROJECTS += renode-plugins
 PROJECTS += renode
+PROJECTS += freedom-e-sdk
 
 CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 
