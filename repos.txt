@@ -1,4 +1,4 @@
-hope-tools
+tools
 riscv-gnu-toolchain
 policies
 FreeRTOS

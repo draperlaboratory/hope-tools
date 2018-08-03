@@ -17,8 +17,8 @@ while read repo; do
         echo "Skipping line" $repo
         continue
     fi
-    if [ $repo = "hope-tools" ]; then
-        echo "Skipping hope-tools repo"
+    if [ $repo = "tools" ]; then
+        echo "Skipping tools repo"
         continue
     fi
     ./$repo/isp-support/install-dependencies
