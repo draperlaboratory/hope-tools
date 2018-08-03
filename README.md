@@ -60,7 +60,7 @@ The other repositories can be downloaded running the following:
 On Ubuntu 16.04 run the following to install the necessary software.
 
 ```
-sudo ./support/install-dependencies
+sudo ./isp-support/install-dependencies
 ```
 
 ## Building
