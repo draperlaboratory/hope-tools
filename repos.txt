@@ -8,3 +8,4 @@ policy-engine
 renode-plugins
 freedom-e-sdk
 riscv-newlib
+llvm-riscv
