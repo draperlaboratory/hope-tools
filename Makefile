@@ -17,6 +17,7 @@ PROJECTS += renode-plugins
 PROJECTS += renode
 PROJECTS += freedom-e-sdk
 PROJECTS += riscv-newlib
+PROJECTS += llvm-riscv
 
 CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 
