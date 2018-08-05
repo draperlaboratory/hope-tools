@@ -18,6 +18,7 @@ PROJECTS += renode
 PROJECTS += freedom-e-sdk
 PROJECTS += riscv-newlib
 PROJECTS += llvm-riscv
+PROJECTS += qemu
 
 CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 
