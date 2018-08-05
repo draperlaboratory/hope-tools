@@ -25,7 +25,7 @@ sudo apt-get install -y autoconf automake autotools-dev curl \
     libmpc-dev libmpfr-dev libgmp-dev gawk build-essential \
     bison flex texinfo gperf iverilog libelf-dev socat \
     expat libexpat1-dev git python3 python3-setuptools python-pip \
-    cmake haskell-platform haskell-stack binutils-dev python-pytest
+    cmake haskell-platform haskell-stack binutils-dev python-pytest python-pytest-xdist
 pip2 install pytest-html pytest-timeout
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
