@@ -19,7 +19,7 @@ Note that `ISP_PREFIX` must end with a `/`.
 The dependencies can be installed via the following:
 
 ```
-sudo apt-get install -y autoconf automake autotools-dev curl \
+sudo apt-get install -y autoconf automake autogen autotools-dev curl \
     libmpc-dev libmpfr-dev libgmp-dev gawk build-essential \
     bison flex texinfo gperf iverilog libelf-dev socat \
     expat libexpat1-dev git python3 python3-setuptools \
