@@ -15,7 +15,11 @@ while read repo; do
         if [ -d $repo ]; then
             echo "Directory $repo already exists"
         else
-            git clone --recurse-submodules https://github.com/draperlaboratory/hope-$repo $repo
+            if [[ $repo = freedom-e-sdk ]]; then
+                git clone https://github.com/draperlaboratory/hope-$repo $repo
+            else
+                git clone --recurse-submodules https://github.com/draperlaboratory/hope-$repo $repo
+            fi
         fi
     fi
 done < $repo_file
