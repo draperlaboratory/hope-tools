@@ -45,6 +45,14 @@ an extra argument.  Supposing $http_proxy is your proxy address:
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --keyserver-options http-proxy=$http_proxy --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 ```
 
+## Download The Other Repositories
+
+The other repositories can be downloaded running the following:
+
+```
+./git-clone-repos
+```
+
 ### Ubuntu 16.04
 
 
@@ -52,15 +60,7 @@ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --keyserver-options h
 On Ubuntu 16.04 run the following to install the necessary software.
 
 ```
-sudo ./support/install-dependencies
-```
-
-## Download The Other Repositories
-
-The other repositories can be downloaded running the following:
-
-```
-./git-clone-repos
+sudo ./isp-support/install-dependencies
 ```
 
 ## Building

@@ -17,11 +17,16 @@ while read repo; do
         echo "Skipping line" $repo
         continue
     fi
-    if [ $repo = "hope-tools" ]; then
-        echo "Skipping hope-tools repo"
+    if [ $repo = "tools" ]; then
+        echo "Skipping tools repo"
         continue
     fi
-    ./$repo/isp-support/install-dependencies
+    SCRIPT_FILE="./$repo/isp-support/install-dependencies"
+    if [ ! -f $SCRIPT_FILE ]; then
+        echo "$repo does not have an install-dependencies script"
+        continue
+    fi
+    eval $SCRIPT_FILE
 done < $repo_file
 
 popd > /dev/null
