@@ -52,4 +52,6 @@ documentation:
 	$(MAKE) -C documentation
 
 clean: $(CLEAN_PROJECTS)
+
+distclean: $(CLEAN_PROJECTS)
 	sudo rm -rf $(ISP_PREFIX)
