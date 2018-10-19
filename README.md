@@ -8,41 +8,24 @@ you build.  After you can change the install location by creating an
 environmental variable `ISP_PREFIX` and setting that to whatever you prefer.
 Note that `ISP_PREFIX` must end with a `/`.
 
-## Uninstalling Old Software
-
-`rm ~/.local/bin/policy-tool`
-
 ## Installing Necessary Software
+
+Ubuntu 18.04 is the preferred platform for HOPE development.
 
 ### Ubuntu 18.04
 
-The dependencies can be installed via the following:
+On Ubuntu 18.04 run the following to install the necessary software.
 
 ```
-sudo apt-get install -y autoconf automake autogen autotools-dev curl \
-    libmpc-dev libmpfr-dev libgmp-dev gawk build-essential \
-    bison flex texinfo gperf iverilog libelf-dev socat \
-    expat libexpat1-dev git python3 python3-setuptools \
-    cmake haskell-platform haskell-stack binutils-dev \
-	python3-distutils python3-pytest \
-	python3-pytest-xdist python3-pytest-timeout python3-pyelftools
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-sudo apt update
-sudo apt-get -y install git mono-complete automake autoconf libtool g++ \
-   libgtk2.0-dev screen uml-utilities gtk-sharp2
-sudo apt-get -y install cmake libboost-dev libboost-program-options-dev \
-    libyaml-cpp-dev libgflags-dev
-echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc
-export PATH=$HOME/.local/bin:$PATH
-stack upgrade --binary-only
+sudo ./isp-support/install-dependencies-ubuntu-1804
 ```
 
-NOTE: If you are behind a proxy, the `sudo apt-key adv` command will require
-an extra argument.  Supposing $http_proxy is your proxy address:
+### Ubuntu 16.04
+
+On Ubuntu 16.04 run the following to install the necessary software.
 
 ```
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --keyserver-options http-proxy=$http_proxy --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+sudo ./isp-support/install-dependencies
 ```
 
 ## Download The Other Repositories
@@ -52,17 +35,6 @@ The other repositories can be downloaded running the following:
 ```
 ./git-clone-repos
 ```
-
-### Ubuntu 16.04
-
-
-
-On Ubuntu 16.04 run the following to install the necessary software.
-
-```
-sudo ./isp-support/install-dependencies
-```
-
 ## Building
 
 The software can be built using the Makefile provided in this repository.  It is
@@ -78,62 +50,20 @@ make -j `nproc`
 This build takes a while (at least 10 minutes, and possibly much longer,
 depending on your machine).
 
+## Running Tests
 
-## Getting started
-
-Read the README.md in the policy-engine repository for instructions on how to
-build and run a program under renode.
-
-You now have installed a variety of HOPE-related tools, including a custom
-version of the RISC-V Spike software simulator that has been enhanced with the
-PIPE and a tool for compiling micropolicies.  One good way to get started is to
-run our policy tests.
+### Renode
 
 ```
-cd ../policies/policy_tests
-make install-kernels
-make
+make kernel test
 ```
 
-The `make install-kernels` command builds PEX kernels with several default
-micropolicies.  The final `make` runs our policy tests - a collection of simple
-C programs that do or do not violate various policies.  You should see that
-these tests pass, withoutput like:
+Note: Renode does not support parallel test runs.
+
+### QEMU
 
 ```
-run_unit_tests.py::test_simple[dover.dos.main.cfi-printf_works_1.c-O2] PASSED                     [  0%]
-run_unit_tests.py::test_simple[dover.dos.main.cfi-hello_works_1.c-O2] PASSED                      [  1%]
-run_unit_tests.py::test_simple[dover.dos.main.cfi-stanford_int_treesort_fixed.c-O2] PASSED        [  2%]
-run_unit_tests.py::test_simple[dover.dos.main.cfi-link_list_works_1.c-O2] PASSED                  [  3%]
-run_unit_tests.py::test_simple[dover.dos.main.cfi-ptr_arith_works_1.c-O2] PASSED                  [  4%]
-...
+make kernel test SIM=qemu CONFIG=hifive XDIST='-n auto'
 ```
 
-It's often useful to explore an individual test in the simulator.  To do this, run:
-
-```
-make debug-TESTNAME
-```
-
-Where TESTNAME is the name of one of the tests.  For example, you can run:
-
-```
-make debug-dover.dos.main.cfi-hello_works_1.c-O2
-```
-
-This should results in the creation of some files:
-
-```
-cd debug/dover.dos.main.cfi-hello_works_1.c-O2
-```
-
-Here you can see the C program that is run as part of the test (`main.c`) as
-well as assembly listings of the application code and how they are tagged at
-boot (`*.text.tagged`).  To run the simulator, do:
-
-```
-make && make spike
-```
-
-You are now in the PIPE-enhanced Spike simulator.  You can now step through the
-program and examine tags and memory.  Type "help" for more information.
+Note: XDIST allows for parallel test runs. You may specify the number of parallel jobs with '-n X'.
