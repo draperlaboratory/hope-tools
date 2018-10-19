@@ -1,7 +1,11 @@
 .PHONY: all
 .PHONY: path_check
 .PHONY: documentation
+.PHONY: kernel
+.PHONY: test
 .PHONY: clean
+.PHONY: clean-kernel
+.PHONY: distclean
 
 SHELL:=/bin/bash
 
@@ -51,7 +55,16 @@ $(CLEAN_PROJECTS):
 documentation:
 	$(MAKE) -C documentation
 
-clean: $(CLEAN_PROJECTS)
+kernel:
+	$(MAKE) -C ../policies/policy_tests install-kernels
 
-distclean: $(CLEAN_PROJECTS)
+test:
+	$(MAKE) -C ../policies/policy_tests
+
+clean-kernel:
+	$(MAKE) -C ../policies/policy_tests clean
+
+clean: $(CLEAN_PROJECTS) clean-kernel
+
+distclean: clean
 	sudo rm -rf $(ISP_PREFIX)
