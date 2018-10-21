@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+sudo ${script_dir}/isp-support/install-dependencies-ubuntu-1804
+. ~/.bashrc
+${script_dir}/git-clone-repos
+make -j `nproc`
+make kernel
+make test
