@@ -25,7 +25,7 @@ sudo ./isp-support/install-dependencies-ubuntu-1804
 On Ubuntu 16.04 run the following to install the necessary software.
 
 ```
-sudo ./isp-support/install-dependencies
+sudo ./isp-support/install-dependencies-ubuntu-1604
 ```
 
 ## Download The Other Repositories

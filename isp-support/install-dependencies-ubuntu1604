@@ -1,0 +1,32 @@
+#!/bin/bash
+
+set -e
+
+#!/bin/bash
+
+set -e
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+repo_file="$script_dir/../repos.txt"
+repo_root_dir="$script_dir/../../"
+
+pushd "$repo_root_dir" > /dev/null
+
+while read repo; do
+    if [[ $repo == \#* ]]; then
+        echo "Skipping line" $repo
+        continue
+    fi
+    if [ $repo = "tools" ]; then
+        echo "Skipping tools repo"
+        continue
+    fi
+    SCRIPT_FILE="./$repo/isp-support/install-dependencies"
+    if [ ! -f $SCRIPT_FILE ]; then
+        echo "$repo does not have an install-dependencies script"
+        continue
+    fi
+    eval $SCRIPT_FILE
+done < $repo_file
+
+popd > /dev/null
