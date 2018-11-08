@@ -56,10 +56,10 @@ documentation:
 	$(MAKE) -C documentation
 
 kernel:
-	$(MAKE) -C ../policies/policy_tests install-kernels-full
+	$(MAKE) -C ../policies/policy_tests install-kernels-simple
 
 test:
-	$(MAKE) -C ../policies/policy_tests full
+	$(MAKE) -C ../policies/policy_tests simple
 
 clean-kernel:
 	$(MAKE) -C ../policies/policy_tests clean
