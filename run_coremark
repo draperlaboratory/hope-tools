@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+#set -x
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SRC=$script_dir/..
+TESTDIR=$SRC/policies/policy_tests
+POLICIES="none stack rwx heap threeClass heap-rwx-stack-threeClass"
+TEST=coremark
+
+export CONFIG=hifive
+export SIM=qemu
+export RULE_CACHE=finite
+export RULE_CACHE_SIZE=128
+
+for POLICY in ${POLICIES}; do
+    cd $TESTDIR
+    TARGET=osv.hifive.main.${POLICY}-${TEST}-O2
+    make -B install-kernel-osv.hifive.main.${POLICY}
+    make debug-${TARGET}
+
+    # Print stats
+    grep "Correct operation validated" output/pass/${TARGET}/uart.log || echo "Coremark run failed"
+    grep hit output/pass/${TARGET}/qemu.log || echo "Rule cache stats missing"
+done
