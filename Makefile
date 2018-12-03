@@ -55,16 +55,16 @@ $(CLEAN_PROJECTS):
 documentation:
 	$(MAKE) -C documentation
 
-kernel:
-	$(MAKE) -C ../policies/policy_tests install-kernels-simple
+test-qemu:
+	$(MAKE) -C ../policies/policy_tests qemu
 
-test:
-	$(MAKE) -C ../policies/policy_tests simple
+test-renode:
+	$(MAKE) -C ../policies/policy_tests renode
 
-clean-kernel:
+clean-test:
 	$(MAKE) -C ../policies/policy_tests clean
 
-clean: $(CLEAN_PROJECTS) clean-kernel
+clean: $(CLEAN_PROJECTS) clean-test
 
 distclean: clean
 	sudo rm -rf $(ISP_PREFIX)
