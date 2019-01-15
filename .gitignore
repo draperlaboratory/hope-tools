@@ -3,3 +3,5 @@
 documentation/user/*.pdf
 /build-homes/
 *.bz2
+*.swp
+*.swo
