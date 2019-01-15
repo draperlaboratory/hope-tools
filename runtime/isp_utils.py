@@ -10,15 +10,16 @@ def doMkDir(dir):
         if e.errno != errno.EEXIST:
             raise
 
-def remove_if_exists(filename):
+def removeIfExists(filename):
     if os.path.exists(filename):
         if os.path.isdir(filename):
             shutil.rmtree(filename)
         else:
             os.remove(filename)
 
-def make_entities_file(run_dir, name):
-    filename = os.path.join(run_dir, "..", (name + ".entities.yml"))
+def makeEntitiesFile(run_dir, name):
+    # filename = os.path.join(run_dir, "..", (name + ".entities.yml"))
+    filename = os.path.join(run_dir, (name + ".entities.yml"))
     if os.path.exists(filename) is False:
         print(filename)
         open(filename, "a").close()
@@ -30,9 +31,9 @@ def get_templates_dir():
                                     "policy_tests",
                                     "template")
 
-def get_kernels_dir():
+def getKernelsDir():
     isp_prefix = os.environ["ISP_PREFIX"]
     return os.path.join(isp_prefix, "kernels")
 
-def get_policy_full_name(policy, runtime):
+def getPolicyFullName(policy, runtime):
     return "osv." + runtime + ".main." + policy

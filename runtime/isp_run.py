@@ -10,6 +10,7 @@ import glob
 import errno
 
 from isp_utils import *
+import isp_qemu
 
 # backend helper to run an ISP simulation with a binary & kernel
 
@@ -23,41 +24,28 @@ class retVals:
 # -- MAIN MODULE FUNCTIONALITY
 
 # arguments:
-#  test_dir - output directory produced by isp_build tool
+#  exe_path - path to executable to be run
 #  kernels_dir - directory containing the kernel to be run
 #  run_dir - output of this module. Directory to put supporting files, run
 #    the simulation, and store the appropriate logs
-#  template_dir - Directory containing ISP provided generic run simulation
-#    scripts
-#  runtime - Currently supported: frtos, hifive (bare metal)
 #  policy - name of the policy to be run
 #  sim - name of the simultator to use
-#  rc - rule cache configuration tuple. (cache_name, size)
+#  rule_cache - rule cache configuration tuple. (cache_name, size)
 
-def run_sim(test_dir, kernels_dir, run_dir, template_dir, runtime, policy, sim, rc):
+def runSim(exe_path, kernels_dir, run_dir, policy, sim, rule_cache, debug):
 
-    if not os.path.isfile(os.path.join(test_dir, "build", "main")):
+    if not os.path.isfile(exe_path):
         return retVals.NO_BIN
+
+    exe_name = os.path.basename(exe_path)
 
     doMkDir(run_dir)
 
-    # simulator-specific run options
-    if "qemu" in sim:
-        shutil.copy(os.path.join(template_dir, "runQEMU.py"), test_dir)
-    elif "renode" in sim:
-        shutil.copy(os.path.join(template_dir, "runRenode.py"), test_dir)
-    else:
-        shutil.copy(os.path.join(template_dir, "runFPGA.py"), test_dir)
+    # TODO: replace runRenode.py and runFPGA.py
 
-    # policy-specific stuff
-
-    # retrieve policy
-    subprocess.Popen(["cp", "-r", os.path.join(kernels_dir, policy), run_dir], stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT).wait()
-    if not os.path.isdir(os.path.join(run_dir, policy)):
+    policy_dir = os.path.join(kernels_dir, policy)
+    if not os.path.isdir(policy_dir):
         return retVals.NO_POLICY
-
-    # test-run-level makefile. ie make inits & make qemu
-    doMakefile(policy, run_dir)
 
     # script for renode config
     if sim == "renode":
@@ -66,24 +54,28 @@ def run_sim(test_dir, kernels_dir, run_dir, template_dir, runtime, policy, sim, 
     doDebugScript(run_dir, sim)
 
     # config validator including rule cache
-    doValidatorCfg(policy, run_dir, rc[0], rc[1])
+    doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache[0], rule_cache[1])
 
     # run tagging tools
     doMkDir(os.path.join(run_dir, "bininfo"))
-    make_entities_file(run_dir, "main")
+    makeEntitiesFile(run_dir, exe_name)
 
     with open(os.path.join(run_dir, "inits.log"), "w+") as initlog:
-        subprocess.Popen(["make", "-f", "Makefile.isprun", "inits"], stdout=initlog, stderr=subprocess.STDOUT, cwd=run_dir).wait()
+        subprocess.Popen(["gen_tag_info",
+                          "-d", policy_dir,
+                          "-t", os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
+                          "-b", exe_path,
+                          "-e", os.path.join(policy_dir, policy + ".entities.yml"),
+                          os.path.join(run_dir, exe_name + ".entities.yml")],
+                          stdout=initlog, stderr=subprocess.STDOUT, cwd=run_dir).wait()
 
     # Check for tag information
-    if not os.path.isfile(os.path.join(run_dir, "bininfo", "main.taginfo")) or \
-       not os.path.isfile(os.path.join(run_dir, "bininfo", "main.text"))    or \
-       not os.path.isfile(os.path.join(run_dir, "bininfo", "main.text.tagged")):
+    if not os.path.isfile(os.path.join(run_dir, "bininfo", exe_name + ".taginfo")) or \
+       not os.path.isfile(os.path.join(run_dir, "bininfo", exe_name + ".text"))    or \
+       not os.path.isfile(os.path.join(run_dir, "bininfo", exe_name + ".text.tagged")):
         return retVals.TAG_FAIL
 
-    # run test
-    simlog = open(os.path.join(run_dir, "sim.log"), "w+")
-    subprocess.Popen(["make", "-f", "Makefile.isprun", sim], stdout=simlog, stderr=subprocess.STDOUT, cwd=run_dir).wait()
+    isp_qemu.runOnQEMU(exe_path, run_dir, policy_dir, debug)
 
     return retVals.SUCCESS
 
@@ -384,9 +376,9 @@ break main
 continue
 """.format(path = os.path.join(os.getcwd(), dir))
 
-def doValidatorCfg(policy, dirPath, rule_cache, rule_cache_size):
+def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, rule_cache_size):
 
-    if "hifive" in policy:
+    if "hifive" in policy_dir:
         soc_cfg = "hifive_e_cfg.yml"
     else:
         soc_cfg = "dover_cfg.yml"
@@ -396,9 +388,9 @@ def doValidatorCfg(policy, dirPath, rule_cache, rule_cache_size):
    policy_dir: {policyDir}
    tags_file: {tagfile}
    soc_cfg_path: {soc_cfg}
-""".format(policyDir=os.path.join(os.getcwd(), dirPath, policy),
-           tagfile=os.path.join(os.getcwd(), dirPath, "bininfo/main.taginfo"),
-           soc_cfg=os.path.join(os.getcwd(), dirPath, policy, "soc_cfg", soc_cfg))
+""".format(policyDir=policy_dir,
+           tagfile=os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
+           soc_cfg=os.path.join(policy_dir, "soc_cfg", soc_cfg))
 
     if (rule_cache):
         validatorCfg += """\
@@ -407,5 +399,5 @@ def doValidatorCfg(policy, dirPath, rule_cache, rule_cache_size):
       capacity: {rule_cache_size}
         """.format(rule_cache_name=rule_cache, rule_cache_size=rule_cache_size)
 
-    with open(os.path.join(dirPath,'validator_cfg.yml'), 'w') as f:
+    with open(os.path.join(run_dir, "validator_cfg.yml"), 'w') as f:
         f.write(validatorCfg)

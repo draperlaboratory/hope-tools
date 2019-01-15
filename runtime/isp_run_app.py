@@ -4,33 +4,13 @@ import re
 import argparse
 import isp_utils
 
-def clean_run(run_dir, kernel_dir):
-    isp_utils.remove_if_exists(os.path.join(run_dir, "..", "Makefile.isprun"))
-    isp_utils.remove_if_exists(os.path.join(run_dir, "..", "runQEMU.py"))
-    isp_utils.remove_if_exists(os.path.join(run_dir, "..", "runRenode.py"))
-    isp_utils.remove_if_exists(os.path.join(run_dir, "..", "hifive.c"))
-    isp_utils.remove_if_exists(os.path.join(run_dir, ".." "mem.h"))
-    isp_utils.remove_if_exists(os.path.join(run_dir, "..", "test.h"))
-
-    if os.path.exists(run_dir):
-        for f in os.listdir(run_dir):
-            if os.path.splitext(f)[-1] == ".log":
-                isp_utils.remove_if_exists(os.path.join(run_dir, f))
-
-        for f in os.listdir(os.path.join(run_dir, "..")):
-            if os.path.splitext(f)[-1] == ".yml":
-                isp_utils.remove_if_exists(os.path.join(run_dir ,"..", f))
-
-    isp_utils.remove_if_exists(run_dir)
-
-
-def print_uart_output(run_dir):
+def printUartOutput(run_dir):
     process_log = open(os.path.join(run_dir, "uart.log"))
     print("Process output:")
     print(process_log.read())
 
 
-def get_process_exit_code(run_dir):
+def getProcessExitCode(run_dir):
     process_log = open(os.path.join(run_dir, "uart.log"))
     process_out = process_log.readlines()
     hex_pattern = r"0x[0-9A-Fa-f]+$"
@@ -45,17 +25,17 @@ def get_process_exit_code(run_dir):
 
 def main():
     parser = argparse.ArgumentParser(description="Run standalone ISP applications")
-    parser.add_argument("build_dir", type=str, help='''
-    Build artifacts to run. This is the output of the isp_build_app tool
+    parser.add_argument("exe_path", type=str, help='''
+    Path of the executable to run
     ''')
     parser.add_argument("policy", type=str, help='''
     Name of the policy to run
     ''')
+    parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
+    Currently supported: qemu (default)
+    ''')
     parser.add_argument("-r", "--runtime", type=str, default="hifive", help='''
     Currently supported: frtos, hifive (bare metal) (default)
-    ''')
-    parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
-    Currently supported: qemu (default), renode
     ''')
     parser.add_argument("-o", "--output", type=str, default="", help='''
     Default is current working directory.
@@ -68,35 +48,38 @@ def main():
     parser.add_argument("-u", "--uart", action="store_true", help='''
     Forward UART output from the simulator to stdout
     ''')
+    parser.add_argument("-d", "--debug", action="store_true", help='''
+    Start the simulator in debug mode
+    ''')
 
     args = parser.parse_args()
 
-    policy_full_name = isp_utils.get_policy_full_name(args.policy, args.runtime)
-
     output_dir = args.output
     if args.output == "":
-        output_dir = args.build_dir
+        output_dir = os.getcwd()
 
-    run_dir = os.path.join(output_dir, "test")
-
+    exe_name = os.path.basename(args.exe_path)
+    exe_full_path = os.path.abspath(args.exe_path)
+    run_dir = os.path.join(output_dir, "isp_run_" + exe_name)
+    isp_utils.removeIfExists(run_dir)
     if args.clean is True:
-        clean_run(run_dir, policy_full_name)
         return
 
+    policy_full_name = isp_utils.getPolicyFullName(args.policy, args.runtime)
+
     print("Starting simulator...")
-    result = isp_run.run_sim(args.build_dir,
-                               isp_utils.get_kernels_dir(),
-                               run_dir,
-                               isp_utils.get_templates_dir(),
-                               args.runtime,
-                               policy_full_name,
-                               args.simulator,
-                               ("", 16))
+    result = isp_run.runSim(exe_full_path,
+                            isp_utils.getKernelsDir(),
+                            run_dir,
+                            policy_full_name,
+                            args.simulator,
+                            ("", 16),
+                            args.debug)
 
     if args.uart is True:
-        print_uart_output(run_dir)
+        printUartOutput(run_dir)
 
-    process_exit_code = get_process_exit_code(run_dir)
+    process_exit_code = getProcessExitCode(run_dir)
     print("Process exited with code {}".format(process_exit_code))
 
     if result is not isp_run.retVals.SUCCESS:
