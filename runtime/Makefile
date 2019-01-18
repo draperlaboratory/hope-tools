@@ -22,6 +22,7 @@ ISP_BACKEND := isp_build.py
 ISP_BACKEND += isp_run.py
 ISP_BACKEND += isp_utils.py
 ISP_BACKEND += isp_qemu.py
+ISP_BACKEND += isp_renode.py
 
 HIFIVE_PREFIX := osv.hifive.main.
 FRTOS_PREFIX := osv.frtos.main.

@@ -7,14 +7,11 @@ import subprocess
 import os
 import logging
 
-# this script relys on either the AP or Pex printing this to end the test
+# this script relies on either the AP or Pex printing this to end the test
 terminate_msg = "Progam has exited with code:"
 
-# print fpga io to stdout
-printIO = True
-
 # set timeout seconds
-timeoutSec = 3600
+timeout_seconds = 3600
 
 uart_log_file = "uart.log"
 status_log_file = "pex.log"
@@ -43,7 +40,7 @@ def qemuOptions(exe_path, run_dir, debug=0):
 
 def watchdog():
     global test_done
-    for i in range(timeoutSec * 10):
+    for i in range(timeout_seconds * 10):
         if not test_done:
             time.sleep(0.5)
         else:
@@ -97,7 +94,7 @@ def launchQEMUDebug(exe_path, run_dir, policy_dir, debug):
 
 def runOnQEMU(exe_path, run_dir, policy_dir, debug):
     try:
-        logger.debug("Begin QEMU test... (timeout: {})".format(timeoutSec))
+        logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
         if debug is not 0:
             launchQEMUDebug(exe_path, run_dir, policy_dir, debug)
         else:

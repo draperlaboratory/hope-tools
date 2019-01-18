@@ -1,4 +1,3 @@
-# test script for running unit test
 import functools
 import itertools
 import operator
@@ -11,8 +10,10 @@ import errno
 
 from isp_utils import *
 import isp_qemu
+import isp_renode
 
 # backend helper to run an ISP simulation with a binary & kernel
+# TODO: runFPGA support
 
 # possible module outcomes
 class retVals:
@@ -25,7 +26,7 @@ class retVals:
 
 # arguments:
 #  exe_path - path to executable to be run
-#  kernels_dir - directory containing the kernel to be run
+#  kernels_dir - directory containing PEX kernels
 #  run_dir - output of this module. Directory to put supporting files, run
 #    the simulation, and store the appropriate logs
 #  policy - name of the policy to be run
@@ -34,28 +35,39 @@ class retVals:
 #  gdb - debug port for gdbserver mode (optional)
 
 def runSim(exe_path, kernels_dir, run_dir, policy, sim, rule_cache, gdb):
+    exe_name = os.path.basename(exe_path)
 
     if not os.path.isfile(exe_path):
         return retVals.NO_BIN
-
-    exe_name = os.path.basename(exe_path)
-
-    doMkDir(run_dir)
-
-    # TODO: replace runRenode.py and runFPGA.py
 
     policy_dir = os.path.join(kernels_dir, policy)
     if not os.path.isdir(policy_dir):
         return retVals.NO_POLICY
 
-    if sim == "renode":
-        doRenodeScript(policy, run_dir)
+    doMkDir(run_dir)
 
     doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache)
+    doEntitiesFile(run_dir, exe_name)
+    generateTagInfo(exe_path, run_dir, policy_dir)
 
+    bininfo_base_path = os.path.join(run_dir, "bininfo", exe_name) + ".{}"
+    if not os.path.isfile(bininfo_base_path.format("taginfo")) or \
+       not os.path.isfile(bininfo_base_path.format("text"))    or \
+       not os.path.isfile(bininfo_base_path.format("text.tagged")):
+        return retVals.TAG_FAIL
+
+    if sim == "qemu":
+        isp_qemu.runOnQEMU(exe_path, run_dir, policy_dir, gdb)
+    elif sim == "renode":
+        isp_renode.runOnRenode(exe_path, run_dir, policy_dir, gdb)
+
+    return retVals.SUCCESS
+
+
+def generateTagInfo(exe_path, run_dir, policy_dir):
+    policy = os.path.basename(policy_dir)
+    exe_name = os.path.basename(exe_path)
     doMkDir(os.path.join(run_dir, "bininfo"))
-    makeEntitiesFile(run_dir, exe_name)
-
     with open(os.path.join(run_dir, "inits.log"), "w+") as initlog:
         subprocess.Popen(["gen_tag_info",
                           "-d", policy_dir,
@@ -65,44 +77,12 @@ def runSim(exe_path, kernels_dir, run_dir, policy, sim, rule_cache, gdb):
                           os.path.join(run_dir, exe_name + ".entities.yml")],
                           stdout=initlog, stderr=subprocess.STDOUT, cwd=run_dir).wait()
 
-    if not os.path.isfile(os.path.join(run_dir, "bininfo", exe_name + ".taginfo")) or \
-       not os.path.isfile(os.path.join(run_dir, "bininfo", exe_name + ".text"))    or \
-       not os.path.isfile(os.path.join(run_dir, "bininfo", exe_name + ".text.tagged")):
-        return retVals.TAG_FAIL
 
-    isp_qemu.runOnQEMU(exe_path, run_dir, policy_dir, gdb)
+def doEntitiesFile(run_dir, name):
+    filename = os.path.join(run_dir, (name + ".entities.yml"))
+    if os.path.exists(filename) is False:
+        open(filename, "a").close()
 
-    return retVals.SUCCESS
-
-# Generate the resc script for Renode
-def doRenodeScript(policy, dp):
-
-    rs = rescScript(dp, policy)
-
-    with open(os.path.join(dp,'main.resc'), 'w') as f:
-        f.write(rs)
-
-def rescScript(dir, policy, gdb):
-    gdb_command = ""
-
-    if gdb is not 0:
-        gdb_command = "sysbus.ap_core StartGdbServer {}".format(gdb)
-
-    return """
-mach create
-machine LoadPlatformDescription @platforms/boards/dover-riscv-board.repl
-sysbus.ap_core MaximumBlockSize 1
-emulation CreateServerSocketTerminal 4444 "uart-socket"
-connector Connect sysbus.uart1 uart-socket
-#showAnalyzer sysbus.uart Antmicro.Renode.UI.ConsoleWindowBackendAnalyzer
-#emulation CreateUartPtyTerminal "uart-pty" "/tmp/uart-pty"
-#connector Connect sysbus.uart uart-pty
-sysbus LoadELF @{path}/../build/main
-sysbus.ap_core SetExternalValidator @{path}/{policies}/librv32-renode-validator.so @{path}/validator_cfg.yml
-{gdb_command}
-logLevel 1 sysbus.ap_core
-sysbus.ap_core StartStatusServer 3344
-""".format(path = os.path.join(os.getcwd(), dir), policies=policy, gdb_command=gdb_command)
 
 def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache):
     rule_cache_name = rule_cache[0]

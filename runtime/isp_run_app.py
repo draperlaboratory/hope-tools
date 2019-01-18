@@ -82,6 +82,9 @@ def main():
                             ("", 16),
                             args.gdb)
 
+    if result != isp_run.retVals.SUCCESS:
+        logger.error(result)
+
     if args.uart is True:
         printUartOutput(run_dir)
 
