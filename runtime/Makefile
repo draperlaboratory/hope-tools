@@ -2,6 +2,7 @@ SYMLINK_DIR = $(ISP_PREFIX)/sources/
 KERNEL_DIR = $(ISP_PREFIX)/kernels/
 KERNEL_INSTALL = $(ISP_PREFIX)/kernels/
 BIN_DIR = $(ISP_PREFIX)/bin/
+GDB_DIR = $(ISP_PREFIX)/gdb-scripts/
 
 ROOT = $(realpath ../../)
 
@@ -12,6 +13,10 @@ POLICY_NAMES := $(shell python policy_names.py)
 
 ISP_SCRIPTS := isp_build_app
 ISP_SCRIPTS += isp_run_app
+ISP_SCRIPTS += isp_debug_app
+
+GDB_SCRIPTS := qemu.gdb
+GDB_SCRIPTS += renode.gdb
 
 ISP_BACKEND := isp_build.py
 ISP_BACKEND += isp_run.py
@@ -28,8 +33,8 @@ KERNELS := $(patsubst %,$(HIFIVE_PREFIX)%,$(POLICY_NAMES))
 KERNELS += $(patsubst %,$(FRTOS_PREFIX)%,$(POLICY_NAMES))
 
 INSTALLED_KERNELS := $(patsubst %,$(KERNEL_INSTALL)/%,$(KERNELS))
-
 INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
+INSTALLED_GDB_SCRIPTS := $(patsubst %,$(GDB_DIR)/%,$(GDB_SCRIPTS))
 
 POLICIES_DIR = $(SYMLINK_DIR)/policies/
 TEMPLATE_DIR = $(POLICIES_DIR)/policy_tests/template/
@@ -38,7 +43,7 @@ POLICY_ENGINE_DIR = $(SYMLINK_DIR)/policy-engine/
 .PHONY: all install clean uninstall kernels
 all: $(ISP_SCRIPTS)
 
-install: $(INSTALLED_ISP_SCRIPTS)
+install: $(INSTALLED_ISP_SCRIPTS) $(INSTALLED_GDB_SCRIPTS) $(INSTALLED_GDB_SCRIPTS)
 
 kernels: $(INSTALLED_KERNELS)
 
@@ -47,6 +52,10 @@ $(INSTALLED_ISP_SCRIPTS): $(ISP_SCRIPTS) $(ISP_BACKEND)
 
 $(ISP_SCRIPTS): %: %.py $(SYMLINK_DSTS) $(ISP_BACKEND)
 	pyinstaller --onefile --distpath . $<
+
+$(INSTALLED_GDB_SCRIPTS): $(GDB_SCRIPTS)
+	mkdir -p $(GDB_DIR)
+	cp -rf $(GDB_SCRIPTS) $(GDB_DIR)
 
 $(INSTALLED_KERNELS): $(KERNELS)
 	mkdir -p $(KERNEL_INSTALL)
@@ -69,4 +78,4 @@ clean:
 	rm -rf $(ISP_SCRIPTS) $(KERNELS) *.pyc *.spec build/
 
 uninstall:
-	rm -rf $(SYMLINK_DIR) $(INSTALLED_ISP_SCRIPTS) $(KERNEL_INSTALL)
+	rm -rf $(INSTALLED_ISP_SCRIPTS) $(INSTALLED_GDB_SCRIPTS) $(INSTALLED_KERNELS)

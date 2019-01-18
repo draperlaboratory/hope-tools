@@ -22,7 +22,7 @@ sim_log_file = "sim.log"
 test_done = False
 run_cmd = "qemu-system-riscv32"
 
-def qemuOptions(exe_path, run_dir, debug):
+def qemuOptions(exe_path, run_dir, debug=0):
     opts = [ "-nographic",
              "-machine", "sifive_e",
              "-kernel", exe_path,
@@ -32,8 +32,8 @@ def qemuOptions(exe_path, run_dir, debug):
              "-d", "nochain",
              "--policy-validator-cfg",
              "yaml-cfg={}".format(os.path.join(run_dir, "validator_cfg.yml"))]
-    if debug is True:
-        opts += ["-S", "-gdb", "tcp::3333"]
+    if debug is not 0:
+        opts += ["-S", "-gdb", "tcp::{}".format(debug)]
 
     return opts
 
@@ -51,7 +51,7 @@ def watchdog():
 def launchQEMU(exe_path, run_dir, policy_dir):
     global test_done
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
-    opts = qemuOptions(exe_path, run_dir, False)
+    opts = qemuOptions(exe_path, run_dir)
     try:
         print("Running qemu cmd:{}\n", str([run_cmd] + opts))
         rc = subprocess.Popen([run_cmd] + opts,
@@ -83,9 +83,9 @@ def launchQEMU(exe_path, run_dir, policy_dir):
         print("QEMU run failed for exception {}.\n".format(e))
         raise
 
-def launchQEMUDebug(exe_path, run_dir, policy_dir):
+def launchQEMUDebug(exe_path, run_dir, policy_dir, debug):
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
-    opts = qemuOptions(exe_path, run_dir, True)
+    opts = qemuOptions(exe_path, run_dir, debug)
     print("Running qemu cmd:{}\n", str([run_cmd] + opts))
     rc = subprocess.Popen([run_cmd] + opts,
                           env={"LD_LIBRARY_PATH": policy_dir,
@@ -95,8 +95,8 @@ def launchQEMUDebug(exe_path, run_dir, policy_dir):
 def runOnQEMU(exe_path, run_dir, policy_dir, debug):
     try:
         print("Begin QEMU test... (timeout: ", timeoutSec, ")")
-        if debug is True:
-            launchQEMUDebug(exe_path, run_dir, policy_dir)
+        if debug is not 0:
+            launchQEMUDebug(exe_path, run_dir, policy_dir, debug)
         else:
             wd = threading.Thread(target=watchdog)
             wd.start()

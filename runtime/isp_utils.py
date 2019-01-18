@@ -18,13 +18,12 @@ def removeIfExists(filename):
             os.remove(filename)
 
 def makeEntitiesFile(run_dir, name):
-    # filename = os.path.join(run_dir, "..", (name + ".entities.yml"))
     filename = os.path.join(run_dir, (name + ".entities.yml"))
     if os.path.exists(filename) is False:
         print(filename)
         open(filename, "a").close()
 
-def get_templates_dir():
+def getTemplatesDir():
     isp_prefix = os.environ["ISP_PREFIX"]
     return os.path.join(isp_prefix, "sources",
                                     "policies",

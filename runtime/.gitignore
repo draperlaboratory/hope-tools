@@ -4,3 +4,4 @@ build/
 osv.*/
 isp_build_app
 isp_run_app
+isp_debug_app

@@ -5,14 +5,14 @@ import argparse
 import isp_utils
 
 def clean_build(source_dir, output_dir, runtime):
-    isp_utils.remove_if_exists(os.path.join(output_dir, "build"))
-    isp_utils.remove_if_exists(os.path.join(output_dir, "Makefile.ispbuild"))
-    isp_utils.remove_if_exists(os.path.join(source_dir, runtime + ".c"))
-    isp_utils.remove_if_exists(os.path.join(source_dir, "mem.h"))
-    isp_utils.remove_if_exists(os.path.join(source_dir, "test.h"))
+    isp_utils.removeIfExists(os.path.join(output_dir, "build"))
+    isp_utils.removeIfExists(os.path.join(output_dir, "Makefile.ispbuild"))
+    isp_utils.removeIfExists(os.path.join(source_dir, runtime + ".c"))
+    isp_utils.removeIfExists(os.path.join(source_dir, "mem.h"))
+    isp_utils.removeIfExists(os.path.join(source_dir, "test.h"))
     for f in os.listdir(source_dir):
         if os.path.splitext(f)[-1] == ".o":
-            isp_utils.remove_if_exists(os.path.join(source_dir, f))
+            isp_utils.removeIfExists(os.path.join(source_dir, f))
 
 def main():
     parser = argparse.ArgumentParser(description="Build standalone ISP applications")
@@ -46,7 +46,7 @@ def main():
         return
 
     result = isp_build.do_build(source_dir,
-                                isp_utils.get_templates_dir(),
+                                isp_utils.getTemplatesDir(),
                                 args.runtime,
                                 args.output,
                                 True)

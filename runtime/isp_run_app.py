@@ -48,8 +48,8 @@ def main():
     parser.add_argument("-u", "--uart", action="store_true", help='''
     Forward UART output from the simulator to stdout
     ''')
-    parser.add_argument("-d", "--debug", action="store_true", help='''
-    Start the simulator in debug mode
+    parser.add_argument("-g", "--gdb", type=int, default=0, help='''
+    Start the simulator in gdbserver mode
     ''')
 
     args = parser.parse_args()
@@ -74,7 +74,7 @@ def main():
                             policy_full_name,
                             args.simulator,
                             ("", 16),
-                            args.debug)
+                            args.gdb)
 
     if args.uart is True:
         printUartOutput(run_dir)
