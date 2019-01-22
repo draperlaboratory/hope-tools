@@ -55,8 +55,7 @@ def main():
 
     args = parser.parse_args()
 
-    logger = logging.getLogger()
-    logging.basicConfig()
+    logger = isp_utils.setupLogger()
     logger.setLevel(logging.INFO)
     if args.debug is True:
         logger.setLevel(logging.DEBUG)

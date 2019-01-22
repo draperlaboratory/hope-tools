@@ -1,6 +1,7 @@
 import os
 import errno
 import shutil
+import logging
 
 def doMkDir(dir):
     try:
@@ -30,3 +31,9 @@ def getKernelsDir():
 
 def getPolicyFullName(policy, runtime):
     return "osv." + runtime + ".main." + policy
+
+def setupLogger():
+    logger = logging.getLogger()
+    logging.basicConfig(format="%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s", datefmt="%H:%M:%S")
+
+    return logger
