@@ -67,7 +67,7 @@ def main():
 
     exe_name = os.path.basename(args.exe_path)
     exe_full_path = os.path.abspath(args.exe_path)
-    run_dir = os.path.join(output_dir, "isp_run_" + exe_name)
+    run_dir = os.path.join(output_dir, "isp-run-" + exe_name)
     isp_utils.removeIfExists(run_dir)
 
     policy_full_name = isp_utils.getPolicyFullName(args.policy, args.runtime)

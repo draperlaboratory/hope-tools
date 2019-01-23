@@ -8,18 +8,18 @@ ROOT = $(realpath ../../)
 
 SYMLINKS := policies
 SYMLINKS += policy-engine
+SYMLINKS += tools
 
 POLICY_NAMES := $(shell python policy_names.py)
 
-ISP_SCRIPTS := isp_build_app
+ISP_SCRIPTS := isp_install_runtime
 ISP_SCRIPTS += isp_run_app
-ISP_SCRIPTS += isp_debug_app
+ISP_SCRIPTS += isp_debug
 
 GDB_SCRIPTS := qemu.gdb
 GDB_SCRIPTS += renode.gdb
 
-ISP_BACKEND := isp_build.py
-ISP_BACKEND += isp_run.py
+ISP_BACKEND := isp_run.py
 ISP_BACKEND += isp_utils.py
 ISP_BACKEND += isp_qemu.py
 ISP_BACKEND += isp_renode.py
@@ -41,12 +41,14 @@ POLICIES_DIR = $(SYMLINK_DIR)/policies/
 TEMPLATE_DIR = $(POLICIES_DIR)/policy_tests/template/
 POLICY_ENGINE_DIR = $(SYMLINK_DIR)/policy-engine/
 
-.PHONY: all install clean uninstall kernels
+.PHONY: all install clean uninstall kernels symlinks
 all: $(ISP_SCRIPTS)
 
 install: $(INSTALLED_ISP_SCRIPTS) $(INSTALLED_GDB_SCRIPTS) $(INSTALLED_GDB_SCRIPTS)
 
 kernels: $(INSTALLED_KERNELS)
+
+symlinks: $(SYMLINK_DSTS)
 
 $(INSTALLED_ISP_SCRIPTS): $(ISP_SCRIPTS) $(ISP_BACKEND)
 	cp $(ISP_SCRIPTS) $(BIN_DIR)

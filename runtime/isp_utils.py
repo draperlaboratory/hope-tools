@@ -21,9 +21,9 @@ def removeIfExists(filename):
 def getTemplatesDir():
     isp_prefix = os.environ["ISP_PREFIX"]
     return os.path.join(isp_prefix, "sources",
-                                    "policies",
-                                    "policy_tests",
-                                    "template")
+                                    "tools",
+                                    "runtime",
+                                    "templates")
 
 def getKernelsDir():
     isp_prefix = os.environ["ISP_PREFIX"]
