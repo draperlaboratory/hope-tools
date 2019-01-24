@@ -37,3 +37,11 @@ def setupLogger():
     logging.basicConfig(format="%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s", datefmt="%H:%M:%S")
 
     return logger
+
+def terminateMessage(runtime):
+    if runtime == "frtos":
+        return "Main task has completed with code:"
+    elif runtime == "hifive":
+        return "Program has exited with code:"
+
+    return ""

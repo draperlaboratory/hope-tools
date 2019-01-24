@@ -6,9 +6,7 @@ import sys
 import subprocess
 import os
 import logging
-
-# this script relies on either the AP or Pex printing this to end the test
-terminate_msg = "Progam has exited with code:"
+import isp_utils
 
 # set timeout seconds
 timeout_seconds = 3600
@@ -22,7 +20,7 @@ run_cmd = "qemu-system-riscv32"
 
 logger = logging.getLogger()
 
-def qemuOptions(exe_path, run_dir, debug=0):
+def qemuOptions(exe_path, run_dir, gdb_port=0):
     opts = [ "-nographic",
              "-machine", "sifive_e",
              "-kernel", exe_path,
@@ -32,8 +30,8 @@ def qemuOptions(exe_path, run_dir, debug=0):
              "-d", "nochain",
              "--policy-validator-cfg",
              "yaml-cfg={}".format(os.path.join(run_dir, "validator_cfg.yml"))]
-    if debug is not 0:
-        opts += ["-S", "-gdb", "tcp::{}".format(debug)]
+    if gdb_port is not 0:
+        opts += ["-S", "-gdb", "tcp::{}".format(gdb_port)]
 
     return opts
 
@@ -48,10 +46,12 @@ def watchdog():
     logger.warn("Watchdog timeout")
     test_done = True
 
-def launchQEMU(exe_path, run_dir, policy_dir):
+def launchQEMU(exe_path, run_dir, policy_dir, runtime):
     global test_done
+    terminate_msg = isp_utils.terminateMessage(runtime)
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
     opts = qemuOptions(exe_path, run_dir)
+
     try:
         logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + opts)))
         rc = subprocess.Popen([run_cmd] + opts,
@@ -83,24 +83,24 @@ def launchQEMU(exe_path, run_dir, policy_dir):
         logger.error("QEMU run failed for exception {}.\n".format(e))
         raise
 
-def launchQEMUDebug(exe_path, run_dir, policy_dir, debug):
+def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port):
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
-    opts = qemuOptions(exe_path, run_dir, debug)
+    opts = qemuOptions(exe_path, run_dir, gdb_port)
     logger.debug("Running qemu cmd:{}\n", str([run_cmd] + opts))
     rc = subprocess.Popen([run_cmd] + opts,
                           env={"LD_LIBRARY_PATH": policy_dir,
                                "PATH": os.environ["PATH"]}, stdout=sim_log)
     rc.wait()
 
-def runOnQEMU(exe_path, run_dir, policy_dir, debug):
+def runOnQEMU(exe_path, run_dir, policy_dir, runtime, gdb_port):
     try:
         logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
-        if debug is not 0:
-            launchQEMUDebug(exe_path, run_dir, policy_dir, debug)
+        if gdb_port is not 0:
+            launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port)
         else:
             wd = threading.Thread(target=watchdog)
             wd.start()
-            qemu = threading.Thread(target=launchQEMU, args=(exe_path, run_dir, policy_dir))
+            qemu = threading.Thread(target=launchQEMU, args=(exe_path, run_dir, policy_dir, runtime))
             qemu.start()
             wd.join()
             qemu.join()

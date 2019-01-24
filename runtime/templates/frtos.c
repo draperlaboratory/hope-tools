@@ -16,9 +16,12 @@ extern int test_main(void);
 void main_task(void*);
 void main_task(void *argument)
 {
-  test_main();
+  unsigned long result;
+
+  result = (unsigned long)test_main();
   vTaskDelay(1);
 
+  printf_uart("\nMain task has completed with code: 0x%08x\n", result);
   for( ;; );
 
   // this may need changes to portable layer

@@ -34,7 +34,7 @@ class retVals:
 #  rule_cache - rule cache configuration tuple. (cache_name, size)
 #  gdb - debug port for gdbserver mode (optional)
 
-def runSim(exe_path, kernels_dir, run_dir, policy, sim, rule_cache, gdb):
+def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb):
     exe_name = os.path.basename(exe_path)
 
     if not os.path.isfile(exe_path):
@@ -57,9 +57,9 @@ def runSim(exe_path, kernels_dir, run_dir, policy, sim, rule_cache, gdb):
         return retVals.TAG_FAIL
 
     if sim == "qemu":
-        isp_qemu.runOnQEMU(exe_path, run_dir, policy_dir, gdb)
+        isp_qemu.runOnQEMU(exe_path, run_dir, policy_dir, runtime, gdb)
     elif sim == "renode":
-        isp_renode.runOnRenode(exe_path, run_dir, policy_dir, gdb)
+        isp_renode.runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb)
 
     return retVals.SUCCESS
 

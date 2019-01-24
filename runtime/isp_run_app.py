@@ -11,12 +11,12 @@ def printUartOutput(run_dir):
     print(process_log.read())
 
 
-def getProcessExitCode(run_dir):
+def getProcessExitCode(run_dir, runtime):
     process_log = open(os.path.join(run_dir, "uart.log"))
     process_out = process_log.readlines()
     hex_pattern = r"0x[0-9A-Fa-f]+$"
     for line in process_out:
-        if "Progam has exited with code:" in line:
+        if isp_utils.terminateMessage(runtime) in line:
             matches = re.findall(hex_pattern, line)
             if matches is not None:
                 return int(matches[0], 0)
@@ -33,7 +33,7 @@ def main():
     Name of the policy to run. Default is none
     ''')
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
-    Currently supported: qemu (default)
+    Currently supported: qemu (default), renode
     ''')
     parser.add_argument("-r", "--runtime", type=str, default="hifive", help='''
     Currently supported: frtos, hifive (bare metal) (default)
@@ -65,6 +65,10 @@ def main():
     if args.output == "":
         output_dir = os.getcwd()
 
+    if args.runtime not in ["frtos", "hifive"]:
+        logger.error("Invalid choice of runtime. Valid choices: frtos, hifive")
+        return
+
     exe_name = os.path.basename(args.exe_path)
     exe_full_path = os.path.abspath(args.exe_path)
     run_dir = os.path.join(output_dir, "isp-run-" + exe_name)
@@ -78,6 +82,7 @@ def main():
                             run_dir,
                             policy_full_name,
                             args.simulator,
+                            args.runtime,
                             ("", 16),
                             args.gdb)
 
@@ -87,7 +92,7 @@ def main():
     if args.uart is True:
         printUartOutput(run_dir)
 
-    process_exit_code = getProcessExitCode(run_dir)
+    process_exit_code = getProcessExitCode(run_dir, args.runtime)
     logger.debug("Process exited with code {}".format(process_exit_code))
 
     if result is not isp_run.retVals.SUCCESS:

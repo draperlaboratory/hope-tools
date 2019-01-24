@@ -6,11 +6,9 @@ import sys
 import subprocess
 import os
 import logging
+import isp_utils
 
 logger = logging.getLogger()
-
-# this script relies on either the AP or Pex printing this to end the test
-terminate_msg = "MSG: End test."
 
 # set timeout seconds
 timeout_seconds = 60
@@ -54,7 +52,7 @@ def socketConnect(host, port):
     return res
 
 
-def logPort(name, log_file, port):
+def logPort(name, log_file, port, runtime):
     global test_done
     data = ""
     logger.info("Logging {} to: {}".format(name, log_file))
@@ -62,7 +60,7 @@ def logPort(name, log_file, port):
     s = socketConnect(socket.gethostname(), port)
     while(s and not test_done):
         time.sleep(1)
-        if terminate_msg in data:
+        if isp_utils.terminateMessage(runtime) in data:
             test_done = True
         data = ""
         ready_r, ready_w, err = select.select([s], [], [],1)
@@ -81,9 +79,10 @@ def launchRenode():
         cmd = ["renode",
                "--plain",
                "--disable-xwt",
+               "--hide-log",
                "--port={}".format(renode_port)]
         logger.debug("Running command: {}".format(cmd))
-        rc = subprocess.Popen(cmd)
+        rc = subprocess.Popen(cmd, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT)
         while rc.poll() is None:
             time.sleep(0.01)
     finally:
@@ -99,7 +98,7 @@ def launchRenodeDebug(run_dir, uart_log, status_log):
     subprocess.call(cmd)
  
 
-def runOnRenode(exe_path, run_dir, policy_dir, gdb_port):
+def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
     global test_done
     global connecting
     uart_log_path = os.path.join(run_dir, uart_log_file)
@@ -122,10 +121,10 @@ def runOnRenode(exe_path, run_dir, policy_dir, gdb_port):
 
         time.sleep(2)
         logger.debug("Start Logging...")
-        uart_logger = threading.Thread(target=logPort, args=("Uart", uart_log_path, uart_port))
+        uart_logger = threading.Thread(target=logPort, args=("Uart", uart_log_path, uart_port, runtime))
         uart_logger.start()
 
-        status_logger = threading.Thread(target=logPort, args=("Status", status_log_path, status_port))
+        status_logger = threading.Thread(target=logPort, args=("Status", status_log_path, status_port, runtime))
         status_logger.start()
 
         logger.debug("Connecting to Renode server...")
