@@ -36,6 +36,8 @@ This Makefile sets `CC` to the ISP version of Clang and exposes the following va
 
 To build an application for ISP, include `isp-runtime.mk` in an existing Makefile and add the above variables to your targets as needed.
 
+NOTE: You must rename the `main()` function of your executable to `isp_main()` so that the runtime can locate it.
+
 ##### Running an application
 
 The `isp_run_app` script runs an application on one of the supported simulators: QEMU or Renode. Use the script as follows:

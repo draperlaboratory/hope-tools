@@ -1,23 +1,26 @@
 #include <stdio.h>
 #include <stdarg.h>
-#include "test.h"
 #include "platform.h"
 
-uint32_t get_usec_time() {
+uint32_t get_usec_time()
+{
   return (uint32_t)get_timer_value();
 }
 
-uint32_t get_inst_ret() {
+uint32_t get_inst_ret()
+{
   uint64_t instret;
   asm volatile ("csrr %0, 0xc02 " : "=r"(instret));
   return instret;
 }
 
-uint32_t uiPortGetWallTimestampUs() {
+uint32_t uiPortGetWallTimestampUs()
+{
   return (uint32_t)get_timer_value();
 }
 
-int t_printf(const char *s, ...) {
+int t_printf(const char *s, ...)
+{
   char buf[128];
   va_list vl;
 
@@ -32,8 +35,9 @@ int t_printf(const char *s, ...) {
   return 0;
 }
 
-int main(void) {
-  test_main();
+int main(void)
+{
+  isp_main();
 
   return 0;
 }
