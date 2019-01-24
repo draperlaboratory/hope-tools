@@ -3,30 +3,65 @@
 This directory contains resources for building and running standalone ISP applications.
 Included are scripts for building and installing kernels, compiling applications, and running the supported simulators.
 
-### How to Install
+### Setup
 
-To install kernels to the current install directory (as specified by `ISP_PREFIX`), run `make kernels`.
-To install the `isp_build_app` and `isp_run_app` commands, run `make`.
+Run the following commands to install the PEX kernels and runtime tools, respectively:
+```
+make kernels
+make install
+```
+
+The PEX kernels installed support the `none`, `heap`, `rwx`, `stack`, and `threeClass` policies and all of their composites.
 
 ### Usage
 
-The two main interfaces for using the ISP runtime are `isp_build_app` and `isp_run_app`.
+The ISP runtime consists of three commands: `isp_install_runtime`, `isp_run_app`, and `isp_debug`.
 
 ##### Building an application
 
-To build an application, run the command `isp_build_app source_dir`, where `source_dir` is the directory containing the source code of the target application.
-Inside of the source directory, all source code should be located in a subdirectory named `srcs/`.
-This script generates a `build` directory in the current working directory by default. To change this directory, use the `-o` flag.
-The default runtime is `hifive`, but `frtos` is also supported. Use the `-r` option to change the runtime.
+The `isp_install_runtime` script bootstraps an existing project directory with resources that allow applications to build with one of
+ISP's currently supported runtimes: FreeRTOS or Hifive (bare metal). Use the script as follows:
+
+```
+isp_install_runtime <frtos/hifive> -b <project directory (default .)>
+```
+
+This will generate the `isp-runtime` directory in the project directory, as well as a Makefile `isp-runtime.mk`.
+This Makefile sets `CC` to the ISP version of Clang and exposes the following variables:
+- `ISP_CFLAGS` - required compiler flags to pass to Clang
+- `ISP_INCLUDES` - header files for the chosen runtime
+- `ISP_LDFLAGS` - command to use a custom linker script for the target application
+- `ISP_DEPS` - additional dependencies for the runtime
+- `ISP_CLEAN` - files to be removed by `make clean`
+
+To build an application for ISP, include `isp-runtime.mk` in an existing Makefile and add the above variables to your targets as needed.
 
 ##### Running an application
 
-To run an application, run the command `isp_run_app exe_path policy`, where `exe_path` is the target executable and `policy` is the policy to run.
-By default, this script generates runtime artifacts in the current working directory. To generate these files elsewhere, use the `-o` flag.
-The current supported policies are `none`, `heap`, `rwx`, `stack`, `threeClass`, and `heap-rwx-stack-threeClass`.
-The default runtime is `hifive`, but `frtos` is also supported. Use the `-r` option to change the runtime.
-The default simulator is `qemu`, but `renode` is also supported. Use the `-s` option to change the simulator.
+The `isp_run_app` script runs an application on one of the supported simulators: QEMU or Renode. Use the script as follows:
 
-##### Cleaning Up
+```
+isp_run_app <executable> -p <policy (default none)> -s <qemu/renode (default qemu)> -r <frtos/hifive (default hifive)> -o <output directory (default .)>
+```
 
-To delete build and runtime artifacts, append the `-c` flag to the `isp_build_app` and `isp_run_app` commands, respectively.
+Additional options are:
+- `-u/--uart`: echo the output of the application to stdout
+- `-d/--debug`: print extra debug logs
+- `-g/--gdb <port>`: start the simulator in gdbserver mode on the specified port
+
+`isp_run_app` creates a directory containing application logs and support files in the location specified by `-o`. The name of this directory is `isp-run-<executable name>`.
+Important files in this directory are:
+- `uart.log`: The application output
+- `sim.log`: The output from QEMU/Renode
+- `pex.log`: The output from the PEX core, containing any policy violation messages
+- `bininfo/<executable name>.text`: the disassembled source of the application
+
+NOTE: Currently, the QEMU option only supports Hifive applications and the Renode option only supports FreeRTOS applications.
+
+##### Debugging an application
+
+While `isp_run_app` is started with the `-g` option, use the `isp_debug` script to attach to the debugging session. Use the script as follows:
+
+```
+isp_debug <executable> <port> -s <qemu/renode (default qemu)>
+```

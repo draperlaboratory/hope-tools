@@ -74,20 +74,16 @@ def main():
     parser = argparse.ArgumentParser(description='''
     Install ISP runtime into standalone C project
     ''')
+    parser.add_argument("runtime", type=str, help='''
+    Currently supported: frtos, hifive (bare metal) (default)
+    ''')
     parser.add_argument("-b", "--build-dir", type=str, default=".", help='''
     Directory containing the Makefile for the main executable.
     Default is current working directory.
-    This script will add the following files to this directory:
-     build_dir/
-       isp-runtime.mk
-       isp-runtime/
-         <hifive/frtos sources>
-    ''')
-    parser.add_argument("-r", "--runtime", type=str, default="hifive", help='''
-    Currently supported: frtos, hifive (bare metal) (default)
     ''')
 
     args = parser.parse_args()
+    
     build_dir_full = os.path.abspath(args.build_dir)
 
     result = doInstall(build_dir_full,
