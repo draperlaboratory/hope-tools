@@ -15,7 +15,7 @@ uart_log_file = "uart.log"
 status_log_file = "pex.log"
 sim_log_file = "sim.log"
 
-test_done = False
+process_exit = False
 run_cmd = "qemu-system-riscv32"
 
 logger = logging.getLogger()
@@ -37,17 +37,17 @@ def qemuOptions(exe_path, run_dir, gdb_port=0):
 
 
 def watchdog():
-    global test_done
+    global process_exit
     for i in range(timeout_seconds * 10):
-        if not test_done:
+        if not process_exit:
             time.sleep(0.5)
         else:
             return
     logger.warn("Watchdog timeout")
-    test_done = True
+    process_exit = True
 
 def launchQEMU(exe_path, run_dir, policy_dir, runtime):
-    global test_done
+    global process_exit
     terminate_msg = isp_utils.terminateMessage(runtime)
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
     opts = qemuOptions(exe_path, run_dir)
@@ -60,13 +60,14 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime):
         while rc.poll() is None:
             time.sleep(1)
             try:
-                if terminate_msg in open(os.path.join(run_dir, uart_log_file), 'r').read() or test_done:
+                if terminate_msg in open(os.path.join(run_dir, uart_log_file), 'r').read() or process_exit:
                     rc.terminate()
-                    test_done = True
+                    process_exit = True
                     return
-                if terminate_msg in open(os.path.join(run_dir, status_log_file), 'r').read() or test_done:
+                if "Policy Violation:" in open(os.path.join(run_dir, status_log_file), 'r').read() or process_exit:
                     rc.terminate()
-                    test_done = True
+                    process_exit = True
+                    logger.warn("Process exited due to policy violation")
                     return
             except IOError:
                 #keep trying if fail to open uart log
@@ -74,11 +75,11 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime):
             except UnicodeDecodeError:
                 # TODO: is this really what we want to do on this exception?
                 rc.terminate()
-                test_done = True
+                process_exit = True
                 return;
         if rc.returncode != 0:
             raise Exception("exited with return code " + str(rc.returncode))
-        test_done = True
+        process_exit = True
     except Exception as e:
         logger.error("QEMU run failed for exception {}.\n".format(e))
         raise
@@ -104,6 +105,5 @@ def runOnQEMU(exe_path, run_dir, policy_dir, runtime, gdb_port):
             qemu.start()
             wd.join()
             qemu.join()
-            logger.debug("Test Completed")
     finally:
         pass
