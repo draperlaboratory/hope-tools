@@ -52,6 +52,9 @@ def main():
     parser.add_argument("-d", "--debug", action="store_true", help='''
     Enable debug logging
     ''')
+    parser.add_argument("-t", "--tag-only", action="store_true", help='''
+    Run the tagging tools without running the application
+    ''')
 
     args = parser.parse_args()
 
@@ -85,10 +88,14 @@ def main():
                             args.simulator,
                             args.runtime,
                             ("", 16),
-                            args.gdb)
+                            args.gdb,
+                            args.tag_only)
 
     if result != isp_run.retVals.SUCCESS:
         logger.error(result)
+
+    if args.tag_only is True:
+        return
 
     if args.uart is True:
         printUartOutput(run_dir)
