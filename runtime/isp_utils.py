@@ -18,13 +18,6 @@ def removeIfExists(filename):
         else:
             os.remove(filename)
 
-def getTemplatesDir():
-    isp_prefix = os.environ["ISP_PREFIX"]
-    return os.path.join(isp_prefix, "sources",
-                                    "tools",
-                                    "runtime",
-                                    "templates")
-
 def getKernelsDir():
     isp_prefix = os.environ["ISP_PREFIX"]
     return os.path.join(isp_prefix, "kernels")

@@ -26,6 +26,13 @@ class retVals:
 #  $(ISP_CLEAN) removed in the clean target
 #  main() renamed to isp_main()
 
+def getTemplatesDir():
+    isp_prefix = os.environ["ISP_PREFIX"]
+    return os.path.join(isp_prefix, "sources",
+                                    "tools",
+                                    "runtime",
+                                    "templates")
+
 
 def doInstall(build_dir, template_dir, runtime):
     if not os.path.isdir(build_dir):
@@ -34,7 +41,7 @@ def doInstall(build_dir, template_dir, runtime):
     if not os.path.isdir(template_dir):
         return retVals.NO_TEMPLATE
 
-    runtime_dir = os.path.join(build_dir, "isp-runtime")
+    runtime_dir = os.path.join(build_dir, "isp-runtime-{}".format(runtime))
 
     isp_utils.removeIfExists(runtime_dir)
     isp_utils.doMkDir(runtime_dir)
@@ -49,7 +56,7 @@ def doInstall(build_dir, template_dir, runtime):
         shutil.copy(os.path.join(template_dir, "frtos.cmake"),
                     os.path.join(frtos_dir, "CMakeLists.txt"))
         shutil.copy(os.path.join(template_dir, "frtos.mk"),
-                    os.path.join(build_dir, "isp-runtime.mk"))
+                    os.path.join(build_dir, "isp-runtime-frtos.mk"))
 
     elif "hifive" in runtime:
         shutil.copy(os.path.join(template_dir, "hifive-mem.h"),
@@ -57,7 +64,7 @@ def doInstall(build_dir, template_dir, runtime):
         shutil.copy(os.path.join(template_dir, "hifive.c"),
                     os.path.join(runtime_dir, "hifive.c"))
         shutil.copy(os.path.join(template_dir, "hifive.mk"),
-                    os.path.join(build_dir, "isp-runtime.mk"))
+                    os.path.join(build_dir, "isp-runtime-hifive.mk"))
         shutil.copytree(os.path.join(os.getenv("ISP_PREFIX"), "hifive_bsp"),
                         os.path.join(runtime_dir, "bsp"))
 
@@ -84,7 +91,7 @@ def main():
     build_dir_full = os.path.abspath(args.build_dir)
 
     result = doInstall(build_dir_full,
-                       isp_utils.getTemplatesDir(),
+                       getTemplatesDir(),
                        args.runtime)
 
     if result is not retVals.SUCCESS:
