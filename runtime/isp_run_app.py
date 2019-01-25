@@ -30,7 +30,7 @@ def main():
     Path of the executable to run
     ''')
     parser.add_argument("-p", "--policy", type=str, default="none", help='''
-    Name of the policy to run. Default is none
+    Name of the installed policy to run or directory containing policy. Default is none
     ''')
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
     Currently supported: qemu (default), renode
@@ -72,13 +72,17 @@ def main():
         logger.error("Invalid choice of runtime. Valid choices: frtos, hifive")
         return
 
+    policy_full_name = isp_utils.getPolicyFullName(args.policy, args.runtime)
+    policy_name = args.policy
+    if os.path.isdir(args.policy):
+        policy_full_name = os.path.abspath(args.policy)
+        policy_name = os.path.basename(policy_full_name)
+
     exe_name = os.path.basename(args.exe_path)
     exe_full_path = os.path.abspath(args.exe_path)
-    run_dir = os.path.join(output_dir, "isp-run-{}-{}".format(exe_name, args.policy))
+    run_dir = os.path.join(output_dir, "isp-run-{}-{}".format(exe_name, policy_name))
     run_dir_full_path = os.path.abspath(run_dir)
     isp_utils.removeIfExists(run_dir_full_path)
-
-    policy_full_name = isp_utils.getPolicyFullName(args.policy, args.runtime)
 
     logger.debug("Starting simulator...")
     result = isp_run.runSim(exe_full_path,
