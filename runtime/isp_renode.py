@@ -52,15 +52,15 @@ def socketConnect(host, port):
     return res
 
 
-def logPort(name, log_file, port, runtime):
+def logPort(terminate_msg, log_file, port):
     global test_done
     data = ""
-    logger.info("Logging {} to: {}".format(name, log_file))
+    logger.info("Logging to: {}".format(name, log_file))
     f = open(log_file, "w")
     s = socketConnect(socket.gethostname(), port)
     while(s and not test_done):
         time.sleep(1)
-        if isp_utils.terminateMessage(runtime) in data:
+        if terminate_msg in data:
             test_done = True
         data = ""
         ready_r, ready_w, err = select.select([s], [], [],1)
@@ -71,6 +71,17 @@ def logPort(name, log_file, port, runtime):
     if s:
         s.close()
     f.close()
+
+def logUart(run_dir, runtime):
+    uart_log_path = os.path.join(run_dir, uart_log_file)
+    logPort(isp_utils.terminateMessage(runtime), uart_log_path, uart_port)
+
+
+def logStatus(run_dir):
+    status_log_path = os.path.join(run_dir, status_log_file)
+    logPort("Policy Violation:", status_log_path, status_port)
+    if "Policy Violation:" in open(status_log_path, 'r').read():
+        logger.warn("Process exited due to policy violation")
 
 
 def launchRenode():
@@ -101,8 +112,6 @@ def launchRenodeDebug(run_dir, uart_log, status_log):
 def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
     global test_done
     global connecting
-    uart_log_path = os.path.join(run_dir, uart_log_file)
-    status_log_path = os.path.join(run_dir, status_log_file)
 
     doRescScript(exe_path, run_dir, policy_dir, gdb_port)
 
@@ -121,10 +130,10 @@ def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
 
         time.sleep(2)
         logger.debug("Start Logging...")
-        uart_logger = threading.Thread(target=logPort, args=("Uart", uart_log_path, uart_port, runtime))
+        uart_logger = threading.Thread(target=logUart, args=(run_dir, runtime))
         uart_logger.start()
 
-        status_logger = threading.Thread(target=logPort, args=("Status", status_log_path, status_port, runtime))
+        status_logger = threading.Thread(target=logPort, args=(run_dir))
         status_logger.start()
 
         logger.debug("Connecting to Renode server...")
@@ -154,7 +163,6 @@ def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
         # TODO: have the watchdog timer kill the renode process
         # if test_done:
         #     rc.kill()
-        logger.debug("Test Completed")
     finally:
         try:
             if s:
