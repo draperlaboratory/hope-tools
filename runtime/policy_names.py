@@ -29,3 +29,4 @@ print 'none'
 for policy_name in policy_names:
     if policy_name is not '':
         print policy_name
+print '-'.join(policy for policy in policies)

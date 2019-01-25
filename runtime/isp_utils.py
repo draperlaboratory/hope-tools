@@ -22,7 +22,7 @@ def getKernelsDir():
     isp_prefix = os.environ["ISP_PREFIX"]
     return os.path.join(isp_prefix, "kernels")
 
-def getPolicyFullName(policy, runtime):
+def getPolicyFullName(policy, runtime="{}"):
     return "osv." + runtime + ".main." + policy
 
 def setupLogger():

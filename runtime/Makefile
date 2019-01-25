@@ -1,6 +1,5 @@
 SYMLINK_DIR = $(ISP_PREFIX)/sources/
 KERNEL_DIR = $(ISP_PREFIX)/kernels/
-KERNEL_INSTALL = $(ISP_PREFIX)/kernels/
 BIN_DIR = $(ISP_PREFIX)/bin/
 GDB_DIR = $(ISP_PREFIX)/gdb-scripts/
 
@@ -15,6 +14,7 @@ POLICY_NAMES := $(shell python policy_names.py)
 ISP_SCRIPTS := isp_install_runtime
 ISP_SCRIPTS += isp_run_app
 ISP_SCRIPTS += isp_debug
+ISP_SCRIPTS += isp_kernel
 
 GDB_SCRIPTS := qemu.gdb
 GDB_SCRIPTS += renode.gdb
@@ -32,8 +32,8 @@ SYMLINK_DSTS := $(patsubst %,$(SYMLINK_DIR)/%,$(SYMLINKS))
 
 KERNELS := $(patsubst %,$(HIFIVE_PREFIX)%,$(POLICY_NAMES))
 KERNELS += $(patsubst %,$(FRTOS_PREFIX)%,$(POLICY_NAMES))
+KERNELS := $(patsubst %,$(KERNEL_DIR)/%,$(KERNELS))
 
-INSTALLED_KERNELS := $(patsubst %,$(KERNEL_INSTALL)/%,$(KERNELS))
 INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
 INSTALLED_GDB_SCRIPTS := $(patsubst %,$(GDB_DIR)/%,$(GDB_SCRIPTS))
 
@@ -46,7 +46,7 @@ all: $(ISP_SCRIPTS)
 
 install: $(INSTALLED_ISP_SCRIPTS) $(INSTALLED_GDB_SCRIPTS) $(INSTALLED_GDB_SCRIPTS)
 
-kernels: $(INSTALLED_KERNELS)
+kernels: $(KERNELS)
 
 symlinks: $(SYMLINK_DSTS)
 
@@ -60,17 +60,9 @@ $(INSTALLED_GDB_SCRIPTS): $(GDB_SCRIPTS)
 	mkdir -p $(GDB_DIR)
 	cp -rf $(GDB_SCRIPTS) $(GDB_DIR)
 
-$(INSTALLED_KERNELS): $(KERNELS)
-	mkdir -p $(KERNEL_INSTALL)
-	cp -rf $(KERNELS) $(KERNEL_INSTALL)
-
-$(KERNELS): $(SYMLINK_DSTS) isp_kernel.py
-	python isp_kernel.py \
-		$(notdir $@) \
-		$(POLICIES_DIR) \
-		$(POLICIES_DIR)/entities \
-		$(POLICY_ENGINE_DIR) \
-	  $@
+$(KERNELS): $(SYMLINK_DSTS) $(INSTALLED_ISP_SCRIPTS)
+	mkdir -p $(KERNEL_DIR)
+	isp_kernel $(notdir $@) $(KERNEL_DIR)
 
 $(SYMLINK_DSTS): $(SYMLINK_DIR)/%: $(ROOT)/%
 	@echo $(SYMLINK_DSTS)
@@ -81,4 +73,4 @@ clean:
 	rm -rf $(ISP_SCRIPTS) $(KERNELS) *.pyc *.spec build/
 
 uninstall:
-	rm -rf $(INSTALLED_ISP_SCRIPTS) $(INSTALLED_GDB_SCRIPTS) $(INSTALLED_KERNELS)
+	rm -rf $(INSTALLED_ISP_SCRIPTS) $(INSTALLED_GDB_SCRIPTS) $(KERNELS)
