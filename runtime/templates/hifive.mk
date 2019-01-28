@@ -5,6 +5,7 @@ C_SRCS += $(wildcard $(ISP_RUNTIME)/*.c)
 
 ISP_CFLAGS += -O2 -fno-builtin-printf
 ISP_INCLUDES += -I$(ISP_PREFIX)/riscv32-unknown-elf/include
+ISP_INCLUDES += -I$(ISP_RUNTIME)
 
 RISCV_PATH 		?= $(ISP_PREFIX)
 RISCV_GCC     ?= $(abspath $(RISCV_PATH)/bin/clang)

@@ -11,6 +11,8 @@ ISP_INCLUDES += -I$(FREE_RTOS_DIR)/Demo/RISCV_DOVER_GCC/conf
 ISP_INCLUDES += -I$(FREE_RTOS_DIR)/Demo/RISCV_DOVER_GCC/soc/include
 ISP_INCLUDES += -I$(ISP_PREFIX)/riscv32-unknown-elf/include
 
+ISP_INCLUDES += -I$(ISP_RUNTIME)
+
 ISP_LIBS := $(FREE_RTOS_BUILD_DIR)/libfree-rtos.a
 ISP_LIBS += $(FREE_RTOS_BUILD_DIR)/libfree-rtos-dover.a
 
