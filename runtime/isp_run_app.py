@@ -55,6 +55,12 @@ def main():
     parser.add_argument("-t", "--tag-only", action="store_true", help='''
     Run the tagging tools without running the application
     ''')
+    parser.add_argument("-C", "--rule-cache-name", type=str, default="", help='''
+    Name of the rule cache
+    ''')
+    parser.add_argument("-c", "--rule-cache-size", type=int, default=16, help='''
+    Size of the rule cache (if name is provided). Default is 16
+    ''')
 
     args = parser.parse_args()
 
@@ -72,6 +78,9 @@ def main():
         logger.error("Invalid choice of runtime. Valid choices: frtos, hifive")
         return
 
+    if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
+        logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
+
     policy_full_name = isp_utils.getPolicyFullName(args.policy, args.runtime)
     policy_name = args.policy
     if os.path.isdir(args.policy):
@@ -81,6 +90,9 @@ def main():
     exe_name = os.path.basename(args.exe_path)
     exe_full_path = os.path.abspath(args.exe_path)
     run_dir = os.path.join(output_dir, "isp-run-{}-{}".format(exe_name, policy_name))
+    if args.rule_cache_name != "":
+        run_dir = run_dir + "-{}-{}".format(args.rule_cache_name, args.rule_cache_size)
+
     run_dir_full_path = os.path.abspath(run_dir)
     isp_utils.removeIfExists(run_dir_full_path)
 
@@ -91,7 +103,7 @@ def main():
                             policy_full_name,
                             args.simulator,
                             args.runtime,
-                            ("", 16),
+                            (args.rule_cache_name, args.rule_cache_size),
                             args.gdb,
                             args.tag_only)
 
