@@ -55,7 +55,7 @@ def socketConnect(host, port):
 def logPort(terminate_msg, log_file, port):
     global test_done
     data = ""
-    logger.info("Logging to: {}".format(name, log_file))
+    logger.info("Logging to: {}".format(log_file))
     f = open(log_file, "w")
     s = socketConnect(socket.gethostname(), port)
     while(s and not test_done):
@@ -133,7 +133,8 @@ def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
         uart_logger = threading.Thread(target=logUart, args=(run_dir, runtime))
         uart_logger.start()
 
-        status_logger = threading.Thread(target=logPort, args=(run_dir))
+        logging.info(run_dir)
+        status_logger = threading.Thread(target=logStatus, args=(run_dir,))
         status_logger.start()
 
         logger.debug("Connecting to Renode server...")
