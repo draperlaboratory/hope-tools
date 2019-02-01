@@ -52,10 +52,13 @@ def copyPolicyYaml(policy, policies_dir, entities_dir, output_dir):
     else:
         shutil.copyfile(os.path.join(entities_dir, "empty.entities.yml"), entities_dest)
  
-def runPolicyTool(policy, policies_dir, entities_dir, output_dir):
+def runPolicyTool(policy, policies_dir, entities_dir, output_dir, debug):
     policy_output_dir = os.path.join(output_dir, "engine", "policy")
     policy_tool_cmd = "policy-tool"
     policy_tool_args = ["-t", entities_dir, "-m", policies_dir, "-o", policy_output_dir, policy]
+
+    if debug is True:
+        policy_tool_args.insert(0, "-d")
 
     shutil.rmtree(policy_output_dir, ignore_errors=True)
     os.makedirs(policy_output_dir)
@@ -71,11 +74,8 @@ def runPolicyTool(policy, policies_dir, entities_dir, output_dir):
     
     return True
 
-def buildPolicyKernel(policy, policies_dir, entities_dir, output_dir, debug):
+def buildPolicyKernel(policy, policies_dir, entities_dir, output_dir):
     engine_output_dir = os.path.join(output_dir, "engine")
-
-    if debug is True:
-        policy_tool_args.insert(0, "-d")
 
     num_cores = str(multiprocessing.cpu_count())
     with open(os.path.join(output_dir, "build.log"), "w+") as buildlog:
@@ -121,17 +121,19 @@ def main():
             base_output_dir = kernels_dir
 
     output_dir = os.path.abspath(os.path.join(base_output_dir, args.policy))
+    if args.debug is True:
+        output_dir = output_dir + "-debug"
 
     shutil.rmtree(output_dir, ignore_errors=True)
     isp_utils.doMkDir(output_dir)
 
     copyEngineSources(engine_dir, output_dir)
     copyPolicyYaml(args.policy, policies_dir, entities_dir, output_dir)
-    if runPolicyTool(args.policy, policies_dir, entities_dir, output_dir) is False:
+    if runPolicyTool(args.policy, policies_dir, entities_dir, output_dir, args.debug) is False:
         print("Failed to run policy tool")
         sys.exit(1)
 
-    if buildPolicyKernel(args.policy, policies_dir, entities_dir, output_dir, args.debug) is False:
+    if buildPolicyKernel(args.policy, policies_dir, entities_dir, output_dir) is False:
         print("Failed to build policy kernel")
         sys.exit(1)
 
