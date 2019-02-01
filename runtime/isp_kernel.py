@@ -119,6 +119,8 @@ def main():
         kernels_dir = isp_utils.getKernelsDir()
         if os.path.isdir(kernels_dir):
             base_output_dir = kernels_dir
+    else:
+        base_output_dir = args.output
 
     output_dir = os.path.abspath(os.path.join(base_output_dir, args.policy))
     if args.debug is True:

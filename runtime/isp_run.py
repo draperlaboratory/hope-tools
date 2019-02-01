@@ -7,6 +7,7 @@ import shutil
 import time
 import glob
 import errno
+import logging
 
 from isp_utils import *
 import isp_qemu
@@ -14,6 +15,8 @@ import isp_renode
 
 # backend helper to run an ISP simulation with a binary & kernel
 # TODO: runFPGA support
+
+logger = logging.getLogger()
 
 # possible module outcomes
 class retVals:
@@ -33,6 +36,7 @@ class retVals:
 #  sim - name of the simultator to use
 #  rule_cache - rule cache configuration tuple. (cache_name, size)
 #  gdb - debug port for gdbserver mode (optional)
+#  tag_only - run the tagging tools without running the simulator
 
 def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb, tag_only):
     exe_name = os.path.basename(exe_path)
@@ -42,9 +46,9 @@ def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb
 
     policy_dir = policy
     if not os.path.isdir(policy):
-        policy_dir = os.path.join(kernels_dir, policy)
-        if not os.path.isdir(policy_dir):
-            logger.error("Failed to find default policy directory: {}".format(policy_dir))
+        policy_dir = getPolicyDir(policy, kernels_dir)
+        if policy_dir is None:
+            logger.error("Failed to find directory for policy")
             return retVals.NO_POLICY
 
     doMkDir(run_dir)
@@ -68,6 +72,25 @@ def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb
         isp_renode.runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb)
 
     return retVals.SUCCESS
+
+
+def getPolicyDir(policy, kernels_dir):
+    isp_kernel_cmd = "isp_kernel"
+    isp_kernel_args = [policy, "-o", kernels_dir]
+
+    policy_dir = os.path.join(kernels_dir, policy)
+    if not os.path.isdir(policy_dir):
+        logger.info("Attempting to compile missing policy")
+        subprocess.Popen([isp_kernel_cmd] + isp_kernel_args).wait()
+    else:
+        return policy_dir
+
+    if not os.path.isdir(policy_dir):
+        logger.error("Failed to compile missing policy")
+        return None
+
+    logger.info("Successfully compiled missing policy")
+    return policy_dir
 
 
 def generateTagInfo(exe_path, run_dir, policy_dir):
