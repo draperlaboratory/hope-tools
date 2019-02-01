@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "platform.h"
+#include "isp_utils.h"
 
 uint32_t get_usec_time()
 {

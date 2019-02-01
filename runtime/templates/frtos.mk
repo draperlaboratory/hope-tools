@@ -1,3 +1,5 @@
+ISP_PREFIX ?= /opt/isp
+
 ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-frtos\.mk"))
 
 FREE_RTOS_BUILD_DIR := $(ISP_RUNTIME)/frtos

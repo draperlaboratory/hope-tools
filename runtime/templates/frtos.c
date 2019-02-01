@@ -4,8 +4,8 @@
 #include "task.h"
 
 #include "utils.h"
+#include "isp_utils.h"
 
-extern int isp_main(void);
 void main_task(void*);
 void main_task(void *argument)
 {

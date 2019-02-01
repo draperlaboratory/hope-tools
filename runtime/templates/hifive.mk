@@ -1,3 +1,5 @@
+ISP_PREFIX ?= /opt/isp
+
 ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-hifive\.mk"))
 
 ISP_HEADERS += $(wildcard $(ISP_RUNTIME)/*.h)

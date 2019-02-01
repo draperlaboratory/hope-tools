@@ -46,6 +46,9 @@ def doInstall(build_dir, template_dir, runtime):
     isp_utils.removeIfExists(runtime_dir)
     isp_utils.doMkDir(runtime_dir)
 
+    shutil.copy(os.path.join(template_dir, "isp_utils.h"),
+                os.path.join(runtime_dir, "isp_utils.h"))
+
     if "frtos" in runtime:
         frtos_dir = os.path.join(runtime_dir, "frtos")
         isp_utils.doMkDir(frtos_dir)
