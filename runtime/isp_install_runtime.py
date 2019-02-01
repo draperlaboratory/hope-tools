@@ -27,7 +27,7 @@ class retVals:
 #  main() renamed to isp_main()
 
 def getTemplatesDir():
-    isp_prefix = os.environ["ISP_PREFIX"]
+    isp_prefix = isp_utils.getIspPrefix()
     return os.path.join(isp_prefix, "sources",
                                     "tools",
                                     "runtime",
@@ -68,7 +68,7 @@ def doInstall(build_dir, template_dir, runtime):
                     os.path.join(runtime_dir, "hifive.c"))
         shutil.copy(os.path.join(template_dir, "hifive.mk"),
                     os.path.join(build_dir, "isp-runtime-hifive.mk"))
-        shutil.copytree(os.path.join(os.getenv("ISP_PREFIX"), "hifive_bsp"),
+        shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "hifive_bsp"),
                         os.path.join(runtime_dir, "bsp"))
 
     else:

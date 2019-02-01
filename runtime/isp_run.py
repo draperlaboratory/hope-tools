@@ -44,6 +44,7 @@ def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb
     if not os.path.isdir(policy):
         policy_dir = os.path.join(kernels_dir, policy)
         if not os.path.isdir(policy_dir):
+            logger.error("Failed to find default policy directory: {}".format(policy_dir))
             return retVals.NO_POLICY
 
     doMkDir(run_dir)

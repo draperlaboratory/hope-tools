@@ -96,9 +96,11 @@ def main():
     run_dir_full_path = os.path.abspath(run_dir)
     isp_utils.removeIfExists(run_dir_full_path)
 
+    kernels_dir = isp_utils.getKernelsDir()
+
     logger.debug("Starting simulator...")
     result = isp_run.runSim(exe_full_path,
-                            isp_utils.getKernelsDir(),
+                            kernels_dir,
                             run_dir_full_path,
                             policy_full_name,
                             args.simulator,

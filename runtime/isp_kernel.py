@@ -96,8 +96,9 @@ def main():
     parser.add_argument("policy", type=str, help='''
     The name of the policy to compile and install
     ''')
-    parser.add_argument("output_dir", type=str, help='''
+    parser.add_argument("-o", "--output", type=str, default="", help='''
     Directory where the compiled pex kernel is stored
+    Default is ISP_PREFIX/kernels or current working directory if ISP_PREFIX is not set
     ''')
     parser.add_argument("-d", "--debug", action="store_true", help='''
     Enable debug logging
@@ -105,13 +106,21 @@ def main():
 
     args = parser.parse_args()
 
-    isp_prefix = os.environ["ISP_PREFIX"]
+    isp_prefix = isp_utils.getIspPrefix()
     policies_dir = os.path.join(isp_prefix, "sources", "policies")
     engine_dir = os.path.join(isp_prefix, "sources", "policy-engine")
     policy_out_dir = os.path.join(engine_dir, "policy")
     soc_cfg_path = os.path.join(engine_dir, "soc_cfg")
     entities_dir = os.path.join(policies_dir, "entities")
-    output_dir = os.path.abspath(os.path.join(args.output_dir, args.policy))
+
+    base_output_dir = os.getcwd()
+
+    if args.output == "":
+        kernels_dir = isp_utils.getKernelsDir()
+        if os.path.isdir(kernels_dir):
+            base_output_dir = kernels_dir
+
+    output_dir = os.path.abspath(os.path.join(base_output_dir, args.policy))
 
     shutil.rmtree(output_dir, ignore_errors=True)
     isp_utils.doMkDir(output_dir)

@@ -18,18 +18,31 @@ def removeIfExists(filename):
         else:
             os.remove(filename)
 
+def getIspPrefix():
+    isp_prefix = "/opt/isp/"
+
+    try:
+        isp_prefix = os.environ["ISP_PREFIX"]
+    except KeyError:
+        pass
+
+    return isp_prefix
+
 def getKernelsDir():
-    isp_prefix = os.environ["ISP_PREFIX"]
+    isp_prefix = getIspPrefix()
     return os.path.join(isp_prefix, "kernels")
+
 
 def getPolicyFullName(policy, runtime="{}"):
     return "osv." + runtime + ".main." + policy
+
 
 def setupLogger():
     logger = logging.getLogger()
     logging.basicConfig(format="%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s", datefmt="%H:%M:%S")
 
     return logger
+
 
 def terminateMessage(runtime):
     if runtime == "frtos":

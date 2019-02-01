@@ -8,7 +8,7 @@ import isp_utils
 gdb_command = "riscv32-unknown-elf-gdb"
 
 def getGdbScriptPath(sim):
-    isp_prefix = os.environ["ISP_PREFIX"]
+    isp_prefix = isp_utils.getIspPrefix()
     return os.path.join(isp_prefix, "gdb-scripts", "{}.gdb".format(sim))
 
 
