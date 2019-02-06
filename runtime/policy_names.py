@@ -1,14 +1,16 @@
+import itertools
+
 def get_sub_lists(init_list):
-    sub_lists = [[]]
+    sub_lists = []
     for i in range(len(init_list)):
-        j = i+1
-        while j <= len(init_list):
-            sub = init_list[i:j]
+        combinations = itertools.combinations(init_list, i)
+        for c in combinations:
+            sub = []
+            for name in c:
+                sub.append(name)
             sub_lists.append(sub)
-            j += 1
 
     return sub_lists
-
 
 def get_policy_names(policies):
     policy_lists = get_sub_lists(policies)
@@ -23,6 +25,8 @@ def get_policy_names(policies):
 policies = ['heap', 'rwx', 'stack', 'threeClass']
 policy_names = get_policy_names(policies)
 
+print 'none'
 for policy_name in policy_names:
     if policy_name is not '':
         print policy_name
+print '-'.join(policy for policy in policies)

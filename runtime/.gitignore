@@ -2,5 +2,7 @@
 *.spec
 build/
 osv.*/
-isp_build_app
+isp_install_runtime
 isp_run_app
+isp_debug
+isp_kernel
