@@ -1,5 +1,6 @@
 .PHONY: all
 .PHONY: path_check
+.PHONY: runtime
 .PHONY: documentation
 .PHONY: kernel
 .PHONY: test
@@ -29,7 +30,7 @@ CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 .PHONY: $(PROJECTS)
 .PHONY: $(CLEAN_PROJECTS)
 
-all: path_check
+all: path_check runtime
 	$(MAKE) $(PROJECTS)
 
 policy-engine: policy-tool
@@ -51,6 +52,9 @@ $(ISP_PREFIX):
 
 $(CLEAN_PROJECTS):
 	$(MAKE) -f Makefile.isp -C ../$(@:clean-%=%) clean
+
+runtime:
+	$(MAKE) -C runtime install
 
 documentation:
 	$(MAKE) -C documentation
