@@ -5,3 +5,4 @@ documentation/user/*.pdf
 *.bz2
 *.swp
 *.swo
+venv/

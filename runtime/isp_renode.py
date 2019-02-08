@@ -112,6 +112,8 @@ def launchRenodeDebug(run_dir, uart_log, status_log):
 def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
     global test_done
     global connecting
+    uart_log_path = os.path.join(run_dir, uart_log_file)
+    status_log_path = os.path.join(run_dir, status_log_file)
 
     doRescScript(exe_path, run_dir, policy_dir, gdb_port)
 
