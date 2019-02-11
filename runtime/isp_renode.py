@@ -22,23 +22,23 @@ status_log_file = "pex.log"
 
 renode_port = 3320
 
-test_done = False
+process_exit = False
     
 def watchdog():
-    global test_done
+    global process_exit
     for i in range(timeout_seconds * 10):
-        if not test_done:
+        if not process_exit:
             time.sleep(0.1)
     logging.warn("Watchdog timeout")
-    test_done = True
+    process_exit = True
 
 
 def socketConnect(host, port):
-    global test_done
+    global process_exit
     res = None
     connecting = True
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    while connecting and not test_done:
+    while connecting and not process_exit:
         try:
             s.connect((host, port))
             connecting = False
@@ -53,15 +53,15 @@ def socketConnect(host, port):
 
 
 def logPort(terminate_msg, log_file, port):
-    global test_done
+    global process_exit
     data = ""
     logger.info("Logging to: {}".format(log_file))
     f = open(log_file, "w")
     s = socketConnect(socket.gethostname(), port)
-    while(s and not test_done):
+    while(s and not process_exit):
         time.sleep(1)
         if terminate_msg in data:
-            test_done = True
+            process_exit = True
         data = ""
         ready_r, ready_w, err = select.select([s], [], [],1)
         if ready_r:
@@ -85,7 +85,7 @@ def logStatus(run_dir):
 
 
 def launchRenode():
-    global test_done
+    global process_exit
     try:
         cmd = ["renode",
                "--plain",
@@ -93,33 +93,21 @@ def launchRenode():
                "--hide-log",
                "--port={}".format(renode_port)]
         logger.debug("Running command: {}".format(cmd))
-        rc = subprocess.Popen(cmd, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT)
-        while rc.poll() is None:
+        process = subprocess.Popen(cmd, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT)
+        while process.poll() is None:
             time.sleep(0.01)
     finally:
-        test_done = True
+        process_exit = True
+        process.kill()
 
-
-def launchRenodeDebug(run_dir, uart_log, status_log):
-    open(uart_log, 'w').close()
-    open(status_log, 'w').close()
-    cmd = ["renode",
-            "--disable-xwt",
-            os.path.join(run_dir, "main.resc")]
-    subprocess.call(cmd)
- 
 
 def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
-    global test_done
+    global process_exit
     global connecting
     uart_log_path = os.path.join(run_dir, uart_log_file)
     status_log_path = os.path.join(run_dir, status_log_file)
 
     doRescScript(exe_path, run_dir, policy_dir, gdb_port)
-
-    if gdb_port != 0:
-        launchRenodeDebug(run_dir, uart_log_path, status_log_path)
-        return
 
     try:
         logger.debug("Begin Renode test... (timeout: {})".format(timeout_seconds))
@@ -146,7 +134,7 @@ def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
             with open(os.path.join(run_dir, "main.resc"), 'r') as f:
                 s.send(f.read().replace('\n', '\r\n').encode())
                 s.send('start\r\n'.encode())
-            while not test_done:
+            while not process_exit:
                 time.sleep(0.1)
                 ready_r, ready_w, err = select.select([s], [], [],1)
                 if ready_r:
@@ -163,9 +151,6 @@ def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
         uart_logger.join()
         status_logger.join()
         renode.join()
-        # TODO: have the watchdog timer kill the renode process
-        # if test_done:
-        #     rc.kill()
     finally:
         try:
             if s:
