@@ -38,7 +38,6 @@ renode-plugins: renode
 llvm-riscv: riscv-gnu-toolchain
 qemu: policy-engine
 riscv-newlib: llvm-riscv
-runtime: riscv-newlib
 
 path_check:
 	(grep -q $(ISP_PREFIX)bin <<< $(PATH)) || (echo "Need to add $(ISP_PREFIX)/bin to your PATH" && false)
@@ -54,7 +53,7 @@ $(ISP_PREFIX):
 $(CLEAN_PROJECTS):
 	$(MAKE) -f Makefile.isp -C ../$(@:clean-%=%) clean
 
-runtime:
+runtime: $(ISP_PREFIX)
 	$(MAKE) -C runtime install
 
 documentation:
@@ -66,10 +65,13 @@ test-qemu:
 test-renode:
 	$(MAKE) -C ../policies/policy_tests renode
 
+clean-runtime:
+	$(MAKE) -C runtime clean
+
 clean-test:
 	$(MAKE) -C ../policies/policy_tests clean
 
-clean: $(CLEAN_PROJECTS) clean-test
+clean: $(CLEAN_PROJECTS) clean-test clean-runtime
 
 distclean: clean
 	sudo rm -rf $(ISP_PREFIX)

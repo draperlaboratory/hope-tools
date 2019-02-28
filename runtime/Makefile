@@ -1,3 +1,5 @@
+include ../venv.mk
+
 SYMLINK_DIR = $(ISP_PREFIX)/sources/
 KERNEL_DIR = $(ISP_PREFIX)/kernels/
 BIN_DIR = $(ISP_PREFIX)/bin/
@@ -53,8 +55,8 @@ symlinks: $(SYMLINK_DSTS)
 $(INSTALLED_ISP_SCRIPTS): $(ISP_SCRIPTS) $(ISP_BACKEND)
 	cp $(ISP_SCRIPTS) $(BIN_DIR)
 
-$(ISP_SCRIPTS): %: %.py $(SYMLINK_DSTS) $(ISP_BACKEND)
-	pyinstaller --onefile --distpath . $<
+$(ISP_SCRIPTS): %: %.py $(SYMLINK_DSTS) $(ISP_BACKEND) $(VENV_DONE)
+	$(VENV) pyinstaller --onefile --distpath . $<
 
 $(INSTALLED_GDB_SCRIPTS): $(GDB_SCRIPTS)
 	mkdir -p $(GDB_DIR)
