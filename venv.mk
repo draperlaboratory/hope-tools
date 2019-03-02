@@ -9,7 +9,7 @@ VENV = bash -c "source $(VENV_DIR)/bin/activate" &&
 $(VENV_DONE): $(PYTHON_REQUIREMENTS)
 	rm -rf $(VENV_DIR)
 	virtualenv -p $(PYTHON) $(VENV_DIR)
-	$(VENV) pip install -r $(PYTHON_REQUIREMENTS)
+	$(VENV) pip3 install -r $(PYTHON_REQUIREMENTS)
 	touch $@
 
 clean-venv:
