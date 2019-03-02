@@ -94,7 +94,7 @@ def getPolicyDir(policy, kernels_dir):
 
 
 def generateTagInfo(exe_path, run_dir, policy_dir):
-    policy = os.path.basename(policy_dir)
+    policy = os.path.basename(policy_dir).split("-debug")[0]
     exe_name = os.path.basename(exe_path)
     doMkDir(os.path.join(run_dir, "bininfo"))
     with open(os.path.join(run_dir, "inits.log"), "w+") as initlog:
