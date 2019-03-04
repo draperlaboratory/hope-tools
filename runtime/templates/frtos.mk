@@ -23,7 +23,7 @@ ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos.a
 #ISP_CFLAGS := -O2
 
 RISCV_PATH 		?= $(ISP_PREFIX)
-RISCV_GCC     ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-gcc)
+RISCV_GCC     ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-gcc))
 RISCV_GXX     ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-g++)
 RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-objdump)
 RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-gdb)
@@ -34,4 +34,4 @@ CC=$(RISCV_GCC)
 all:
 
 $(ISP_LIBS):
-	cd $(FREERTOS_RVDEMO_DIR) && make
+	$(MAKE) -C $(FREERTOS_RVDEMO_DIR)
