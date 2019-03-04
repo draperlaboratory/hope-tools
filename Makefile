@@ -59,11 +59,11 @@ runtime: $(ISP_PREFIX)
 documentation:
 	$(MAKE) -C documentation
 
-test-qemu:
-	$(MAKE) -C ../policies/policy_tests qemu
+test-bare:
+	$(MAKE) -C ../policies/policy_tests bare
 
-test-renode:
-	$(MAKE) -C ../policies/policy_tests renode
+test-frtos:
+	$(MAKE) -C ../policies/policy_tests frtos
 
 clean-runtime:
 	$(MAKE) -C runtime clean
