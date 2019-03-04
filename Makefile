@@ -75,3 +75,4 @@ clean: $(CLEAN_PROJECTS) clean-test clean-runtime
 
 distclean: clean
 	sudo rm -rf $(ISP_PREFIX)
+	rm -rf tools/venv
