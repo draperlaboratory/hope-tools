@@ -116,11 +116,7 @@ def doEntitiesFile(run_dir, name):
 def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache):
     rule_cache_name = rule_cache[0]
     rule_cache_size = rule_cache[1]
-
-    if "hifive" in policy_dir:
-        soc_cfg = "hifive_e_cfg.yml"
-    else:
-        soc_cfg = "dover_cfg.yml"
+    soc_cfg = "hifive_e_cfg.yml"
 
     validatorCfg =  """\
 ---
