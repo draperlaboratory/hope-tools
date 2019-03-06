@@ -53,6 +53,7 @@ kernels: $(KERNELS)
 symlinks: $(SYMLINK_DSTS)
 
 $(INSTALLED_ISP_SCRIPTS): $(ISP_SCRIPTS) $(ISP_BACKEND)
+	mkdir -p $(BIN_DIR)
 	cp $(ISP_SCRIPTS) $(BIN_DIR)
 
 $(ISP_SCRIPTS): %: %.py $(SYMLINK_DSTS) $(ISP_BACKEND) $(VENV_DONE)
