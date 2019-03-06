@@ -61,7 +61,7 @@ int t_printf(const char *s, ...)
   va_list vl;
 
   va_start(vl, s);
-  vprintf_uart(s, vl);
+  printf_uart(s, vl);
   va_end(vl);
 
   return 0;
