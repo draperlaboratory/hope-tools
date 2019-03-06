@@ -21,6 +21,7 @@ status_port = 3344
 status_log_file = "pex.log"
 
 renode_port = 3320
+renode_log_file = "sim.log"
 
 process_exit = False
     
@@ -84,7 +85,7 @@ def logStatus(run_dir):
         logger.warn("Process exited due to policy violation")
 
 
-def launchRenode():
+def launchRenode(run_dir):
     global process_exit
     try:
         cmd = ["renode",
@@ -93,7 +94,9 @@ def launchRenode():
                "--hide-log",
                "--port={}".format(renode_port)]
         logger.debug("Running command: {}".format(cmd))
-        process = subprocess.Popen(cmd, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT)
+
+        renode_log_path = os.path.join(run_dir, renode_log_file)
+        process = subprocess.Popen(cmd, stdout=open(renode_log_path, 'w'), stderr=subprocess.STDOUT)
         while process.poll() is None:
             time.sleep(0.01)
     finally:
@@ -104,8 +107,6 @@ def launchRenode():
 def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
     global process_exit
     global connecting
-    uart_log_path = os.path.join(run_dir, uart_log_file)
-    status_log_path = os.path.join(run_dir, status_log_file)
 
     doRescScript(exe_path, run_dir, policy_dir, gdb_port)
 
@@ -115,7 +116,7 @@ def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
         wd.start()
 
         logger.debug("Start Renode server...")
-        renode = threading.Thread(target=launchRenode)
+        renode = threading.Thread(target=launchRenode, args=(run_dir,))
         renode.start()
 
         time.sleep(2)
