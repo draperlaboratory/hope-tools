@@ -101,7 +101,11 @@ def launchRenode(run_dir):
             time.sleep(0.01)
     finally:
         process_exit = True
-        process.kill()
+        try:
+            process.kill()
+        except OSError:
+            logger.debug("Renode process no longer exists")
+            pass
 
 
 def runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb_port):
