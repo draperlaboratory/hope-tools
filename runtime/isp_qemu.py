@@ -56,7 +56,7 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime):
         logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + opts)))
         rc = subprocess.Popen([run_cmd] + opts,
                               env={"LD_LIBRARY_PATH": policy_dir,
-                                   "PATH": os.environ["PATH"]}, stdout=sim_log)
+                                   "PATH": os.environ["PATH"]}, stdout=sim_log, stderr=subprocess.STDOUT)
         while rc.poll() is None:
             time.sleep(1)
             try:

@@ -4,6 +4,7 @@ import re
 import argparse
 import isp_utils
 import logging
+import sys
 
 def printUartOutput(run_dir):
     process_log = open(os.path.join(run_dir, "uart.log"))
@@ -111,6 +112,7 @@ def main():
 
     if result != isp_run.retVals.SUCCESS:
         logger.error(result)
+        sys.exit(-1)
 
     if args.tag_only is True:
         return
