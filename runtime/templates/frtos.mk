@@ -1,8 +1,7 @@
 ISP_PREFIX ?= /opt/isp
 
 ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-frtos\.mk"))
-ROOT_DIR := $(shell echo $(ISP_RUNTIME) | sed -E 's/policies.*//')
-FREERTOS_DIR := $(ROOT_DIR)/FreeRTOS/FreeRTOS
+FREERTOS_DIR := $(ISP_PREFIX)/FreeRTOS
 FREERTOS_RVDEMO_DIR := $(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio
 SDK_DIR := $(FREERTOS_RVDEMO_DIR)/freedom-e-sdk
 FREERTOS_BUILD_DIR := $(FREERTOS_RVDEMO_DIR)/build
@@ -20,8 +19,6 @@ ISP_INCLUDES += -I$(ISP_RUNTIME)
 
 ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos.a
 
-#ISP_CFLAGS := -O2
-
 RISCV_PATH 		?= $(ISP_PREFIX)
 RISCV_GCC     ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-gcc)
 RISCV_GXX     ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-g++)
@@ -34,4 +31,6 @@ CC=$(RISCV_GCC)
 all:
 
 $(ISP_LIBS):
-	$(MAKE) -C $(FREERTOS_RVDEMO_DIR)
+	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) build/libfreertos.a
+
+include $(FREERTOS_RVDEMO_DIR)/BuildEnvironment.mk
