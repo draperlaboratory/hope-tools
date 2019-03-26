@@ -15,12 +15,10 @@ def getGdbScriptPath(sim):
 def startGdb(exe_path, port, sim):
     args = [gdb_command, "-q", "-ix", getGdbScriptPath(sim),
                          "-ex", "target remote :{}".format(port),
-                         "-ex", "break main",
-                         "-ex", "continue",
                          exe_path]
     if sim == "renode":
-        args.insert(8, "-ex")
-        args.insert(9, "monitor start")
+        args.insert(6, "-ex")
+        args.insert(7, "monitor start")
 
     proc = subprocess.call(args)
 

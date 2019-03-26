@@ -54,14 +54,14 @@ symlinks: $(SYMLINK_DSTS)
 
 $(INSTALLED_ISP_SCRIPTS): $(ISP_SCRIPTS) $(ISP_BACKEND)
 	mkdir -p $(BIN_DIR)
-	cp $(ISP_SCRIPTS) $(BIN_DIR)
+	cp -u $(ISP_SCRIPTS) $(BIN_DIR)
 
 $(ISP_SCRIPTS): %: %.py $(SYMLINK_DSTS) $(ISP_BACKEND) $(VENV_DONE)
 	$(VENV) pyinstaller --onefile --distpath . $<
 
 $(INSTALLED_GDB_SCRIPTS): $(GDB_SCRIPTS)
 	mkdir -p $(GDB_DIR)
-	cp -rf $(GDB_SCRIPTS) $(GDB_DIR)
+	cp -u $(GDB_SCRIPTS) $(GDB_DIR)
 
 $(KERNELS): $(SYMLINK_DSTS) $(INSTALLED_ISP_SCRIPTS)
 	mkdir -p $(KERNEL_DIR)
