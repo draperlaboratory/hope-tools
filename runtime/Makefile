@@ -65,7 +65,7 @@ $(INSTALLED_GDB_SCRIPTS): $(GDB_SCRIPTS)
 
 $(KERNELS): $(SYMLINK_DSTS) $(INSTALLED_ISP_SCRIPTS)
 	mkdir -p $(KERNEL_DIR)
-	isp_kernel $(notdir $@) $(KERNEL_DIR)
+	isp_kernel $(notdir $@) -o $(KERNEL_DIR)
 
 $(SYMLINK_DSTS): $(SYMLINK_DIR)/%: $(ROOT)/%
 	@echo $(SYMLINK_DSTS)
