@@ -19,6 +19,5 @@ sudo apt-get install -y autoconf automake autogen autotools-dev curl \
     cmake libboost-dev libboost-program-options-dev \
     libyaml-cpp-dev libgflags-dev \
     python3-psutil xterm verilator virtualenv python3-pip
-stack upgrade --binary-only
-echo 'export PATH=$HOME/.local/bin:$PATH:/opt/isp/bin' >> ~/.bashrc
-echo 'export ISP_PREFIX=/opt/isp/' >> ~/.bashrc
+
+stack upgrade --binary-only --allow-different-user
