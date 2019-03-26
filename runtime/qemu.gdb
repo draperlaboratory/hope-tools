@@ -34,7 +34,7 @@ document env-m
 end
 
 define reg-m
-   monitor reg-m
+   monitor reg-m $arg0
 end
 
 document reg-m
