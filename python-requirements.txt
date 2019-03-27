@@ -1,1 +1,2 @@
 pyinstaller==3.4
+pyyaml
