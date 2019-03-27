@@ -21,7 +21,7 @@ Ubuntu 18.04 is the preferred platform for HOPE development.
 On Ubuntu 18.04 run the following to install the necessary software.
 
 ```
-sudo ./isp-support/install-dependencies-ubuntu1804
+./isp-support/install-dependencies-ubuntu1804
 ```
 
 ### Ubuntu 16.04
@@ -29,7 +29,7 @@ sudo ./isp-support/install-dependencies-ubuntu1804
 On Ubuntu 16.04 run the following to install the necessary software.
 
 ```
-sudo ./isp-support/install-dependencies-ubuntu1604
+./isp-support/install-dependencies-ubuntu1604
 ```
 
 ## Download The Other Repositories
