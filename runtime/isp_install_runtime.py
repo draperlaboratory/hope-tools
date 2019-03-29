@@ -54,10 +54,6 @@ def doInstall(build_dir, template_dir, runtime):
         isp_utils.doMkDir(frtos_dir)
         shutil.copy(os.path.join(template_dir, "frtos-mem.h"),
                     os.path.join(runtime_dir, "mem.h"))
-        shutil.copy(os.path.join(template_dir, "frtos.c"),
-                    os.path.join(runtime_dir, "frtos.c"))
-        shutil.copy(os.path.join(template_dir, "frtos.cmake"),
-                    os.path.join(frtos_dir, "CMakeLists.txt"))
         shutil.copy(os.path.join(template_dir, "frtos.mk"),
                     os.path.join(build_dir, "isp-runtime-frtos.mk"))
 

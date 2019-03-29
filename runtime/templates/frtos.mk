@@ -33,6 +33,5 @@ CC=$(RISCV_GCC)
 
 all:
 
-
 $(ISP_LIBS):
 	cd $(FREERTOS_RVDEMO_DIR) && make
