@@ -10,7 +10,7 @@
 
 SHELL:=/bin/bash
 
-ISP_PREFIX ?= /opt/isp/
+ISP_PREFIX ?= $(HOME)/.local/isp/
 
 SDK_VERSION:=0.0.0
 
