@@ -5,7 +5,7 @@ set(USE_CLANG 1)
 if (DEFINED ENV{ISP_PREFIX})
   set(ISP_PREFIX $ENV{ISP_PREFIX})
 else()
-  set(ISP_PREFIX "/opt/isp/")
+  set(ISP_PREFIX "$ENV{HOME}/.local/isp/")
 endif()
 
 if (DEFINED ENV{FREE_RTOS_DIR})
