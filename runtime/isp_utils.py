@@ -19,7 +19,7 @@ def removeIfExists(filename):
             os.remove(filename)
 
 def getIspPrefix():
-    isp_prefix = "/opt/isp/"
+    isp_prefix = os.environ["HOME"] + "/.local/isp/"
 
     try:
         isp_prefix = os.environ["ISP_PREFIX"]

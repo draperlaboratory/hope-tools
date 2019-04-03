@@ -1,0 +1,7 @@
+#!/bin/bash
+
+: ${ISP:=$HOME/.local/isp/}
+
+export ISP_PREFIX=$ISP
+[[ ":$PATH:" != *":${ISP_PREFIX}bin:"* ]] && \
+  export PATH="${ISP_PREFIX}bin:${PATH}"

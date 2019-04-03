@@ -2,11 +2,15 @@
 
 This is a step by step guide on how to build the HOPE software toolchain.
 
-By default everything is built in `/opt/isp/`.  This is also where the package
-installs everything.  You will need to add `/opt/isp/bin/` to your `PATH` before
-you build.  After you can change the install location by creating an
-environmental variable `ISP_PREFIX` and setting that to whatever you prefer.
-Note that `ISP_PREFIX` must end with a `/`.
+## Setting Environment Variables
+To set the necessary environment variables, run the following command:
+
+
+```
+ISP=/your/isp/build/ source ./isp-support/set-env
+```
+
+If no `ISP` variable is specified, the default build location is `~/.local/isp/`.
 
 ## Installing Necessary Software
 
@@ -17,7 +21,7 @@ Ubuntu 18.04 is the preferred platform for HOPE development.
 On Ubuntu 18.04 run the following to install the necessary software.
 
 ```
-sudo ./isp-support/install-dependencies-ubuntu-1804
+./isp-support/install-dependencies-ubuntu1804
 ```
 
 ### Ubuntu 16.04
@@ -25,7 +29,7 @@ sudo ./isp-support/install-dependencies-ubuntu-1804
 On Ubuntu 16.04 run the following to install the necessary software.
 
 ```
-sudo ./isp-support/install-dependencies-ubuntu-1604
+./isp-support/install-dependencies-ubuntu1604
 ```
 
 ## Download The Other Repositories
