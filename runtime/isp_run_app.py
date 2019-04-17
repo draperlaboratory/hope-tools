@@ -62,6 +62,9 @@ def main():
     parser.add_argument("-c", "--rule-cache-size", type=int, default=16, help='''
     Size of the rule cache (if name is provided). Default is 16
     ''')
+    parser.add_argument("-e", "--extra", type=str, help='''
+    Extra command line arguments for the simulator
+    ''')
 
     args = parser.parse_args()
 
@@ -108,7 +111,8 @@ def main():
                             args.runtime,
                             (args.rule_cache_name, args.rule_cache_size),
                             args.gdb,
-                            args.tag_only)
+                            args.tag_only,
+                            args.extra)
 
     if result != isp_run.retVals.SUCCESS:
         logger.error(result)
