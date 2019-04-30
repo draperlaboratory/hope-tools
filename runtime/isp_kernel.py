@@ -10,6 +10,7 @@ import multiprocessing
 import argparse
 import sys
 import isp_utils
+import yaml
 
 def copyEngineSources(engine_dir, output_dir):
     engine_output_dir = os.path.join(output_dir, "engine")
@@ -42,16 +43,26 @@ def copyPolicyYaml(policy, policies_dir, entities_dir, output_dir):
 
     # build composite entities for composite policy w.o existing entities
     elif (len(policy_parts) != 1):
-        shutil.copyfile(os.path.join(entities_dir, "empty.entities.yml"), entities_dest)
-        with open(entities_dest, 'wb') as comp_ents:
+
+        ents = []
+        with open(entities_dest, 'w') as comp_ents:
             for p in policy_parts:
+
                 policy_entities_file = policy_prefix + p + ".entities.yml"
+
                 if os.path.isfile(os.path.join(entities_dir, policy_entities_file)):
-                    with open(os.path.join(entities_dir, policy_entities_file), 'rb') as fd:
-                        shutil.copyfileobj(fd, comp_ents);
-    else:
+                    f = os.path.join(entities_dir, policy_entities_file)
+                    with open(f, "r") as instream:
+                        for e in yaml.load_all(instream, Loader=yaml.FullLoader):
+                            ents.append(e)
+
+            if ents:
+                yaml.dump_all(ents, comp_ents)
+
+    if not os.path.isfile(entities_dest):
         shutil.copyfile(os.path.join(entities_dir, "empty.entities.yml"), entities_dest)
- 
+
+        
 def runPolicyTool(policy, policies_dir, entities_dir, output_dir, debug):
     policy_output_dir = os.path.join(output_dir, "engine", "policy")
     policy_tool_cmd = "policy-tool"
