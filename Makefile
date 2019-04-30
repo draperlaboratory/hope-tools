@@ -47,8 +47,8 @@ $(PROJECTS): $(ISP_PREFIX)
 	$(MAKE) -f Makefile.isp -C ../$@ install
 
 $(ISP_PREFIX):
-	sudo mkdir -p $(ISP_PREFIX)
-	sudo chown $(USER) $(ISP_PREFIX)
+	mkdir -p $(ISP_PREFIX)
+	chown $(USER) $(ISP_PREFIX)
 
 $(CLEAN_PROJECTS):
 	$(MAKE) -f Makefile.isp -C ../$(@:clean-%=%) clean
@@ -74,5 +74,5 @@ clean-test:
 clean: $(CLEAN_PROJECTS) clean-test clean-runtime
 
 distclean: clean
-	sudo rm -rf $(ISP_PREFIX)
+	rm -rf $(ISP_PREFIX)
 	rm -rf tools/venv
