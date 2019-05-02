@@ -20,4 +20,5 @@ sudo apt-get install -y autoconf automake autogen autotools-dev curl \
     libyaml-cpp-dev libgflags-dev \
     python3-psutil xterm verilator virtualenv python3-pip
 
+sudo pip3 install pyinstaller
 stack upgrade --binary-only --allow-different-user
