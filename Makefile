@@ -2,10 +2,7 @@
 .PHONY: path_check
 .PHONY: runtime
 .PHONY: documentation
-.PHONY: kernel
-.PHONY: test
 .PHONY: clean
-.PHONY: clean-kernel
 .PHONY: distclean
 
 SHELL:=/bin/bash
