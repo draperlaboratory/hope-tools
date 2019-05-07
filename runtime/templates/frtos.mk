@@ -1,29 +1,23 @@
 ISP_PREFIX ?= $(HOME)/.local/isp/
 
 ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-frtos\.mk"))
+FREERTOS_DIR := $(ISP_PREFIX)/FreeRTOS
+FREERTOS_RVDEMO_DIR := $(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio
+SDK_DIR := $(FREERTOS_RVDEMO_DIR)/freedom-e-sdk
+FREERTOS_BUILD_DIR := $(FREERTOS_RVDEMO_DIR)/build
 
-FREE_RTOS_BUILD_DIR := $(ISP_RUNTIME)/frtos
+include $(FREERTOS_RVDEMO_DIR)/BuildEnvironment.mk
 
-FREE_RTOS_DIR := $(ISP_PREFIX)/FreeRTOS
-
-ISP_INCLUDES := -I$(FREE_RTOS_DIR)/Source/include
-ISP_INCLUDES += -I$(FREE_RTOS_DIR)/Source/portable/GCC/RISCV
-ISP_INCLUDES += -I$(FREE_RTOS_DIR)/Demo/RISCV_DOVER_GCC/arch
-ISP_INCLUDES += -I$(FREE_RTOS_DIR)/Demo/RISCV_DOVER_GCC/conf
-ISP_INCLUDES += -I$(FREE_RTOS_DIR)/Demo/RISCV_DOVER_GCC/soc/include
+ISP_INCLUDES := -I$(FREERTOS_DIR)/Source/include
+ISP_INCLUDES += -I$(FREERTOS_DIR)/Source/portable/GCC/RISC-V
+ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio
+ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/include
+ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env
+ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env/freedom-e300-hifive1
 ISP_INCLUDES += -I$(ISP_PREFIX)/riscv32-unknown-elf/include
-
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
-ISP_LIBS := $(FREE_RTOS_BUILD_DIR)/libfree-rtos.a
-ISP_LIBS += $(FREE_RTOS_BUILD_DIR)/libfree-rtos-dover.a
-
-ISP_LDFLAGS := -T$(FREE_RTOS_DIR)/Demo/RISCV_DOVER_GCC/soc/link.ld -nostartfiles
-
-ISP_CFLAGS := -O2
-
-ISP_SOURCES := $(wildcard $(ISP_RUNTIME)/*.c)
-ISP_OBJECTS := $(patsubst %.c,%.o,$(ISP_SOURCES))
+ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos.a
 
 RISCV_PATH 		?= $(ISP_PREFIX)
 RISCV_GCC     ?= $(abspath $(RISCV_PATH)/bin/clang)
@@ -36,9 +30,8 @@ CC=$(RISCV_GCC)
 
 all:
 
-
-$(ISP_OBJECTS): %.o: %.c
-	$(CC) $(ISP_CFLAGS) $(ISP_INCLUDES) $< -c -o $@
-
 $(ISP_LIBS):
-	cd $(FREE_RTOS_BUILD_DIR) && cmake . && make
+	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) directories
+	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) build/libfreertos.a
+
+include $(FREERTOS_RVDEMO_DIR)/BuildEnvironment.mk
