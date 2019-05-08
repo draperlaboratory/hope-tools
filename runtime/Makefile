@@ -42,35 +42,41 @@ INSTALLED_GDB_SCRIPTS := $(patsubst %,$(GDB_DIR)/%,$(GDB_SCRIPTS))
 POLICIES_DIR = $(SYMLINK_DIR)/policies/
 TEMPLATE_DIR = $(POLICIES_DIR)/policy_tests/template/
 POLICY_ENGINE_DIR = $(SYMLINK_DIR)/policy-engine/
+INSTALL_DIRS = $(BIN_DIR) $(GDB_DIR) $(KERNEL_DIR) $(SYMLINK_DIR)
 
-.PHONY: all install clean uninstall kernels symlinks
-all: $(ISP_SCRIPTS)
+.PHONY: all install clean uninstall kernels symlinks install-isp-scripts install-gdb-scripts
+all: $(ISP_SCRIPTS) $(INSTALL_DIRS)
 
-install: $(INSTALLED_ISP_SCRIPTS) $(INSTALLED_GDB_SCRIPTS) $(INSTALLED_GDB_SCRIPTS)
+install: all $(INSTALLED_ISP_SCRIPTS) $(INSTALLED_GDB_SCRIPTS) $(INSTALLED_GDB_SCRIPTS)
 
 kernels: $(KERNELS)
 
 symlinks: $(SYMLINK_DSTS)
 
-$(INSTALLED_ISP_SCRIPTS): $(ISP_SCRIPTS) $(ISP_BACKEND)
-	mkdir -p $(BIN_DIR)
-	cp -u $(ISP_SCRIPTS) $(BIN_DIR)
+$(INSTALLED_ISP_SCRIPTS): install-isp-scripts
+
+install-isp-scripts: $(ISP_SCRIPTS) $(BIN_DIR)
+	install $(ISP_SCRIPTS) $(BIN_DIR)
 
 $(ISP_SCRIPTS): %: %.py $(SYMLINK_DSTS) $(ISP_BACKEND) $(VENV_DONE)
 	$(VENV) pyinstaller --onefile --distpath . $<
 
-$(INSTALLED_GDB_SCRIPTS): $(GDB_SCRIPTS)
-	mkdir -p $(GDB_DIR)
-	cp -u $(GDB_SCRIPTS) $(GDB_DIR)
+$(INSTALLED_GDB_SCRIPTS): install-gdb-scripts
 
-$(KERNELS): $(SYMLINK_DSTS) $(INSTALLED_ISP_SCRIPTS)
-	mkdir -p $(KERNEL_DIR)
+install-gdb-scripts: $(GDB_SCRIPTS) $(GDB_DIR)
+	install $(GDB_SCRIPTS) $(GDB_DIR)
+
+$(KERNELS): $(SYMLINK_DSTS) $(INSTALLED_ISP_SCRIPTS) $(KERNEL_DIR)
 	isp_kernel $(notdir $@) $(KERNEL_DIR)
 
 $(SYMLINK_DSTS): $(SYMLINK_DIR)/%: $(ROOT)/%
 	@echo $(SYMLINK_DSTS)
-	mkdir -p $(SYMLINK_DIR)
 	ln -s $< $@
+
+$(SYMLINK_DSTS): $(SYMLINK_DIR)
+
+$(INSTALL_DIRS):
+	mkdir -p $@
 
 clean:
 	rm -rf $(ISP_SCRIPTS) $(KERNELS) *.pyc *.spec build/
