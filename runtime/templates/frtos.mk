@@ -31,7 +31,6 @@ CC=$(RISCV_GCC)
 all:
 
 $(ISP_LIBS):
-	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) directories
-	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) build/libfreertos.a
+	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) lib
 
 include $(FREERTOS_RVDEMO_DIR)/BuildEnvironment.mk
