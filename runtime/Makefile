@@ -71,7 +71,7 @@ $(KERNELS): $(SYMLINK_DSTS) $(INSTALLED_ISP_SCRIPTS) $(KERNEL_DIR)
 
 $(SYMLINK_DSTS): $(SYMLINK_DIR)/%: $(ROOT)/%
 	@echo $(SYMLINK_DSTS)
-	ln -s $< $@
+	ln -sf $< $@
 
 $(SYMLINK_DSTS): $(SYMLINK_DIR)
 
