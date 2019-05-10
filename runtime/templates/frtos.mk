@@ -30,6 +30,7 @@ CC=$(RISCV_GCC)
 
 all:
 
+
 $(ISP_LIBS):
 	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) lib
 
