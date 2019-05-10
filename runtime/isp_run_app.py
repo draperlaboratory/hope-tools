@@ -36,8 +36,8 @@ def main():
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
     Currently supported: qemu (default), renode
     ''')
-    parser.add_argument("-r", "--runtime", type=str, default="hifive", help='''
-    Currently supported: frtos, hifive (bare metal) (default)
+    parser.add_argument("-r", "--runtime", type=str, default="bare", help='''
+    Currently supported: frtos, bare (bare metal) (default)
     ''')
     parser.add_argument("-o", "--output", type=str, default="", help='''
     Location of simulator output directory. Contains supporting files and
@@ -75,8 +75,8 @@ def main():
     if args.output == "":
         output_dir = os.getcwd()
 
-    if args.runtime not in ["frtos", "hifive"]:
-        logger.error("Invalid choice of runtime. Valid choices: frtos, hifive")
+    if args.runtime not in ["frtos", "bare"]:
+        logger.error("Invalid choice of runtime. Valid choices: frtos, bare")
         return
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:

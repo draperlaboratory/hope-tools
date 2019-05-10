@@ -20,10 +20,10 @@ The ISP runtime consists of three commands: `isp_install_runtime`, `isp_run_app`
 ##### Building an application
 
 The `isp_install_runtime` script bootstraps an existing project directory with resources that allow applications to build with one of
-ISP's currently supported runtimes: FreeRTOS or Hifive (bare metal). Use the script as follows:
+ISP's currently supported runtimes: FreeRTOS or Bare (bare metal). Use the script as follows:
 
 ```
-isp_install_runtime <frtos/hifive> -b <project directory (default .)>
+isp_install_runtime <frtos/bare> -b <project directory (default .)>
 ```
 
 This will generate the `isp-runtime` directory in the project directory, as well as a Makefile `isp-runtime.mk`.
@@ -43,7 +43,7 @@ NOTE: You must rename the `main()` function of your executable to `isp_main()` s
 The `isp_run_app` script runs an application on one of the supported simulators: QEMU or Renode. Use the script as follows:
 
 ```
-isp_run_app <executable> -p <policy (default none)> -s <qemu/renode (default qemu)> -r <frtos/hifive (default hifive)> -o <output directory (default .)>
+isp_run_app <executable> -p <policy (default none)> -s <qemu/renode (default qemu)> -r <frtos/bare (default bare)> -o <output directory (default .)>
 ```
 
 Additional options are:
@@ -57,8 +57,6 @@ Important files in this directory are:
 - `sim.log`: The output from QEMU/Renode
 - `pex.log`: The output from the PEX core, containing any policy violation messages
 - `bininfo/<executable name>.text`: the disassembled source of the application
-
-NOTE: Currently, the QEMU option only supports Hifive applications and the Renode option only supports FreeRTOS applications.
 
 ##### Debugging an application
 

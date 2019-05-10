@@ -16,7 +16,7 @@ class retVals:
 # Arguments:
 #  build_dir - path to the build directory. Must contain the user's Makefile
 #  template_dir - path to ISP generic runtime code and template Makefiles
-#  runtime - Currently supported: frtos, hifive (bare metal)
+#  runtime - Currently supported: frtos, bare (bare metal)
 
 # User must have:
 #  include isp-build.mk in Makefile
@@ -48,22 +48,20 @@ def doInstall(build_dir, template_dir, runtime):
 
     shutil.copy(os.path.join(template_dir, "isp_utils.h"),
                 os.path.join(runtime_dir, "isp_utils.h"))
+    shutil.copy(os.path.join(template_dir, "mem.h"),
+                os.path.join(runtime_dir, "mem.h"))
 
     if "frtos" in runtime:
         frtos_dir = os.path.join(runtime_dir, "frtos")
         isp_utils.doMkDir(frtos_dir)
-        shutil.copy(os.path.join(template_dir, "frtos-mem.h"),
-                    os.path.join(runtime_dir, "mem.h"))
         shutil.copy(os.path.join(template_dir, "frtos.mk"),
                     os.path.join(build_dir, "isp-runtime-frtos.mk"))
 
-    elif "hifive" in runtime:
-        shutil.copy(os.path.join(template_dir, "hifive-mem.h"),
-                    os.path.join(runtime_dir, "mem.h"))
-        shutil.copy(os.path.join(template_dir, "hifive.c"),
-                    os.path.join(runtime_dir, "hifive.c"))
-        shutil.copy(os.path.join(template_dir, "hifive.mk"),
-                    os.path.join(build_dir, "isp-runtime-hifive.mk"))
+    elif "bare" in runtime:
+        shutil.copy(os.path.join(template_dir, "bare.c"),
+                    os.path.join(runtime_dir, "bare.c"))
+        shutil.copy(os.path.join(template_dir, "bare.mk"),
+                    os.path.join(build_dir, "isp-runtime-bare.mk"))
         shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "hifive_bsp"),
                         os.path.join(runtime_dir, "bsp"))
 
@@ -78,7 +76,7 @@ def main():
     Install ISP runtime into standalone C project
     ''')
     parser.add_argument("runtime", type=str, help='''
-    Currently supported: frtos, hifive (bare metal) (default)
+    Currently supported: frtos, bare (bare metal) (default)
     ''')
     parser.add_argument("-b", "--build-dir", type=str, default=".", help='''
     Directory containing the Makefile for the main executable.

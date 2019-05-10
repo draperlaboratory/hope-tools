@@ -67,7 +67,7 @@ Note: Renode does not support parallel test runs.
 ### QEMU
 
 ```
-make kernel test SIM=qemu CONFIG=hifive XDIST='-n auto'
+make kernel test SIM=qemu CONFIG=bare XDIST='-n auto'
 ```
 
 Note: XDIST allows for parallel test runs. You may specify the number of parallel jobs with '-n X'.

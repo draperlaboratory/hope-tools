@@ -26,13 +26,13 @@ ISP_BACKEND += isp_utils.py
 ISP_BACKEND += isp_qemu.py
 ISP_BACKEND += isp_renode.py
 
-HIFIVE_PREFIX := osv.hifive.main.
+BARE_PREFIX := osv.bare.main.
 FRTOS_PREFIX := osv.frtos.main.
 
 SYMLINK_SRCS := $(patsubst %,$(ROOT)/%,$(SYMLINKS))
 SYMLINK_DSTS := $(patsubst %,$(SYMLINK_DIR)/%,$(SYMLINKS))
 
-KERNELS := $(patsubst %,$(HIFIVE_PREFIX)%,$(POLICY_NAMES))
+KERNELS := $(patsubst %,$(BARE_PREFIX)%,$(POLICY_NAMES))
 KERNELS += $(patsubst %,$(FRTOS_PREFIX)%,$(POLICY_NAMES))
 KERNELS := $(patsubst %,$(KERNEL_DIR)/%,$(KERNELS))
 
