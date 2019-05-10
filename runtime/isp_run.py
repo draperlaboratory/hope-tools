@@ -37,8 +37,9 @@ class retVals:
 #  rule_cache - rule cache configuration tuple. (cache_name, size)
 #  gdb - debug port for gdbserver mode (optional)
 #  tag_only - run the tagging tools without running the simulator
+#  extra - extra command line arguments to the simulator
 
-def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb, tag_only):
+def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb, tag_only, extra):
     exe_name = os.path.basename(exe_path)
 
     if not os.path.isfile(exe_path):
@@ -67,7 +68,7 @@ def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb
         return retVals.SUCCESS
 
     if sim == "qemu":
-        isp_qemu.runOnQEMU(exe_path, run_dir, policy_dir, runtime, gdb)
+        isp_qemu.runOnQEMU(exe_path, run_dir, policy_dir, runtime, gdb, extra)
     elif sim == "renode":
         isp_renode.runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb)
 
