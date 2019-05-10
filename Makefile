@@ -35,6 +35,7 @@ renode-plugins: renode
 llvm-project: riscv-gnu-toolchain
 qemu: policy-engine
 riscv-newlib: llvm-project
+FreeRTOS: riscv-newlib
 
 path_check:
 	(grep -q $(ISP_PREFIX)bin <<< $(PATH)) || (echo "Need to add $(ISP_PREFIX)/bin to your PATH" && false)
