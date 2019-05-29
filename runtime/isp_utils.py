@@ -14,7 +14,7 @@ def doMkDir(dir):
 def removeIfExists(filename):
     if os.path.exists(filename):
         if os.path.isdir(filename):
-            shutil.rmtree(filename)
+            shutil.rmtree(filename, ignore_errors=True)
         else:
             os.remove(filename)
 
