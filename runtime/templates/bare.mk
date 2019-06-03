@@ -25,4 +25,12 @@ BOARD ?= freedom-e300-hifive1
 LINK_TARGET ?= flash
 
 BSP_BASE = $(ISP_RUNTIME)/bsp
+
+ISP_LIBS := $(BSP_BASE)/libwrap/libwrap.a
+
+all:
+
+.PHONY: isp-runtime-common
+isp-runtime-common: $(ISP_LIBS) $(ISP_OBJECTS)
+
 include $(BSP_BASE)/env/common.mk
