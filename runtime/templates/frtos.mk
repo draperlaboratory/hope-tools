@@ -33,4 +33,7 @@ all:
 $(ISP_LIBS):
 	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) lib
 
+.PHONY: isp-runtime-common
+isp-runtime-common: $(ISP_LIBS) $(ISP_OBJECTS)
+
 include $(FREERTOS_RVDEMO_DIR)/BuildEnvironment.mk
