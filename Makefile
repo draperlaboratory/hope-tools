@@ -27,7 +27,7 @@ CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 .PHONY: $(PROJECTS)
 .PHONY: $(CLEAN_PROJECTS)
 
-all: path_check runtime
+all: runtime
 	$(MAKE) $(PROJECTS)
 
 policy-engine: policy-tool
