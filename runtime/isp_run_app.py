@@ -65,6 +65,9 @@ def main():
     parser.add_argument("-e", "--extra", type=str, help='''
     Extra command line arguments for the simulator
     ''')
+    parser.add_argument("-S", "--suffix", type=str, help='''
+    Extra suffix to add to the test directory name
+    ''')
 
     args = parser.parse_args()
 
@@ -96,6 +99,9 @@ def main():
     run_dir = os.path.join(output_dir, "isp-run-{}-{}".format(exe_name, policy_name))
     if args.rule_cache_name != "":
         run_dir = run_dir + "-{}-{}".format(args.rule_cache_name, args.rule_cache_size)
+
+    if args.suffix:
+        run_dir = run_dir + "-" + args.suffix
 
     run_dir_full_path = os.path.abspath(run_dir)
     isp_utils.removeIfExists(run_dir_full_path)
