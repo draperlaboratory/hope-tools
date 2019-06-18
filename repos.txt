@@ -3,9 +3,7 @@ riscv-gnu-toolchain
 policies
 FreeRTOS
 policy-tool
-renode
 policy-engine
-renode-plugins
 freedom-e-sdk
 riscv-newlib
 llvm-project
