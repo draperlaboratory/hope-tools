@@ -15,8 +15,6 @@ PROJECTS := riscv-gnu-toolchain
 PROJECTS += policy-tool
 PROJECTS += policy-engine
 PROJECTS += FreeRTOS
-PROJECTS += renode-plugins
-PROJECTS += renode
 PROJECTS += freedom-e-sdk
 PROJECTS += riscv-newlib
 PROJECTS += llvm-project
@@ -31,7 +29,6 @@ all: runtime
 	$(MAKE) $(PROJECTS)
 
 policy-engine: policy-tool
-renode-plugins: renode
 llvm-project: riscv-gnu-toolchain
 qemu: policy-engine
 riscv-newlib: llvm-project
