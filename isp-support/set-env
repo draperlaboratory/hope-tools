@@ -4,4 +4,4 @@
 
 export ISP_PREFIX=$ISP
 [[ ":$PATH:" != *":${ISP_PREFIX}bin:"* ]] && \
-  export PATH="${ISP_PREFIX}bin:${PATH}"
+  export PATH="${PATH}:${ISP_PREFIX}bin"
