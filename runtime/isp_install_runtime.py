@@ -51,17 +51,31 @@ def doInstall(build_dir, template_dir, runtime):
     shutil.copy(os.path.join(template_dir, "mem.h"),
                 os.path.join(runtime_dir, "mem.h"))
 
-    if "frtos" in runtime:
+    if "frtos" == runtime:
         frtos_dir = os.path.join(runtime_dir, "frtos")
         isp_utils.doMkDir(frtos_dir)
         shutil.copy(os.path.join(template_dir, "frtos.mk"),
                     os.path.join(build_dir, "isp-runtime-frtos.mk"))
 
-    elif "bare" in runtime:
+    elif "bare" == runtime:
         shutil.copy(os.path.join(template_dir, "bare.c"),
                     os.path.join(runtime_dir, "bare.c"))
         shutil.copy(os.path.join(template_dir, "bare.mk"),
                     os.path.join(build_dir, "isp-runtime-bare.mk"))
+        shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "hifive_bsp"),
+                        os.path.join(runtime_dir, "bsp"))
+
+    elif "stock_frtos" == runtime:
+        frtos_dir = os.path.join(runtime_dir, "stock_frtos")
+        isp_utils.doMkDir(frtos_dir)
+        shutil.copy(os.path.join(template_dir, "stock_frtos.mk"),
+                    os.path.join(build_dir, "isp-runtime-stock_frtos.mk"))
+
+    elif "stock_bare" == runtime:
+        shutil.copy(os.path.join(template_dir, "bare.c"),
+                    os.path.join(runtime_dir, "bare.c"))
+        shutil.copy(os.path.join(template_dir, "stock_bare.mk"),
+                    os.path.join(build_dir, "isp-runtime-stock_bare.mk"))
         shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "hifive_bsp"),
                         os.path.join(runtime_dir, "bsp"))
 
@@ -76,7 +90,7 @@ def main():
     Install ISP runtime into standalone C project
     ''')
     parser.add_argument("runtime", type=str, help='''
-    Currently supported: frtos, bare (bare metal) (default)
+    Currently supported: frtos, bare (bare metal) (default), stock_frtos, stock_bare
     ''')
     parser.add_argument("-b", "--build-dir", type=str, default=".", help='''
     Directory containing the Makefile for the main executable.
@@ -84,7 +98,7 @@ def main():
     ''')
 
     args = parser.parse_args()
-    
+
     build_dir_full = os.path.abspath(args.build_dir)
 
     result = doInstall(build_dir_full,
