@@ -17,7 +17,7 @@ ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedo
 ISP_INCLUDES += -I$(ISP_PREFIX)/riscv-none-embed/include
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
-ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos.a
+ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos-stock.a
 
 RISCV_PATH    ?= $(ISP_PREFIX)
 STOCK_TOOLS   ?= $(abspath $(ISP_PREFIX)/stock-tools)
@@ -32,7 +32,8 @@ CC=$(RISCV_CLANG)
 all:
 
 $(ISP_LIBS):
-	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) lib
+	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) clean-libfreertos-objs
+	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) build/libfreertos-stock.a MALLOC_VERSION=stock_heap_2
 
 .PHONY: isp-runtime-common
 isp-runtime-common: $(ISP_LIBS) $(ISP_OBJECTS)
