@@ -9,14 +9,14 @@ ISP_CFLAGS += -O2 -fno-builtin-printf
 ISP_INCLUDES += -I$(ISP_PREFIX)/riscv32-unknown-elf/include
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
-RISCV_PATH 		?= $(ISP_PREFIX)
-RISCV_GCC     ?= $(abspath $(RISCV_PATH)/bin/clang)
-RISCV_GXX     ?= $(abspath $(RISCV_PATH)/bin/clang)
+RISCV_PATH    ?= $(ISP_PREFIX)
+RISCV_CLANG   ?= $(abspath $(RISCV_PATH)/bin/clang)
+RISCV_GXX     ?= $(RISCV_CLANG)
 RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-objdump)
 RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-gdb)
 RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-ar)
 
-CC=$(RISCV_GCC)
+CC=$(RISCV_CLANG)
 
 RISCV_ARCH ?= rv32ima
 RISCV_ABI ?= ilp32
