@@ -106,7 +106,6 @@ def runSim(exe_path, run_dir, policy_dir, runtime, gdb_port, extra, use_val=True
     global sim_log_file
 
     if not use_val:
-
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],"stock-tools/bin/qemu-system-riscv32")
         uart_log_file = "uart_noval.log"
         status_log_file = "pex_noval.log"
