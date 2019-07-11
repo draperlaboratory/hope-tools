@@ -17,7 +17,7 @@ def getProcessExitCode(run_dir, runtime):
     process_out = process_log.readlines()
     hex_pattern = r"0x[0-9A-Fa-f]+$"
     for line in process_out:
-        if isp_utils.terminateMessage(runtime) in line:
+        if isp_utils.terminateMessage(runtime.replace("stock_", '')) in line:
             matches = re.findall(hex_pattern, line)
             if matches is not None:
                 return int(matches[0], 0)
