@@ -49,18 +49,19 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
 
     doMkDir(run_dir)
 
-    doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg)
-    doEntitiesFile(run_dir, exe_name)
-    generateTagInfo(exe_path, run_dir, policy_dir)
+    if "stock" not in runtime:
+        doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache)
+        doEntitiesFile(run_dir, exe_name)
+        generateTagInfo(exe_path, run_dir, policy_dir)
 
-    bininfo_base_path = os.path.join(run_dir, "bininfo", exe_name) + ".{}"
-    if not os.path.isfile(bininfo_base_path.format("taginfo")) or \
-       not os.path.isfile(bininfo_base_path.format("text"))    or \
-       not os.path.isfile(bininfo_base_path.format("text.tagged")):
-        return retVals.TAG_FAIL
+        bininfo_base_path = os.path.join(run_dir, "bininfo", exe_name) + ".{}"
+        if not os.path.isfile(bininfo_base_path.format("taginfo")) or \
+           not os.path.isfile(bininfo_base_path.format("text"))    or \
+           not os.path.isfile(bininfo_base_path.format("text.tagged")):
+            return retVals.TAG_FAIL
 
-    if tag_only is True:
-        return retVals.SUCCESS
+        if tag_only is True:
+            return retVals.SUCCESS
 
     sim_module = __import__("isp_" + sim)
     sim_module.runSim(exe_path, run_dir, policy_dir, runtime, gdb, extra)
