@@ -1,6 +1,6 @@
 ISP_PREFIX ?= $(HOME)/.local/isp/
 
-ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-stock_bare\.mk"))
+ISP_RUNTIME := $(basename $(filter /%/isp-runtime-stock_bare.mk, $(abspath $(MAKEFILE_LIST))))
 
 ISP_HEADERS += $(wildcard $(ISP_RUNTIME)/*.h)
 C_SRCS += $(wildcard $(ISP_RUNTIME)/*.c)
