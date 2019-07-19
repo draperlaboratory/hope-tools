@@ -92,11 +92,16 @@ def main():
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
 
-    policy_full_name = isp_utils.getPolicyFullName(args.policy, args.runtime)
-    policy_name = args.policy
-    if os.path.isdir(args.policy):
-        policy_full_name = os.path.abspath(args.policy)
-        policy_name = os.path.basename(policy_full_name)
+    # Policy Directory Building
+    if "stock_" not in args.runtime:
+        policy_full_name = isp_utils.getPolicyFullName(args.policy, args.runtime)
+        policy_name = args.policy
+        if os.path.isdir(args.policy):
+            policy_full_name = os.path.abspath(args.policy)
+            policy_name = os.path.basename(policy_full_name)
+    else:
+        policy_name = 'none'
+        policy_full_name = 'osv.bare.main.none'
 
     kernels_dir = os.path.join(isp_utils.getIspPrefix(), "kernels")
     policy_dir = os.path.join(kernels_dir, policy_full_name)
