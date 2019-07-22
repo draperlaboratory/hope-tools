@@ -68,6 +68,9 @@ def main():
     parser.add_argument("-S", "--suffix", type=str, help='''
     Extra suffix to add to the test directory name
     ''')
+    parser.add_argument("--soc", type=str, help='''
+    SOC configuration YAML file (default is <policy_dir>/soc_cfg/hifive_e_cfg.yml)
+    ''')
 
     args = parser.parse_args()
 
@@ -75,7 +78,6 @@ def main():
     logger.setLevel(logging.INFO)
     if args.debug is True:
         logger.setLevel(logging.DEBUG)
-
 
     output_dir = args.output
     if args.output == "":
@@ -94,30 +96,37 @@ def main():
         policy_full_name = os.path.abspath(args.policy)
         policy_name = os.path.basename(policy_full_name)
 
+    kernels_dir = os.path.join(isp_utils.getIspPrefix(), "kernels")
+    policy_dir = os.path.join(kernels_dir, policy_full_name)
+
     exe_name = os.path.basename(args.exe_path)
     exe_full_path = os.path.abspath(args.exe_path)
-    run_dir = os.path.join(output_dir, "isp-run-{}-{}".format(exe_name, policy_name))
+    run_dir = os.path.join(output_dir,
+                           "isp-run-{}-{}".format(exe_name, policy_name))
     if args.rule_cache_name != "":
-        run_dir = run_dir + "-{}-{}".format(args.rule_cache_name, args.rule_cache_size)
+        run_dir = run_dir + "-{}-{}".format(args.rule_cache_name,
+                                            args.rule_cache_size)
 
     if args.suffix:
         run_dir = run_dir + "-" + args.suffix
 
+    soc_path = os.path.join(policy_dir, "soc_cfg", "hifive_e_cfg.yml")
+    if args.soc is not None:
+        soc_path = os.path.abspath(args.soc)
+
     run_dir_full_path = os.path.abspath(run_dir)
     isp_utils.removeIfExists(run_dir_full_path)
 
-    kernels_dir = isp_utils.getKernelsDir()
-
     logger.debug("Starting simulator...")
     result = isp_run.runSim(exe_full_path,
-                            kernels_dir,
+                            policy_dir,
                             run_dir_full_path,
-                            policy_full_name,
                             args.simulator,
                             args.runtime,
                             (args.rule_cache_name, args.rule_cache_size),
                             args.gdb,
                             args.tag_only,
+                            soc_path,
                             args.extra)
 
     if result != isp_run.retVals.SUCCESS:
