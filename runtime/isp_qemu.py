@@ -97,7 +97,7 @@ def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra):
                                "PATH": os.environ["PATH"]}, stdout=sim_log)
     rc.wait()
 
-def runOnQEMU(exe_path, run_dir, policy_dir, runtime, gdb_port, extra):
+def runSim(exe_path, run_dir, policy_dir, runtime, gdb_port, extra):
     try:
         logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
         if gdb_port is not 0:

@@ -34,7 +34,7 @@ def main():
     Name of the installed policy to run or directory containing policy. Default is none
     ''')
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
-    Currently supported: qemu (default), renode
+    Module for simulating/running application. Must be installed to $ISP_PREFIX/runtime_modules
     ''')
     parser.add_argument("-r", "--runtime", type=str, default="bare", help='''
     Currently supported: frtos, bare (bare metal) (default)
@@ -78,6 +78,8 @@ def main():
     logger.setLevel(logging.INFO)
     if args.debug is True:
         logger.setLevel(logging.DEBUG)
+
+    sys.path.append(os.path.join(isp_utils.getIspPrefix(), "runtime_modules"))
 
     output_dir = args.output
     if args.output == "":
