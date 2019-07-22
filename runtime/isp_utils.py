@@ -11,12 +11,14 @@ def doMkDir(dir):
         if e.errno != errno.EEXIST:
             raise
 
+
 def removeIfExists(filename):
     if os.path.exists(filename):
         if os.path.isdir(filename):
             shutil.rmtree(filename)
         else:
             os.remove(filename)
+
 
 def getIspPrefix():
     isp_prefix = os.environ["HOME"] + "/.local/isp/"
@@ -27,10 +29,6 @@ def getIspPrefix():
         pass
 
     return isp_prefix
-
-def getKernelsDir():
-    isp_prefix = getIspPrefix()
-    return os.path.join(isp_prefix, "kernels")
 
 
 def getPolicyFullName(policy, runtime="{}"):

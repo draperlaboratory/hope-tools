@@ -127,7 +127,7 @@ def main():
     base_output_dir = os.getcwd()
 
     if args.output == "":
-        kernels_dir = isp_utils.getKernelsDir()
+        kernels_dir = os.path.join(isp_utils.getIspPrefix(), "kernels")
         if os.path.isdir(kernels_dir):
             base_output_dir = kernels_dir
     else:

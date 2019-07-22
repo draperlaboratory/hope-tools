@@ -39,22 +39,19 @@ class retVals:
 #  tag_only - run the tagging tools without running the simulator
 #  extra - extra command line arguments to the simulator
 
-def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb, tag_only, extra):
+def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, soc_cfg, extra):
     exe_name = os.path.basename(exe_path)
 
     if not os.path.isfile(exe_path):
         return retVals.NO_BIN
 
-    policy_dir = policy
-    if not os.path.isdir(policy):
-        policy_dir = getPolicyDir(policy, kernels_dir)
-        if policy_dir is None:
-            logger.error("Failed to find directory for policy")
+    if not os.path.isdir(policy_dir):
+        if compileMissingPolicy(policy_dir) is False:
             return retVals.NO_POLICY
 
     doMkDir(run_dir)
 
-    doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache)
+    doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg)
     doEntitiesFile(run_dir, exe_name)
     generateTagInfo(exe_path, run_dir, policy_dir)
 
@@ -75,23 +72,19 @@ def runSim(exe_path, kernels_dir, run_dir, policy, sim, runtime, rule_cache, gdb
     return retVals.SUCCESS
 
 
-def getPolicyDir(policy, kernels_dir):
-    isp_kernel_cmd = "isp_kernel"
-    isp_kernel_args = [policy, "-o", kernels_dir]
+def compileMissingPolicy(policy_dir):
+    isp_kernel_args = [os.path.basename(policy_dir), "-o",
+            os.path.dirname(policy_dir)]
 
-    policy_dir = os.path.join(kernels_dir, policy)
-    if not os.path.isdir(policy_dir):
-        logger.info("Attempting to compile missing policy")
-        subprocess.Popen([isp_kernel_cmd] + isp_kernel_args).wait()
-    else:
-        return policy_dir
+    logger.info("Attempting to compile missing policy")
+    subprocess.Popen(["isp_kernel"] + isp_kernel_args).wait()
 
     if not os.path.isdir(policy_dir):
         logger.error("Failed to compile missing policy")
-        return None
+        return False
 
     logger.info("Successfully compiled missing policy")
-    return policy_dir
+    return True
 
 
 def generateTagInfo(exe_path, run_dir, policy_dir):
@@ -114,10 +107,11 @@ def doEntitiesFile(run_dir, name):
         open(filename, "a").close()
 
 
-def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache):
+def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg):
     rule_cache_name = rule_cache[0]
     rule_cache_size = rule_cache[1]
-    soc_cfg = "hifive_e_cfg.yml"
+
+    logger.info("Using soc_cfg file: {}".format(soc_cfg))
 
     validatorCfg =  """\
 ---
@@ -126,7 +120,7 @@ def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache):
    soc_cfg_path: {soc_cfg}
 """.format(policyDir=policy_dir,
            tagfile=os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
-           soc_cfg=os.path.join(policy_dir, "soc_cfg", soc_cfg))
+           soc_cfg=soc_cfg)
 
     if rule_cache_name != "":
         validatorCfg += """\
