@@ -10,8 +10,6 @@ import errno
 import logging
 
 from isp_utils import *
-import isp_qemu
-import isp_renode
 
 # backend helper to run an ISP simulation with a binary & kernel
 # TODO: runFPGA support
@@ -64,10 +62,8 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
     if tag_only is True:
         return retVals.SUCCESS
 
-    if sim == "qemu":
-        isp_qemu.runOnQEMU(exe_path, run_dir, policy_dir, runtime, gdb, extra)
-    elif sim == "renode":
-        isp_renode.runOnRenode(exe_path, run_dir, policy_dir, runtime, gdb)
+    sim_module = __import__("isp_" + sim)
+    sim_module.runSim(exe_path, run_dir, policy_dir, runtime, gdb, extra)
 
     return retVals.SUCCESS
 
