@@ -45,6 +45,8 @@ def setupLogger():
 def terminateMessage(runtime):
     if runtime == "frtos":
         return "Main task has completed with code:"
+    if runtime == "sel4":
+        return "Root task has completed with code:"
     elif runtime == "bare":
         return "Program has exited with code:"
 

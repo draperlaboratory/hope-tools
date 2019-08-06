@@ -23,7 +23,7 @@ The `isp_install_runtime` script bootstraps an existing project directory with r
 ISP's currently supported runtimes: FreeRTOS or Bare (bare metal). Use the script as follows:
 
 ```
-isp_install_runtime <frtos/bare/stock_frtos/stock_bare> -b <project directory (default .)>
+isp_install_runtime <frtos/sel4/bare/stock_frtos/stock_bare> -b <project directory (default .)>
 ```
 
 The `stock` variants build the runtime using a non-ISP toolchain. It looks for these binaries to be located in `STOCK_TOOLS/bin`, which defaults to `ISP_PREFIX/stock-tools/bin` 

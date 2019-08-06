@@ -16,7 +16,7 @@ class retVals:
 # Arguments:
 #  build_dir - path to the build directory. Must contain the user's Makefile
 #  template_dir - path to ISP generic runtime code and template Makefiles
-#  runtime - Currently supported: frtos, bare (bare metal), stock_frtos, stock_bare
+#  runtime - Currently supported: frtos, sel4, bare (bare metal), stock_frtos, stock_bare
 
 # User must have:
 #  include isp-build.mk in Makefile
@@ -57,7 +57,13 @@ def doInstall(build_dir, template_dir, runtime):
         shutil.copy(os.path.join(template_dir, "frtos.mk"),
                     os.path.join(build_dir, "isp-runtime-frtos.mk"))
 
-    elif "bare" == runtime:
+    elif "sel4" in runtime:
+        sel4_dir = os.path.join(runtime_dir, "sel4")
+        isp_utils.doMkDir(sel4_dir)
+        shutil.copy(os.path.join(template_dir, "sel4.mk"),
+                    os.path.join(build_dir, "isp-runtime-sel4.mk"))
+
+    elif "bare" in runtime:
         shutil.copy(os.path.join(template_dir, "bare.c"),
                     os.path.join(runtime_dir, "bare.c"))
         shutil.copy(os.path.join(template_dir, "bare.mk"),
