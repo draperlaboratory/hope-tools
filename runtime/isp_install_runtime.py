@@ -96,7 +96,7 @@ def main():
     Install ISP runtime into standalone C project
     ''')
     parser.add_argument("runtime", type=str, help='''
-    Currently supported: frtos, bare (bare metal) (default), stock_frtos, stock_bare
+    Currently supported: frtos, sel4, bare (bare metal) (default), stock_frtos, stock_bare
     ''')
     parser.add_argument("-b", "--build-dir", type=str, default=".", help='''
     Directory containing the Makefile for the main executable.
