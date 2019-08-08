@@ -46,7 +46,7 @@ def terminateMessage(runtime):
     if runtime == "frtos":
         return "Main task has completed with code:"
     if runtime == "sel4":
-        return "Root task has completed with code:"
+        return "seL4 root server abort()ed"
     elif runtime == "bare":
         return "Program has exited with code:"
 

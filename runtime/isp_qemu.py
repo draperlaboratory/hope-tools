@@ -16,12 +16,11 @@ status_log_file = "pex.log"
 sim_log_file = "sim.log"
 
 process_exit = False
-run_cmd = "qemu-system-riscv32"
+qemu_cmd = "qemu-system-riscv32"
 
 logger = logging.getLogger()
 
-def qemuOptions(exe_path, run_dir, extra, use_validator=True, gdb_port=0):
-
+def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=0):
     # Base options for any runtime
     opts = [ "-nographic",
              "-kernel", exe_path,
@@ -36,7 +35,14 @@ def qemuOptions(exe_path, run_dir, extra, use_validator=True, gdb_port=0):
                  "yaml-cfg={}".format(os.path.join(run_dir, "validator_cfg.yml"))]
 
     # Machine selection
-    opts += ["-machine", "sifive_e"]
+    if "sel4" in runtime:
+        opts += ["-machine", "virt"]
+    else:
+        opts += ["-machine", "sifive_e"]
+
+    # Runtime specific options
+    if "sel4" in runtime:
+        opts += ["-m", "size=2000M"]
 
     if gdb_port is not 0:
         opts += ["-S", "-gdb", "tcp::{}".format(gdb_port)]
@@ -68,7 +74,7 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True
     global process_exit
     terminate_msg = isp_utils.terminateMessage(runtime)
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
-    opts = qemuOptions(exe_path, run_dir, extra, use_validator, gdb_port=0)
+    opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port=0)
 
     env = qemuEnv(use_validator)
 
@@ -103,9 +109,9 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True
         logger.error("QEMU run failed for exception {}.\n".format(e))
         raise
 
-def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, use_validator):
+def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, runtime, use_validator):
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
-    opts = qemuOptions(exe_path, run_dir, extra, use_validator, gdb_port)
+    opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port)
     logger.debug("Running qemu cmd:{}\n", str([run_cmd] + opts))
 
     env = qemuEnv(use_validator)
@@ -127,7 +133,8 @@ def runSim(exe_path, run_dir, policy_dir, runtime, gdb_port, extra, use_validato
     try:
         logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
         if gdb_port is not 0:
-            launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, use_validator)
+            launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra,
+                            runtime, use_validator)
         else:
             wd = threading.Thread(target=watchdog)
             wd.start()
