@@ -16,7 +16,7 @@ class retVals:
 # Arguments:
 #  build_dir - path to the build directory. Must contain the user's Makefile
 #  template_dir - path to ISP generic runtime code and template Makefiles
-#  runtime - Currently supported: frtos, bare (bare metal)
+#  runtime - Currently supported: frtos, bare (bare metal), stock_frtos, stock_bare
 
 # User must have:
 #  include isp-build.mk in Makefile
