@@ -74,6 +74,7 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True
     global process_exit
     terminate_msg = isp_utils.terminateMessage(runtime)
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
+
     opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port=0)
 
     env = qemuEnv(use_validator)
