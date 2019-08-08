@@ -55,11 +55,12 @@ def copyPolicyYaml(policy, policies_dir, entities_dir, output_dir):
                 if os.path.isfile(os.path.join(entities_dir, policy_entities_file)):
                     f = os.path.join(entities_dir, policy_entities_file)
                     with open(f, "r") as instream:
-                        for e in yaml.load_all(instream, Loader=yaml.FullLoader):
-                            ents.append(e)
+                        for el in yaml.load_all(instream, Loader=yaml.FullLoader):
+                            for e in el:
+                                ents.append(e)
 
             if ents:
-                yaml.dump_all(ents, comp_ents)
+                yaml.dump_all([ents], comp_ents)
 
     if not os.path.isfile(entities_dest):
         shutil.copyfile(os.path.join(entities_dir, "empty.entities.yml"), entities_dest)
