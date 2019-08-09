@@ -86,7 +86,7 @@ def main():
         output_dir = os.getcwd()
 
     if args.runtime not in ["frtos", "bare", "stock_frtos", "stock_bare"]:
-        logger.error("Invalid choice of runtime. Valid choices: frtos, bare, stock_bare, stock_frtos")
+        logger.error("Invalid choice of runtime. Valid choices: frtos, bare, stock_frtos, stock_bare")
         return
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
