@@ -45,7 +45,7 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
 
     policy_dir = policy
     print("POLICY DIR: {}".format(policy))
-    if "stock" not in runtime:
+    if "stock_" not in runtime and "stock_" not in sim:
         if not os.path.isdir(policy):
             policy_dir = getPolicyDir(policy, kernels_dir)
             if policy_dir is None:
@@ -54,7 +54,7 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
 
     doMkDir(run_dir)
 
-    if "stock" not in runtime:
+    if "stock_" not in runtime and "stock_" not in sim:
         doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache)
         doEntitiesFile(run_dir, exe_name)
         generateTagInfo(exe_path, run_dir, policy_dir)

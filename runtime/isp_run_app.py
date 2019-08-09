@@ -92,16 +92,22 @@ def main():
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
 
+    if args.simulator not in ["qemu", "renode", "stock_qemu"]:
+        logger.error("Invalid choice of simulator. Valid choices are: qemu, renode, stock_qemu")
+
     # Policy Directory Building
-    if "stock_" not in args.runtime:
-        policy_full_name = isp_utils.getPolicyFullName(args.policy, args.runtime)
-        policy_name = args.policy
-        if os.path.isdir(args.policy):
-            policy_full_name = os.path.abspath(args.policy)
-            policy_name = os.path.basename(policy_full_name)
-    else:
+    # Force policy to none if we're using stock
+    if "stock_" in args.simulator or "stock_" in args.runtime:
+        logger.info("Using a stock simulator or runtime, setting policy to 'none'")
         policy_name = 'none'
         policy_full_name = 'osv.bare.main.none'
+    else:
+        policy_name = args.policy
+
+    policy_full_name = isp_utils.getPolicyFullName(policy_name, args.runtime)
+    if os.path.isdir(policy_name):
+        policy_full_name = os.path.abspath(policy_name)
+        policy_name = os.path.basename(policy_full_name)
 
     kernels_dir = os.path.join(isp_utils.getIspPrefix(), "kernels")
     policy_dir = os.path.join(kernels_dir, policy_full_name)
