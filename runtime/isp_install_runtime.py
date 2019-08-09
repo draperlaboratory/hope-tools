@@ -63,7 +63,7 @@ def doInstall(build_dir, template_dir, runtime):
         shutil.copy(os.path.join(template_dir, "sel4.mk"),
                     os.path.join(build_dir, "isp-runtime-sel4.mk"))
 
-    elif "bare" in runtime:
+    elif "bare" == runtime:
         shutil.copy(os.path.join(template_dir, "bare.c"),
                     os.path.join(runtime_dir, "bare.c"))
         shutil.copy(os.path.join(template_dir, "bare.mk"),
