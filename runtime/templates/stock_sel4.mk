@@ -1,16 +1,20 @@
-ISP_PREFIX ?= $(HOME)/.local/isp/
+ISP_PREFIX  ?= $(HOME)/.local/isp/
+STOCK_TOOLS ?= $(abspath $(ISP_PREFIX)/stock-tools)
 
 ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-sel4\.mk"))
 SEL4_DIR := $(ISP_PREFIX)/sel4test
 
-RISCV_PATH    ?= $(ISP_PREFIX)
-RISCV_CLANG   ?= $(abspath $(RISCV_PATH)/bin/clang)
+RISCV_PATH    ?= $(STOCK_TOOLS)
+RISCV_CLANG   ?= $(abspath $(STOCK_TOOLS)/bin/clang)
 RISCV_GXX     ?= $(RISCV_CLANG)
 RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-objdump)
 RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-gdb)
 RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-ar)
 
 CC=$(RISCV_CLANG)
+
+RISCV_ARCH ?= rv32ima
+RISCV_ABI  ?= ilp32
 
 all:
 	bash $(SEL4_DIR)/init-build.sh -DPLATFORM=spike -DRISCV32=TRUE
