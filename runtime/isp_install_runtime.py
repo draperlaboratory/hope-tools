@@ -57,7 +57,7 @@ def doInstall(build_dir, template_dir, runtime):
         shutil.copy(os.path.join(template_dir, "frtos.mk"),
                     os.path.join(build_dir, "isp-runtime-frtos.mk"))
 
-    elif "sel4" in runtime:
+    elif "sel4" == runtime:
         sel4_dir = os.path.join(runtime_dir, "sel4")
         isp_utils.doMkDir(sel4_dir)
         shutil.copy(os.path.join(template_dir, "sel4.mk"),
@@ -76,6 +76,12 @@ def doInstall(build_dir, template_dir, runtime):
         isp_utils.doMkDir(frtos_dir)
         shutil.copy(os.path.join(template_dir, "stock_frtos.mk"),
                     os.path.join(build_dir, "isp-runtime-stock_frtos.mk"))
+
+    elif "stock_sel4" == runtime:
+        sel4_dir = os.path.join(runtime_dir, "stock_sel4")
+        isp_utils.doMkDir(sel4_dir)
+        shutil.copy(os.path.join(template_dir, "stock_sel4.mk"),
+                    os.path.join(build_dir, "isp-runtime-stock_sel4.mk"))
 
     elif "stock_bare" == runtime:
         shutil.copy(os.path.join(template_dir, "bare.c"),
