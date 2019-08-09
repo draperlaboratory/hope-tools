@@ -43,14 +43,14 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
     if not os.path.isfile(exe_path):
         return retVals.NO_BIN
 
-    if "stock" not in runtime:
+    if "stock_" not in runtime:
         if not os.path.isdir(policy_dir):
             if compileMissingPolicy(policy_dir) is False:
                 return retVals.NO_POLICY
 
     doMkDir(run_dir)
 
-    if "stock" not in runtime:
+    if "stock_" not in runtime and "stock_" not in sim:
         doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache)
         doEntitiesFile(run_dir, exe_name)
         generateTagInfo(exe_path, run_dir, policy_dir)
