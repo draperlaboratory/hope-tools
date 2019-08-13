@@ -64,7 +64,10 @@ def doInstall(build_dir, template_dir, runtime):
         sel4_build_dir = os.path.join(build_dir, "build_sel4")
         isp_utils.doMkDir(sel4_build_dir)
 
-        shutil.copytree(sel4_prefix_source_dir, sel4_local_source_dir)
+        try:
+            shutil.copytree(sel4_prefix_source_dir, sel4_local_source_dir)
+        except OSError:
+            print("WARNING: Local copy of seL4 already exists, not re-copying.")
 
         shutil.copy(os.path.join(template_dir, "isp_utils.h"),
                 os.path.join(sel4_local_source_dir, "projects", "bootstrap_main", "src"))
