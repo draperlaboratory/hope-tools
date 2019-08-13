@@ -130,6 +130,9 @@ def runSim(exe_path, run_dir, policy_dir, runtime, gdb_port, extra, use_validato
         uart_log_file = "uart_noval.log"
         status_log_file = "pex_noval.log"
         sim_log_file = "sim_noval.log"
+        run_cmd = os.path.join(os.environ['ISP_PREFIX'],'stock-tools','bin','qemu-system-riscv32')
+    else:
+        run_cmd = os.path.join(os.environ['ISP_PREFIX'],'bin','qemu-system-riscv32')
 
     try:
         logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
