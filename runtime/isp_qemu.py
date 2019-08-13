@@ -113,7 +113,7 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True
 def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, runtime, use_validator):
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
     opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port)
-    logger.debug("Running qemu cmd:{}\n", str([run_cmd] + opts))
+    logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + opts)))
 
     env = qemuEnv(use_validator, policy_dir)
     rc = subprocess.Popen([run_cmd] + opts, env=env, stdout=sim_log)
