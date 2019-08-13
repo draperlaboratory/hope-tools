@@ -33,6 +33,18 @@ def getTemplatesDir():
                                     "runtime",
                                     "templates")
 
+def sel4_setup_source(build_dir, template_dir):
+    sel4_prefix_source_dir = os.path.join(isp_utils.getIspPrefix(), "hope-seL4")
+    sel4_local_source_dir = os.path.join(build_dir, "hope-seL4")
+
+    try:
+        shutil.copytree(sel4_prefix_source_dir, sel4_local_source_dir)
+    except OSError:
+        print("WARNING: Local copy of seL4 already exists, not re-copying.")
+
+    shutil.copy(os.path.join(template_dir, "isp_utils.h"),
+                os.path.join(sel4_local_source_dir, "projects", "bootstrap_main", "src"))
+
 
 def doInstall(build_dir, template_dir, runtime):
     if not os.path.isdir(build_dir):
@@ -58,22 +70,14 @@ def doInstall(build_dir, template_dir, runtime):
                     os.path.join(build_dir, "isp-runtime-frtos.mk"))
 
     elif "sel4" == runtime:
-        sel4_prefix_source_dir = os.path.join(isp_utils.getIspPrefix(), "hope-seL4")
-        sel4_local_source_dir = os.path.join(build_dir, "hope-seL4")
+        sel4_setup_source(build_dir, template_dir)
 
         sel4_build_dir = os.path.join(build_dir, "build_sel4")
         isp_utils.doMkDir(sel4_build_dir)
 
-        try:
-            shutil.copytree(sel4_prefix_source_dir, sel4_local_source_dir)
-        except OSError:
-            print("WARNING: Local copy of seL4 already exists, not re-copying.")
-
-        shutil.copy(os.path.join(template_dir, "isp_utils.h"),
-                os.path.join(sel4_local_source_dir, "projects", "bootstrap_main", "src"))
-
         sel4_dir = os.path.join(runtime_dir, "sel4")
         isp_utils.doMkDir(sel4_dir)
+
         shutil.copy(os.path.join(template_dir, "sel4.mk"),
                     os.path.join(build_dir, "isp-runtime-sel4.mk"))
 
@@ -92,6 +96,11 @@ def doInstall(build_dir, template_dir, runtime):
                     os.path.join(build_dir, "isp-runtime-stock_frtos.mk"))
 
     elif "stock_sel4" == runtime:
+        sel4_setup_source(build_dir, template_dir)
+
+        sel4_build_dir = os.path.join(build_dir, "build_stock_sel4")
+        isp_utils.doMkDir(sel4_build_dir)
+
         sel4_dir = os.path.join(runtime_dir, "stock_sel4")
         isp_utils.doMkDir(sel4_dir)
         shutil.copy(os.path.join(template_dir, "stock_sel4.mk"),
