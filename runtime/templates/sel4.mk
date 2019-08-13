@@ -1,7 +1,6 @@
 ISP_PREFIX ?= $(HOME)/.local/isp/
 
 ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-sel4\.mk"))
-SEL4_DIR := $(ISP_PREFIX)/sel4test
 
 RISCV_PATH    ?= $(ISP_PREFIX)
 RISCV_CLANG   ?= $(abspath $(RISCV_PATH)/bin/clang)
@@ -13,5 +12,5 @@ RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-ar)
 CC=$(RISCV_CLANG)
 
 all:
-	bash $(SEL4_DIR)/init-build.sh -DPLATFORM=spike -DRISCV32=TRUE
-	ninja
+	cp $(SOURCE) hope-seL4/projects/bootstrap_main/src/main.c 
+	cd build_sel4 && bash ../hope-seL4/init-build.sh -DPLATFORM=spike -DRISCV32=TRUE && ninja

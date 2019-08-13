@@ -58,6 +58,17 @@ def doInstall(build_dir, template_dir, runtime):
                     os.path.join(build_dir, "isp-runtime-frtos.mk"))
 
     elif "sel4" == runtime:
+        sel4_prefix_source_dir = os.path.join(isp_utils.getIspPrefix(), "hope-seL4")
+        sel4_local_source_dir = os.path.join(build_dir, "hope-seL4")
+
+        sel4_build_dir = os.path.join(build_dir, "build_sel4")
+        isp_utils.doMkDir(sel4_build_dir)
+
+        shutil.copytree(sel4_prefix_source_dir, sel4_local_source_dir)
+
+        shutil.copy(os.path.join(template_dir, "isp_utils.h"),
+                os.path.join(sel4_local_source_dir, "projects", "bootstrap_main", "src"))
+
         sel4_dir = os.path.join(runtime_dir, "sel4")
         isp_utils.doMkDir(sel4_dir)
         shutil.copy(os.path.join(template_dir, "sel4.mk"),
