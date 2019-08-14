@@ -43,7 +43,7 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
     if not os.path.isfile(exe_path):
         return retVals.NO_BIN
 
-    if "stock_" not in runtime:
+    if "stock_" not in runtime and use_validator == True:
         if not os.path.isdir(policy_dir):
             if compileMissingPolicy(policy_dir) is False:
                 return retVals.NO_POLICY
