@@ -15,6 +15,7 @@ CC=$(RISCV_CLANG)
 RISCV_ARCH ?= rv32ima
 RISCV_ABI  ?= ilp32
 
-all:
-	cp $(SOURCE) hope-seL4/projects/bootstrap_main/src/target/ 
-	cd build_sel4 && bash ../hope-seL4/init-build.sh -DPLATFORM=spike -DRISCV32=TRUE && ninja
+sel4-build: sel4-lib
+	rm $(OBJECTS)
+	mv target.a hope-seL4/projects/bootstrap_main/src/target.a
+	cd build_sel4; bash ../hope-seL4/init-build.sh -DPLATFORM=spike -DRISCV32=TRUE; ninja
