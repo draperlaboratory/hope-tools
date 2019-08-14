@@ -12,5 +12,5 @@ RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-ar)
 CC=$(RISCV_CLANG)
 
 all:
-	cp $(SOURCE) hope-seL4/projects/bootstrap_main/src/target/main.c 
+	cp $(SOURCE) hope-seL4/projects/bootstrap_main/src/target/ 
 	cd build_sel4 && bash ../hope-seL4/init-build.sh -DPLATFORM=spike -DRISCV32=TRUE && ninja
