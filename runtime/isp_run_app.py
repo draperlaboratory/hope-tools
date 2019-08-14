@@ -71,6 +71,9 @@ def main():
     parser.add_argument("--soc", type=str, help='''
     SOC configuration YAML file (default is <policy_dir>/soc_cfg/hifive_e_cfg.yml)
     ''')
+    parser.add_argument("-N", "--no_validator", action="store_true", help='''
+    Do not use the validator and run the stock version of the simulator.
+    ''')
 
     args = parser.parse_args()
 
@@ -92,8 +95,8 @@ def main():
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
 
-    if args.simulator not in ["qemu", "renode", "stock_qemu"]:
-        logger.error("Invalid choice of simulator. Valid choices are: qemu, renode, stock_qemu")
+    if args.simulator not in ["qemu", "renode"]:
+        logger.error("Invalid choice of simulator. Valid choices are: qemu, renode")
 
     # Policy Directory Building
     # Force policy to none if we're using stock
@@ -127,6 +130,10 @@ def main():
     if args.soc is not None:
         soc_path = os.path.abspath(args.soc)
 
+    use_validator = True
+    if args.no_validator == True:
+        use_validator = False
+
     run_dir_full_path = os.path.abspath(run_dir)
     isp_utils.removeIfExists(run_dir_full_path)
 
@@ -140,6 +147,7 @@ def main():
                             args.gdb,
                             args.tag_only,
                             soc_path,
+                            use_validator,
                             args.extra)
 
     if result != isp_run.retVals.SUCCESS:

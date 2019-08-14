@@ -45,7 +45,7 @@ NOTE: You must rename the `main()` function of your executable to `isp_main()` s
 The `isp_run_app` script runs an application on one of the supported simulators: QEMU or Renode. Use the script as follows:
 
 ```
-isp_run_app <executable> -p <policy (default none)> -s <qemu/renode/stock_qemu (default qemu)> -r <frtos/bare/stock_frtos/stock_bare (default bare)> -o <output directory (default .)>
+isp_run_app <executable> -p <policy (default none)> -s <qemu/renode (default qemu)> -r <frtos/bare/stock_frtos/stock_bare (default bare)> -o <output directory (default .)>
 ```
 
 Additional options are:
@@ -65,5 +65,5 @@ Important files in this directory are:
 While `isp_run_app` is started with the `-g` option, use the `isp_debug` script to attach to the debugging session. Use the script as follows:
 
 ```
-isp_debug <executable> <port> -s <qemu/renode/stock_qemu (default qemu)>
+isp_debug <executable> <port> -s <qemu/renode (default qemu)>
 ```
