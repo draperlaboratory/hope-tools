@@ -43,9 +43,6 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
     if not os.path.isfile(exe_path):
         return retVals.NO_BIN
 
-    policy_dir = policy
-
-    print("POLICY DIR: {}".format(policy))
     if "stock_" not in runtime and use_validator == True:
         if not os.path.isdir(policy):
             policy_dir = getPolicyDir(policy, kernels_dir)
