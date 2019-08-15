@@ -42,9 +42,6 @@ def sel4_setup_source(build_dir, template_dir):
     except OSError:
         print("WARNING: Local copy of seL4 already exists, not re-copying.")
 
-    shutil.copy(os.path.join(template_dir, "isp_utils.h"),
-                os.path.join(sel4_local_source_dir, "projects", "bootstrap_main", "src", "target"))
-
 
 def doInstall(build_dir, template_dir, runtime):
     if not os.path.isdir(build_dir):
