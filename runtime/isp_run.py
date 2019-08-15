@@ -51,7 +51,7 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
     doMkDir(run_dir)
 
     if "stock_" not in runtime and use_validator == True:
-        doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache)
+        doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg)
         doEntitiesFile(run_dir, exe_name)
         generateTagInfo(exe_path, run_dir, policy_dir)
 
