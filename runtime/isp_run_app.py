@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import isp_run
 import os
 import re
@@ -63,7 +65,7 @@ def main():
     parser.add_argument("-c", "--rule-cache-size", type=int, default=16, help='''
     Size of the rule cache (if name is provided). Default is 16
     ''')
-    parser.add_argument("-e", "--extra", type=str, help='''
+    parser.add_argument("-e", "--extra", nargs="+", help='''
     Extra command line arguments for the simulator
     ''')
     parser.add_argument("-S", "--suffix", type=str, help='''
@@ -84,7 +86,7 @@ def main():
     if args.debug is True:
         logger.setLevel(logging.DEBUG)
 
-    sys.path.append(os.path.join(isp_utils.getIspPrefix(), "runtime_modules"))
+    sys.path.append(os.path.join(isp_utils.getIspPrefix(), "runtime", "modules"))
 
     output_dir = args.output
     if args.output == "":

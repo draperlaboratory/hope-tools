@@ -79,4 +79,4 @@ clean: $(CLEAN_PROJECTS) clean-test clean-runtime
 
 distclean: clean
 	rm -rf $(ISP_PREFIX)
-	rm -rf tools/venv
+	rm -rf $(VENV_DIR)
