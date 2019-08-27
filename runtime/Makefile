@@ -4,7 +4,8 @@ SYMLINK_DIR = $(ISP_PREFIX)/sources/
 KERNEL_DIR = $(ISP_PREFIX)/kernels/
 BIN_DIR = $(ISP_PREFIX)/bin/
 GDB_DIR = $(ISP_PREFIX)/gdb-scripts/
-MODULE_DIR = $(ISP_PREFIX)/runtime_modules/
+RUNTIME_DIR = $(ISP_PREFIX)/runtime/
+MODULE_DIR = $(ISP_PREFIX)/runtime/modules/
 
 CLANG_PATH := $(shell command -v clang 2> /dev/null;)
 
@@ -44,15 +45,21 @@ KERNELS := $(patsubst %,$(KERNEL_DIR)/%,$(KERNELS))
 
 INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
 
+PYTHON_SCRIPTS := $(patsubst %,%.py,$(ISP_SCRIPTS))
+PYTHON_SCRIPTS += $(ISP_BACKEND)
+
 POLICIES_DIR = $(SYMLINK_DIR)/policies/
 TEMPLATE_DIR = $(POLICIES_DIR)/policy_tests/template/
 POLICY_ENGINE_DIR = $(SYMLINK_DIR)/policy-engine/
-INSTALL_DIRS = $(BIN_DIR) $(GDB_DIR) $(KERNEL_DIR) $(SYMLINK_DIR) $(MODULE_DIR)
+INSTALL_DIRS = $(BIN_DIR) $(GDB_DIR) $(KERNEL_DIR) $(SYMLINK_DIR) $(RUNTIME_DIR) $(MODULE_DIR)
 
-.PHONY: all install clean uninstall kernels symlinks install-isp-scripts install-gdb-scripts
+.PHONY: all install clean uninstall kernels symlinks install-isp-scripts install-gdb-scripts install-runtime
 all: $(ISP_SCRIPTS)
 
-install: install-isp-scripts install-gdb-scripts install-modules install-stock-tools install-sel4-template
+install: install-runtime install-isp-scripts install-gdb-scripts install-modules install-stock-tools install-sel4-template $(VENV_DONE)
+
+install-runtime:
+	install $(PYTHON_SCRIPTS) $(RUNTIME_DIR)
 
 install-isp-scripts: $(ISP_SCRIPTS) $(BIN_DIR)
 	install $(ISP_SCRIPTS) $(BIN_DIR)
@@ -87,8 +94,9 @@ kernels: $(KERNELS)
 
 symlinks: $(SYMLINK_DSTS)
 
-$(ISP_SCRIPTS): %: %.py $(SYMLINK_DSTS) $(ISP_BACKEND) $(VENV_DONE)
-	$(VENV) pyinstaller --onefile --distpath . $<
+$(ISP_SCRIPTS): %: %.py
+	echo '#!/bin/sh\n$(VENV) $(RUNTIME_DIR)/$< "$$@"' > $@
+	chmod +x $@
 
 $(KERNELS): $(SYMLINK_DSTS) $(KERNEL_DIR) isp_kernel
 	./isp_kernel $(notdir $@) -o $(KERNEL_DIR)

@@ -1,7 +1,7 @@
-ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+ROOT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 PYTHON := python3
-VENV_DIR := $(ROOT_DIR)/venv
+VENV_DIR := $(ISP_PREFIX)/venv
 VENV_DONE := $(VENV_DIR)/.done
 PYTHON_REQUIREMENTS := $(ROOT_DIR)/python-requirements.txt
 VENV = bash -c "source $(VENV_DIR)/bin/activate" &&
