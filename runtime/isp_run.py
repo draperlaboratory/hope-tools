@@ -56,6 +56,7 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
         generateTagInfo(exe_path, run_dir, policy_dir)
 
         bininfo_base_path = os.path.join(run_dir, "bininfo", exe_name) + ".{}"
+
         if not os.path.isfile(bininfo_base_path.format("taginfo")) or \
            not os.path.isfile(bininfo_base_path.format("text"))    or \
            not os.path.isfile(bininfo_base_path.format("text.tagged")):

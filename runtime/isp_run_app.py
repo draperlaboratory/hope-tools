@@ -19,7 +19,8 @@ def getProcessExitCode(run_dir, runtime):
     for line in process_out:
         if isp_utils.terminateMessage(runtime.replace("stock_", '')) in line:
             matches = re.findall(hex_pattern, line)
-            if matches is not None:
+
+            if len(matches) > 0:
                 return int(matches[0], 0)
 
     return -1
@@ -37,7 +38,7 @@ def main():
     Module for simulating/running application. Must be installed to $ISP_PREFIX/runtime_modules
     ''')
     parser.add_argument("-r", "--runtime", type=str, default="bare", help='''
-    Currently supported: frtos, bare (bare metal) (default), stock_frtos, stock_bare
+    Currently supported: frtos, sel4, bare (bare metal) (default), stock_frtos, stock_sel4, stock_bare
     ''')
     parser.add_argument("-o", "--output", type=str, default="", help='''
     Location of simulator output directory. Contains supporting files and
@@ -88,8 +89,8 @@ def main():
     if args.output == "":
         output_dir = os.getcwd()
 
-    if args.runtime not in ["frtos", "bare", "stock_frtos", "stock_bare"]:
-        logger.error("Invalid choice of runtime. Valid choices: frtos, bare, stock_frtos, stock_bare")
+    if args.runtime not in ["frtos", "sel4", "bare", "stock_frtos", "stock_sel4", "stock_bare"]:
+        logger.error("Invalid choice of runtime. Valid choices: frtos, sel4, bare, stock_frtos, stock_sel4, stock_bare")
         return
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:

@@ -16,7 +16,7 @@ class retVals:
 # Arguments:
 #  build_dir - path to the build directory. Must contain the user's Makefile
 #  template_dir - path to ISP generic runtime code and template Makefiles
-#  runtime - Currently supported: frtos, bare (bare metal), stock_frtos, stock_bare
+#  runtime - Currently supported: frtos, sel4, bare (bare metal), stock_frtos, stock_sel4, stock_bare
 
 # User must have:
 #  include isp-build.mk in Makefile
@@ -32,6 +32,15 @@ def getTemplatesDir():
                                     "tools",
                                     "runtime",
                                     "templates")
+
+def sel4_setup_source(build_dir, template_dir):
+    sel4_prefix_source_dir = os.path.join(isp_utils.getIspPrefix(), "hope-seL4")
+    sel4_local_source_dir = os.path.join(build_dir, "hope-seL4")
+
+    try:
+        shutil.copytree(sel4_prefix_source_dir, sel4_local_source_dir)
+    except OSError:
+        print("WARNING: Local copy of seL4 already exists, not re-copying.")
 
 
 def doInstall(build_dir, template_dir, runtime):
@@ -57,6 +66,18 @@ def doInstall(build_dir, template_dir, runtime):
         shutil.copy(os.path.join(template_dir, "frtos.mk"),
                     os.path.join(build_dir, "isp-runtime-frtos.mk"))
 
+    elif "sel4" == runtime:
+        sel4_setup_source(build_dir, template_dir)
+
+        sel4_build_dir = os.path.join(build_dir, "build_sel4")
+        isp_utils.doMkDir(sel4_build_dir)
+
+        sel4_dir = os.path.join(runtime_dir, "sel4")
+        isp_utils.doMkDir(sel4_dir)
+
+        shutil.copy(os.path.join(template_dir, "sel4.mk"),
+                    os.path.join(build_dir, "isp-runtime-sel4.mk"))
+
     elif "bare" == runtime:
         shutil.copy(os.path.join(template_dir, "bare.c"),
                     os.path.join(runtime_dir, "bare.c"))
@@ -70,6 +91,17 @@ def doInstall(build_dir, template_dir, runtime):
         isp_utils.doMkDir(frtos_dir)
         shutil.copy(os.path.join(template_dir, "stock_frtos.mk"),
                     os.path.join(build_dir, "isp-runtime-stock_frtos.mk"))
+
+    elif "stock_sel4" == runtime:
+        sel4_setup_source(build_dir, template_dir)
+
+        sel4_build_dir = os.path.join(build_dir, "build_stock_sel4")
+        isp_utils.doMkDir(sel4_build_dir)
+
+        sel4_dir = os.path.join(runtime_dir, "stock_sel4")
+        isp_utils.doMkDir(sel4_dir)
+        shutil.copy(os.path.join(template_dir, "stock_sel4.mk"),
+                    os.path.join(build_dir, "isp-runtime-stock_sel4.mk"))
 
     elif "stock_bare" == runtime:
         shutil.copy(os.path.join(template_dir, "bare.c"),
@@ -90,7 +122,7 @@ def main():
     Install ISP runtime into standalone C project
     ''')
     parser.add_argument("runtime", type=str, help='''
-    Currently supported: frtos, bare (bare metal) (default), stock_frtos, stock_bare
+    Currently supported: frtos, sel4, bare (bare metal) (default), stock_frtos, stock_sel4, stock_bare
     ''')
     parser.add_argument("-b", "--build-dir", type=str, default=".", help='''
     Directory containing the Makefile for the main executable.

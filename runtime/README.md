@@ -20,16 +20,16 @@ The ISP runtime consists of three commands: `isp_install_runtime`, `isp_run_app`
 ##### Building an application
 
 The `isp_install_runtime` script bootstraps an existing project directory with resources that allow applications to build with one of
-ISP's currently supported runtimes: FreeRTOS or Bare (bare metal). Use the script as follows:
+ISP's currently supported runtimes: FreeRTOS, seL4, Bare (bare metal). Use the script as follows:
 
 ```
-isp_install_runtime <frtos/bare/stock_frtos/stock_bare> -b <project directory (default .)>
+isp_install_runtime <frtos/sel4/bare/stock_frtos/stock_sel4/stock_bare> -b <project directory (default .)>
 ```
 
 The `stock` variants build the runtime using a non-ISP toolchain. It looks for these binaries to be located in `STOCK_TOOLS/bin`, which defaults to `ISP_PREFIX/stock-tools/bin` 
 
 This will generate the `isp-runtime` directory in the project directory, as well as a Makefile `isp-runtime.mk`.
-This Makefile sets `CC` to the ISP version of Clang and exposes the following variables:
+This Makefile sets `CC` to the ISP or stock version of Clang and exposes the following variables:
 - `ISP_CFLAGS` - required compiler flags to pass to Clang
 - `ISP_INCLUDES` - header files for the chosen runtime
 - `ISP_LDFLAGS` - command to use a custom linker script for the target application
@@ -45,7 +45,7 @@ NOTE: You must rename the `main()` function of your executable to `isp_main()` s
 The `isp_run_app` script runs an application on one of the supported simulators: QEMU or Renode. Use the script as follows:
 
 ```
-isp_run_app <executable> -p <policy (default none)> -s <qemu/renode (default qemu)> -r <frtos/bare/stock_frtos/stock_bare (default bare)> -o <output directory (default .)>
+isp_run_app <executable> -p <policy (default none)> -s <qemu/renode (default qemu)> -r <frtos/sel4/bare/stock_frtos/stock_sel4/stock_bare (default bare)> -o <output directory (default .)>
 ```
 
 Additional options are:
