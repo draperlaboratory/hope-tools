@@ -37,33 +37,35 @@ class retVals:
 #  tag_only - run the tagging tools without running the simulator
 #  extra - extra command line arguments to the simulator
 
-def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, soc_cfg, extra):
+def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, soc_cfg, use_validator, extra):
     exe_name = os.path.basename(exe_path)
 
     if not os.path.isfile(exe_path):
         return retVals.NO_BIN
 
-    if not os.path.isdir(policy_dir):
-        if compileMissingPolicy(policy_dir) is False:
-            return retVals.NO_POLICY
+    if "stock_" not in runtime and use_validator == True:
+        if not os.path.isdir(policy_dir):
+            if compileMissingPolicy(policy_dir) is False:
+                return retVals.NO_POLICY
 
     doMkDir(run_dir)
 
-    doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg)
-    doEntitiesFile(run_dir, exe_name)
-    generateTagInfo(exe_path, run_dir, policy_dir)
+    if "stock_" not in runtime and use_validator == True:
+        doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg)
+        doEntitiesFile(run_dir, exe_name)
+        generateTagInfo(exe_path, run_dir, policy_dir)
 
-    bininfo_base_path = os.path.join(run_dir, "bininfo", exe_name) + ".{}"
-    if not os.path.isfile(bininfo_base_path.format("taginfo")) or \
-       not os.path.isfile(bininfo_base_path.format("text"))    or \
-       not os.path.isfile(bininfo_base_path.format("text.tagged")):
-        return retVals.TAG_FAIL
+        bininfo_base_path = os.path.join(run_dir, "bininfo", exe_name) + ".{}"
+        if not os.path.isfile(bininfo_base_path.format("taginfo")) or \
+           not os.path.isfile(bininfo_base_path.format("text"))    or \
+           not os.path.isfile(bininfo_base_path.format("text.tagged")):
+            return retVals.TAG_FAIL
 
-    if tag_only is True:
-        return retVals.SUCCESS
+        if tag_only is True:
+            return retVals.SUCCESS
 
     sim_module = __import__("isp_" + sim)
-    sim_module.runSim(exe_path, run_dir, policy_dir, runtime, gdb, extra)
+    sim_module.runSim(exe_path, run_dir, policy_dir, runtime, gdb, extra, use_validator)
 
     return retVals.SUCCESS
 

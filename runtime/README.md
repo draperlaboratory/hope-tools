@@ -23,8 +23,10 @@ The `isp_install_runtime` script bootstraps an existing project directory with r
 ISP's currently supported runtimes: FreeRTOS or Bare (bare metal). Use the script as follows:
 
 ```
-isp_install_runtime <frtos/bare> -b <project directory (default .)>
+isp_install_runtime <frtos/bare/stock_frtos/stock_bare> -b <project directory (default .)>
 ```
+
+The `stock` variants build the runtime using a non-ISP toolchain. It looks for these binaries to be located in `STOCK_TOOLS/bin`, which defaults to `ISP_PREFIX/stock-tools/bin` 
 
 This will generate the `isp-runtime` directory in the project directory, as well as a Makefile `isp-runtime.mk`.
 This Makefile sets `CC` to the ISP version of Clang and exposes the following variables:
@@ -43,7 +45,7 @@ NOTE: You must rename the `main()` function of your executable to `isp_main()` s
 The `isp_run_app` script runs an application on one of the supported simulators: QEMU or Renode. Use the script as follows:
 
 ```
-isp_run_app <executable> -p <policy (default none)> -s <qemu/renode (default qemu)> -r <frtos/bare (default bare)> -o <output directory (default .)>
+isp_run_app <executable> -p <policy (default none)> -s <qemu/renode (default qemu)> -r <frtos/bare/stock_frtos/stock_bare (default bare)> -o <output directory (default .)>
 ```
 
 Additional options are:

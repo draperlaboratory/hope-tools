@@ -17,7 +17,7 @@ def getProcessExitCode(run_dir, runtime):
     process_out = process_log.readlines()
     hex_pattern = r"0x[0-9A-Fa-f]+$"
     for line in process_out:
-        if isp_utils.terminateMessage(runtime) in line:
+        if isp_utils.terminateMessage(runtime.replace("stock_", '')) in line:
             matches = re.findall(hex_pattern, line)
             if matches is not None:
                 return int(matches[0], 0)
@@ -37,7 +37,7 @@ def main():
     Module for simulating/running application. Must be installed to $ISP_PREFIX/runtime_modules
     ''')
     parser.add_argument("-r", "--runtime", type=str, default="bare", help='''
-    Currently supported: frtos, bare (bare metal) (default)
+    Currently supported: frtos, bare (bare metal) (default), stock_frtos, stock_bare
     ''')
     parser.add_argument("-o", "--output", type=str, default="", help='''
     Location of simulator output directory. Contains supporting files and
@@ -71,6 +71,9 @@ def main():
     parser.add_argument("--soc", type=str, help='''
     SOC configuration YAML file (default is <policy_dir>/soc_cfg/hifive_e_cfg.yml)
     ''')
+    parser.add_argument("-N", "--no_validator", action="store_true", help='''
+    Do not use the validator and run the stock version of the simulator.
+    ''')
 
     args = parser.parse_args()
 
@@ -85,17 +88,28 @@ def main():
     if args.output == "":
         output_dir = os.getcwd()
 
-    if args.runtime not in ["frtos", "bare"]:
-        logger.error("Invalid choice of runtime. Valid choices: frtos, bare")
+    if args.runtime not in ["frtos", "bare", "stock_frtos", "stock_bare"]:
+        logger.error("Invalid choice of runtime. Valid choices: frtos, bare, stock_frtos, stock_bare")
         return
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
 
-    policy_full_name = isp_utils.getPolicyFullName(args.policy, args.runtime)
-    policy_name = args.policy
-    if os.path.isdir(args.policy):
-        policy_full_name = os.path.abspath(args.policy)
+    if args.simulator not in ["qemu", "renode"]:
+        logger.error("Invalid choice of simulator. Valid choices are: qemu, renode")
+
+    # Policy Directory Building
+    # Force policy to none if we're using stock
+    if "stock_" in args.simulator or "stock_" in args.runtime:
+        logger.info("Using a stock simulator or runtime, setting policy to 'none'")
+        policy_name = 'none'
+        policy_full_name = 'osv.bare.main.none'
+    else:
+        policy_name = args.policy
+
+    policy_full_name = isp_utils.getPolicyFullName(policy_name, args.runtime)
+    if os.path.isdir(policy_name):
+        policy_full_name = os.path.abspath(policy_name)
         policy_name = os.path.basename(policy_full_name)
 
     kernels_dir = os.path.join(isp_utils.getIspPrefix(), "kernels")
@@ -116,6 +130,10 @@ def main():
     if args.soc is not None:
         soc_path = os.path.abspath(args.soc)
 
+    use_validator = True
+    if args.no_validator == True:
+        use_validator = False
+
     run_dir_full_path = os.path.abspath(run_dir)
     isp_utils.removeIfExists(run_dir_full_path)
 
@@ -129,6 +147,7 @@ def main():
                             args.gdb,
                             args.tag_only,
                             soc_path,
+                            use_validator,
                             args.extra)
 
     if result != isp_run.retVals.SUCCESS:

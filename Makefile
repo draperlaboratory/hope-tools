@@ -20,6 +20,10 @@ PROJECTS += riscv-newlib
 PROJECTS += llvm-project
 PROJECTS += qemu
 
+STOCK_TOOLCHAIN := stock-riscv-gnu-toolchain
+STOCK_TOOLCHAIN += stock-llvm-project
+STOCK_TOOLCHAIN += stock-qemu
+
 CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 
 .PHONY: $(PROJECTS)
@@ -33,11 +37,16 @@ llvm-project: riscv-gnu-toolchain
 qemu: policy-engine
 riscv-newlib: llvm-project
 FreeRTOS: riscv-newlib runtime
+stock-riscv-newlib: stock-llvm-project
 
 path_check:
 	(grep -q $(ISP_PREFIX)bin <<< $(PATH)) || (echo "Need to add $(ISP_PREFIX)/bin to your PATH" && false)
 
 $(PROJECTS): $(ISP_PREFIX)
+	$(MAKE) -f Makefile.isp -C ../$@
+	$(MAKE) -f Makefile.isp -C ../$@ install
+
+$(STOCK_TOOLCHAIN): $(ISP_PREFIX)
 	$(MAKE) -f Makefile.isp -C ../$@
 	$(MAKE) -f Makefile.isp -C ../$@ install
 
