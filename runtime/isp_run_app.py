@@ -15,7 +15,10 @@ def printUartOutput(run_dir):
 
 
 def getProcessExitCode(run_dir, runtime):
-    process_log = open(os.path.join(run_dir, "uart.log"))
+    try:
+        process_log = open(os.path.join(run_dir, "uart.log"))
+    except:
+        return
     process_out = process_log.readlines()
     hex_pattern = r"0x[0-9A-Fa-f]+$"
     for line in process_out:
@@ -102,9 +105,6 @@ def main():
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
-
-    if args.simulator not in ["qemu", "renode"]:
-        logger.error("Invalid choice of simulator. Valid choices are: qemu, renode")
 
     # Policy Directory Building
     # Force policy to none if we're using stock
