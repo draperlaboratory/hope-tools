@@ -34,13 +34,14 @@ def getTemplatesDir():
                                     "templates")
 
 def sel4_setup_source(build_dir, template_dir):
-    sel4_prefix_source_dir = os.path.join(isp_utils.getIspPrefix(), "hope-seL4")
-    sel4_local_source_dir = os.path.join(build_dir, "hope-seL4")
+    sel4_prefix_source_dir = os.path.join(isp_utils.getIspPrefix(), "hope-seL4-app-template")
+    sel4_local_source_dir = os.path.join(build_dir, "hope-seL4-app-template")
 
     try:
         shutil.copytree(sel4_prefix_source_dir, sel4_local_source_dir)
-    except OSError:
-        print("WARNING: Local copy of seL4 already exists, not re-copying.")
+    except OSError as e:
+        print("WARNING - seL4 copy failed with message:")
+        print(e)
 
 
 def doInstall(build_dir, template_dir, runtime):
