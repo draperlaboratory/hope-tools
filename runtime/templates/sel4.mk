@@ -9,7 +9,8 @@ ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /
 RISCV_PATH    ?= $(STOCK_TOOLS)
 # riscv32/bin should contain a stock RISC-V GNU toolchain supporting
 # rv32ima / ilp32.
-RISCV_PREFIX ?= $(abspath $(RISCV_PATH)/riscv32/bin/riscv32-unknown-elf-)
+RISCV_PREFIX ?= $(abspath $(RISCV_PATH)/riscv32/bin/riscv32-unknown-linux-gnu-)
+RISCV_AR ?= $(abspath $(RISCV_PREFIX)ar)
 
 sel4-build: sel4-lib
 	rm $(OBJECTS)
