@@ -2,6 +2,7 @@ import os
 import errno
 import shutil
 import logging
+import coloredlogs
 
 def doMkDir(dir):
     try:
@@ -35,9 +36,17 @@ def getPolicyFullName(policy, runtime="{}"):
     return "osv." + runtime + ".main." + policy
 
 
-def setupLogger():
+def setupLogger(level, colors=True):
     logger = logging.getLogger()
     logging.basicConfig(format="%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s", datefmt="%H:%M:%S")
+
+    logger.setLevel(level)
+
+    level_string = "INFO"
+    if level is logging.DEBUG:
+        level_string = "DEBUG"
+    if colors is True:
+        coloredlogs.install(level=level_string, logger=logger)
 
     return logger
 

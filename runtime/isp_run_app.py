@@ -78,13 +78,17 @@ def main():
     Do not use the validator and run the stock version of the simulator (which
     must be located at ISP_PREFIX/stock-tools/bin/qemu-system-riscv32.
     ''')
+    parser.add_argument("--disable-colors", action="store_true", help='''
+    Disable colored logging
+    ''')
 
     args = parser.parse_args()
 
-    logger = isp_utils.setupLogger()
-    logger.setLevel(logging.INFO)
+    log_level = logging.INFO
     if args.debug is True:
-        logger.setLevel(logging.DEBUG)
+        log_level = logging.DEBUG
+
+    logger = isp_utils.setupLogger(log_level, (not args.disable_colors))
 
     sys.path.append(os.path.join(isp_utils.getIspPrefix(), "runtime", "modules"))
 
