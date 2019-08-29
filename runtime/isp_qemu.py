@@ -48,7 +48,7 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
         opts += ["-S", "-gdb", "tcp::{}".format(gdb_port)]
 
     if extra is not None:
-        opts += extra.split()
+        opts += isp_utils.processExtraArgs(extra)
 
     return opts
 
@@ -119,7 +119,9 @@ def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, runtime, use
     rc = subprocess.Popen([run_cmd] + opts, env=env, stdout=sim_log)
     rc.wait()
 
-def runSim(exe_path, run_dir, policy_dir, runtime, gdb_port, extra, use_validator=True):
+
+def runSim(exe_path, run_dir, policy_dir, runtime,
+           gdb_port, soc_cfg, extra, use_validator=True):
     global run_cmd
     global uart_log_file
     global status_log_file
@@ -129,6 +131,8 @@ def runSim(exe_path, run_dir, policy_dir, runtime, gdb_port, extra, use_validato
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'stock-tools','bin','qemu-system-riscv32')
     else:
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'bin','qemu-system-riscv32')
+        if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir) is False:
+            return isp_utils.retVals.TAG_FAIL
 
     try:
         logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
@@ -146,3 +150,5 @@ def runSim(exe_path, run_dir, policy_dir, runtime, gdb_port, extra, use_validato
             qemu.join()
     finally:
         pass
+
+    return isp_utils.retVals.SUCCESS

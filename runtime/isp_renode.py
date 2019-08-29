@@ -108,11 +108,16 @@ def launchRenode(run_dir):
             pass
 
 
-def runSim(exe_path, run_dir, policy_dir, runtime, gdb_port, extra, use_validator=True):
+def runSim(exe_path, run_dir, policy_dir, runtime,
+           gdb_port, extra, soc_cfg, use_validator=True):
     global process_exit
     global connecting
 
     doRescScript(exe_path, run_dir, policy_dir, gdb_port)
+
+    if use_validator == False:
+        if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir) is False:
+            return retVals.TAG_FAIL
 
     try:
         logger.debug("Begin Renode test... (timeout: {})".format(timeout_seconds))
@@ -164,6 +169,8 @@ def runSim(exe_path, run_dir, policy_dir, runtime, gdb_port, extra, use_validato
                 s.close()
         except:
             pass
+
+    return retVals.SUCCESS
 
 
 def doRescScript(exe_path, run_dir, policy_dir, gdb_port):

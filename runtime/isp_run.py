@@ -16,12 +16,6 @@ from isp_utils import *
 
 logger = logging.getLogger()
 
-# possible module outcomes
-class retVals:
-    NO_BIN = "No binary found to run"
-    NO_POLICY = "No policy found"
-    TAG_FAIL  = "Tagging tools did not produce expected output"
-    SUCCESS   = "Simulator run successfully"
 
 # -- MAIN MODULE FUNCTIONALITY
 
@@ -53,22 +47,15 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
     if "stock_" not in runtime and use_validator == True:
         doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg)
         doEntitiesFile(run_dir, exe_name)
-        generateTagInfo(exe_path, run_dir, policy_dir)
-
-        bininfo_base_path = os.path.join(run_dir, "bininfo", exe_name) + ".{}"
-
-        if not os.path.isfile(bininfo_base_path.format("taginfo")) or \
-           not os.path.isfile(bininfo_base_path.format("text"))    or \
-           not os.path.isfile(bininfo_base_path.format("text.tagged")):
-            return retVals.TAG_FAIL
 
         if tag_only is True:
             return retVals.SUCCESS
 
     sim_module = __import__("isp_" + sim)
-    sim_module.runSim(exe_path, run_dir, policy_dir, runtime, gdb, extra, use_validator)
+    ret_val = sim_module.runSim(exe_path, run_dir, policy_dir, runtime,
+                                gdb, soc_cfg, extra, use_validator)
 
-    return retVals.SUCCESS
+    return ret_val
 
 
 def compileMissingPolicy(policy_dir):
@@ -84,20 +71,6 @@ def compileMissingPolicy(policy_dir):
 
     logger.info("Successfully compiled missing policy")
     return True
-
-
-def generateTagInfo(exe_path, run_dir, policy_dir):
-    policy = os.path.basename(policy_dir).split("-debug")[0]
-    exe_name = os.path.basename(exe_path)
-    doMkDir(os.path.join(run_dir, "bininfo"))
-    with open(os.path.join(run_dir, "inits.log"), "w+") as initlog:
-        subprocess.Popen(["gen_tag_info",
-                          "-d", policy_dir,
-                          "-t", os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
-                          "-b", exe_path,
-                          "-e", os.path.join(policy_dir, policy + ".entities.yml"),
-                          os.path.join(run_dir, exe_name + ".entities.yml")],
-                          stdout=initlog, stderr=subprocess.STDOUT, cwd=run_dir).wait()
 
 
 def doEntitiesFile(run_dir, name):
