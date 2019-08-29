@@ -73,7 +73,8 @@ def main():
     SOC configuration YAML file (default is <policy_dir>/soc_cfg/hifive_e_cfg.yml)
     ''')
     parser.add_argument("-N", "--no_validator", action="store_true", help='''
-    Do not use the validator and run the stock version of the simulator.
+    Do not use the validator and run the stock version of the simulator (which
+    must be located at ISP_PREFIX/stock-tools/bin/qemu-system-riscv32.
     ''')
 
     args = parser.parse_args()
