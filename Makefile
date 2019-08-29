@@ -57,7 +57,7 @@ $(ISP_PREFIX):
 $(CLEAN_PROJECTS):
 	$(MAKE) -f Makefile.isp -C ../$(@:clean-%=%) clean
 
-runtime: $(ISP_PREFIX)
+runtime: $(ISP_PREFIX) riscv-gnu-toolchain
 	$(MAKE) -C runtime install
 
 documentation:
