@@ -16,4 +16,4 @@ CC = $(RISCV_GCC)
 sel4-build: sel4-lib
 	rm $(OBJECTS)
 	mv target.a hope-seL4-app-template/projects/bootstrap_main/src/target.a
-	cd hope-seL4-app-template; bash ./make-riscv-build.sh -b 32 -p spike -C $(RISCV_PREFIX)
+	cd hope-seL4-app-template && bash ./make-riscv-build.sh -b 32 -p spike -C $(RISCV_PREFIX)
