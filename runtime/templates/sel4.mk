@@ -1,14 +1,14 @@
 ISP_PREFIX  ?= $(HOME)/.local/isp/
-
+STOCK_TOOLS   ?= $(abspath $(ISP_PREFIX)/stock-tools)
 ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-sel4\.mk"))
 # Currently, seL4 doesn't build with clang, so we just have to build
 # with the stock RISC-V toolchain. This means that stock and normal seL4
 # builds are identical for now.
 
-RISCV_PATH    ?= $(abspath $(ISP_PREFIX)/bin)
+RISCV_PATH    ?= $(STOCK_TOOLS)
 # riscv32/bin should contain a stock RISC-V GNU toolchain supporting
 # rv32ima / ilp32.
-RISCV_PREFIX ?= $(abspath $(RISCV_PATH)/riscv32-unknown-elf-)
+RISCV_PREFIX ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-)
 RISCV_GCC ?= $(abspath $(RISCV_PREFIX)gcc)
 RISCV_AR ?= $(abspath $(RISCV_PREFIX)ar)
 CC = $(RISCV_GCC)
