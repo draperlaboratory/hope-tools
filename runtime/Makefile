@@ -56,7 +56,7 @@ INSTALL_DIRS = $(BIN_DIR) $(GDB_DIR) $(KERNEL_DIR) $(SYMLINK_DIR) $(RUNTIME_DIR)
 .PHONY: all install clean uninstall kernels symlinks install-isp-scripts install-gdb-scripts install-runtime
 all: $(ISP_SCRIPTS)
 
-install: install-runtime install-isp-scripts install-gdb-scripts install-modules install-stock-tools install-sel4-template $(VENV_DONE)
+install: install-runtime install-isp-scripts install-gdb-scripts install-modules install-stock-tools install-sel4-template $(VENV_DONE) $(SYMLINK_DSTS)
 
 install-runtime:
 	install $(PYTHON_SCRIPTS) $(RUNTIME_DIR)
@@ -114,4 +114,4 @@ clean:
 	rm -rf $(ISP_SCRIPTS) $(KERNELS) *.pyc *.spec build/
 
 uninstall:
-	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNELS)
+	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNELS) $(SYMLINK_DIR)
