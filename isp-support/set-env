@@ -2,6 +2,6 @@
 
 : ${ISP:=$HOME/.local/isp/}
 
-export ISP_PREFIX=$ISP
+export ISP_PREFIX=$ISP/
 [[ ":$PATH:" != *":${ISP_PREFIX}bin:"* ]] && \
   export PATH="${PATH}:${ISP_PREFIX}/bin"
