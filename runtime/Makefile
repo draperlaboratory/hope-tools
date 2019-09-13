@@ -51,23 +51,25 @@ PYTHON_SCRIPTS += $(ISP_BACKEND)
 POLICIES_DIR = $(SYMLINK_DIR)/policies/
 TEMPLATE_DIR = $(POLICIES_DIR)/policy_tests/template/
 POLICY_ENGINE_DIR = $(SYMLINK_DIR)/policy-engine/
-INSTALL_DIRS = $(BIN_DIR) $(GDB_DIR) $(KERNEL_DIR) $(SYMLINK_DIR) $(RUNTIME_DIR) $(MODULE_DIR)
-
 .PHONY: all install clean uninstall kernels symlinks install-isp-scripts install-gdb-scripts install-runtime
 all: $(ISP_SCRIPTS)
 
 install: install-runtime install-isp-scripts install-gdb-scripts install-modules install-stock-tools install-sel4-template $(VENV_DONE) $(SYMLINK_DSTS)
 
 install-runtime:
+	mkdir -p $(RUNTIME_DIR)
 	install $(PYTHON_SCRIPTS) $(RUNTIME_DIR)
 
-install-isp-scripts: $(ISP_SCRIPTS) $(BIN_DIR)
+install-isp-scripts: $(ISP_SCRIPTS)
+	mkdir -p $(BIN_DIR)
 	install $(ISP_SCRIPTS) $(BIN_DIR)
 
-install-gdb-scripts: $(GDB_SCRIPTS) $(GDB_DIR)
+install-gdb-scripts: $(GDB_SCRIPTS)
+	mkdir -p $(GDB_DIR)
 	install $(GDB_SCRIPTS) $(GDB_DIR)
 
-install-modules: $(MODULES) $(MODULE_DIR)
+install-modules: $(MODULES)
+	mkdir -p $(MODULE_DIR)
 	install $(MODULES) $(MODULE_DIR)
 
 install-sel4-template:
@@ -102,16 +104,11 @@ $(KERNELS): $(SYMLINK_DSTS) $(KERNEL_DIR) isp_kernel
 	./isp_kernel $(notdir $@) -o $(KERNEL_DIR)
 
 $(SYMLINK_DSTS): $(SYMLINK_DIR)/%: $(ROOT)/%
-	@echo $(SYMLINK_DSTS)
+	mkdir -p $(SYMLINK_DIR)
 	ln -sf $< $@
-
-$(SYMLINK_DSTS): $(SYMLINK_DIR)
-
-$(INSTALL_DIRS):
-	mkdir -p $@
 
 clean:
 	rm -rf $(ISP_SCRIPTS) $(KERNELS) *.pyc *.spec build/
 
 uninstall:
-	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNELS) $(SYMLINK_DIR)
+	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNEL_DIR) $(SYMLINK_DIR) $(RUNTIME_DIR) $(MODULE_DIR)
