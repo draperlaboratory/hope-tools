@@ -32,7 +32,7 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
     if use_validator:
         opts += ["-singlestep", #need to instrument every target instruction
                  "--policy-validator-cfg",
-                 "yaml-cfg={}".format(os.path.join(run_dir, "validator_cfg.yml"))]
+                 "yaml-cfg={},exc=on".format(os.path.join(run_dir, "validator_cfg.yml"))]
 
     # Machine selection
     if "sel4" in runtime:
