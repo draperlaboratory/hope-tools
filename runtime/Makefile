@@ -97,7 +97,7 @@ kernels: $(KERNELS)
 symlinks: $(SYMLINK_DSTS)
 
 $(ISP_SCRIPTS): %: %.py
-	printf '#!/bin/sh\n$(VENV) $(RUNTIME_DIR)/$< "$$@"' > $@
+	printf '#!/bin/sh\n$(VENV) python $(RUNTIME_DIR)/$< "$$@"' > $@
 	chmod +x $@
 
 $(KERNELS): $(SYMLINK_DSTS) $(KERNEL_DIR) isp_kernel

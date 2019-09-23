@@ -1,3 +1,4 @@
-pyinstaller==3.4
-pyyaml
-coloredlogs
+coloredlogs==10.0.0
+pyelftools==0.25
+pyyaml==5.1.2
+yamlordereddictloader==0.4.0
