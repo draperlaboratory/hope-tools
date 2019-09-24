@@ -43,6 +43,9 @@ def main():
     Full name of the installed policy to run or directory containing policy. Default
     is to defer to normal -p behavior. If this is specified, -p is redundant/ignored.
     ''')
+    parser.add_argument("-k", "--kernels", type=str, help='''
+    Where to look for kernels. Default is $(ISP_PREFIX)/kernels
+    ''')
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
     Module for simulating/running application. Must be installed to $ISP_PREFIX/runtime_modules
     ''')
@@ -129,7 +132,10 @@ def main():
         policy_full_name = os.path.abspath(policy_name)
         policy_name = os.path.basename(policy_full_name)
 
-    kernels_dir = os.path.join(isp_utils.getIspPrefix(), "kernels")
+    if args.kernels :
+        kernels_dir = os.path.abspath(args.kernels)
+    else:
+        kernels_dir = os.path.join(isp_utils.getIspPrefix(), "kernels")
     policy_dir = os.path.join(kernels_dir, policy_full_name)
 
     exe_name = os.path.basename(args.exe_path)
