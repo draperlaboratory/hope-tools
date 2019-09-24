@@ -90,11 +90,6 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True
                     rc.terminate()
                     process_exit = True
                     return
-                if "Policy Violation:" in open(os.path.join(run_dir, status_log_file), 'r').read() or process_exit:
-                    rc.terminate()
-                    process_exit = True
-                    logger.warn("Process exited due to policy violation")
-                    return
             except IOError:
                 #keep trying if fail to open uart log
                 pass
