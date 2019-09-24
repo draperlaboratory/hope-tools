@@ -39,6 +39,10 @@ def main():
     parser.add_argument("-p", "--policy", type=str, default="none", help='''
     Name of the installed policy to run or directory containing policy. Default is none
     ''')
+    parser.add_argument("-P", "--policy-full", type=str, help='''
+    Full name of the installed policy to run or directory containing policy. Default
+    is to defer to normal -p behavior. If this is specified, -p is redundant/ignored.
+    ''')
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
     Module for simulating/running application. Must be installed to $ISP_PREFIX/runtime_modules
     ''')
@@ -111,11 +115,16 @@ def main():
     if "stock_" in args.simulator or "stock_" in args.runtime:
         logger.info("Using a stock simulator or runtime, setting policy to 'none'")
         policy_name = 'none'
-        policy_full_name = 'osv.bare.main.none'
+    elif args.policy_full :
+        policy_name = args.policy_full.split(".")[-1]
     else:
         policy_name = args.policy
 
-    policy_full_name = isp_utils.getPolicyFullName(policy_name, args.runtime)
+    if args.policy_full :
+        policy_full_name = args.policy_full
+    else:
+        policy_full_name = isp_utils.getPolicyFullName(policy_name, args.runtime)
+
     if os.path.isdir(policy_name):
         policy_full_name = os.path.abspath(policy_name)
         policy_name = os.path.basename(policy_full_name)
