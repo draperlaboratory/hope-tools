@@ -27,12 +27,23 @@ def copyEngineSources(engine_dir, output_dir):
 
 
 def copyPolicyYaml(policy, policies_dir, entities_dir, output_dir):
-    policy_files = os.listdir(policies_dir)
+
+    policy_files = []
+    for p in policies_dir:
+        policy_files += [os.path.abspath(os.path.join(p,f)) for f in os.listdir(p)]
+
     for policy_file in policy_files:
         if "yml" in policy_file or "log" in policy_file:
-            shutil.copy(os.path.join(policies_dir, policy_file), output_dir)
+            shutil.copy(policy_file, output_dir)
 
-    entities_source = os.path.join(entities_dir, policy + ".entities.yml")
+    # look for exact entity file match for policy
+    entities_sources = []
+    for e in entities_dir:
+        ef = os.path.join(e, policy + ".entities.yml")
+        if os.path.isfile(ef):
+            shutil.copy(ef, output_dir)
+            policy_entities_found = True
+
     entities_dest = os.path.join(output_dir, policy + ".entities.yml")
 
     # special handling for composite policies
@@ -40,11 +51,10 @@ def copyPolicyYaml(policy, policies_dir, entities_dir, output_dir):
     policy_parts = policy.split(".")[-1].split("-")
     policy_prefix = policy.rsplit(".", 1)[0] + "."
 
-    if os.path.isfile(entities_source):
-        shutil.copy(entities_source, output_dir)
+    policy_entities_found = False
 
     # build composite entities for composite policy w.o existing entities
-    elif (len(policy_parts) != 1):
+    if len(policy_parts) != 1 and not policy_entities_found:
 
         ents = []
         with open(entities_dest, 'w') as comp_ents:
@@ -62,14 +72,30 @@ def copyPolicyYaml(policy, policies_dir, entities_dir, output_dir):
             if ents:
                 yaml.dump_all([ents], comp_ents)
 
+    # look for empty entities file.
     if not os.path.isfile(entities_dest):
-        shutil.copyfile(os.path.join(entities_dir, "empty.entities.yml"), entities_dest)
+        for e in entities_dir:
+            for ee in [os.path.abspath(os.path.join(e,f)) for f in os.listdir(e)]:
+                if "empty.entities.yml" in ee:
+                    shutil.copyfile(ee, entities_dest)
+
+    if not os.path.isfile(entities_dest):
+        return False
+
+    return True
+
 
         
 def runPolicyTool(policy, policies_dir, entities_dir, output_dir, debug):
     policy_output_dir = os.path.join(output_dir, "engine", "policy")
     policy_tool_cmd = "policy-tool"
-    policy_tool_args = ["-t", entities_dir, "-m", policies_dir, "-o", policy_output_dir, policy]
+
+    policy_tool_args = []
+    for e in entities_dir:
+        policy_tool_args += ["-t", e]
+    for p in policies_dir:
+        policy_tool_args += ["-m", p]
+    policy_tool_args += ["-o", policy_output_dir, policy]
 
     if debug is True:
         policy_tool_args.insert(0, "-d")
@@ -117,15 +143,26 @@ def main():
     parser.add_argument("-d", "--debug", action="store_true", help='''
     Enable debug logging
     ''')
+    parser.add_argument("-s", "--source", type=lambda s: s.split(','), help='''
+    List directories to search for policy sources (absolute paths, comma separated). 
+    The list will implicitly include ISP_PREFIX/sources/policies. 
+    ''')
 
     args = parser.parse_args()
 
     isp_prefix = isp_utils.getIspPrefix()
-    policies_dir = os.path.join(isp_prefix, "sources", "policies")
+
     engine_dir = os.path.join(isp_prefix, "sources", "policy-engine")
     policy_out_dir = os.path.join(engine_dir, "policy")
     soc_cfg_path = os.path.join(engine_dir, "soc_cfg")
-    entities_dir = os.path.join(policies_dir, "entities")
+
+    policies_dir = [os.path.join(isp_prefix, "sources", "policies")]
+    if args.source != None:
+        policies_dir = [os.path.abspath(s) for s in args.source] + policies_dir
+
+    entities_dir = []
+    for p in policies_dir:
+        entities_dir = entities_dir + [os.path.join(p, "entities")]
 
     base_output_dir = os.getcwd()
 
@@ -144,7 +181,11 @@ def main():
     isp_utils.doMkDir(output_dir)
 
     copyEngineSources(engine_dir, output_dir)
-    copyPolicyYaml(args.policy, policies_dir, entities_dir, output_dir)
+
+    if copyPolicyYaml(args.policy, policies_dir, entities_dir, output_dir) is False:
+        print("Faild to locate or generate appropriate entities file")
+        sys.exit(1)
+        
     if runPolicyTool(args.policy, policies_dir, entities_dir, output_dir, args.debug) is False:
         print("Failed to run policy tool")
         sys.exit(1)
