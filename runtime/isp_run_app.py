@@ -116,12 +116,11 @@ def main():
         policy_name = args.policy
 
     policy_full_name = isp_utils.getPolicyFullName(policy_name, args.runtime)
-    if os.path.isdir(policy_name):
-        policy_full_name = os.path.abspath(policy_name)
-        policy_name = os.path.basename(policy_full_name)
-
     kernels_dir = os.path.join(isp_utils.getIspPrefix(), "kernels")
     policy_dir = os.path.join(kernels_dir, policy_full_name)
+    if os.path.isdir(policy_name):
+        policy_dir = os.path.abspath(policy_name)
+        policy_name = os.path.basename(policy_dir)
 
     exe_name = os.path.basename(args.exe_path)
     exe_full_path = os.path.abspath(args.exe_path)
@@ -134,7 +133,7 @@ def main():
     if args.suffix:
         run_dir = run_dir + "-" + args.suffix
 
-    soc_path = os.path.join(policy_dir, "soc_cfg", "hifive_e_cfg.yml")
+    soc_path = os.path.join(isp_utils.getIspPrefix(), "sources", "policy-engine", "soc_cfg", "hifive_e_cfg.yml")
     if args.soc is not None:
         soc_path = os.path.abspath(args.soc)
 
