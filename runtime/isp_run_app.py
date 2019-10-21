@@ -62,6 +62,9 @@ def main():
     parser.add_argument("-t", "--tag-only", action="store_true", help='''
     Run the tagging tools without running the application
     ''')
+    parser.add_argument("-T", "--tagfile", default=None, help='''
+    Path of tag file to use rather than generating it based on policy
+    ''')
     parser.add_argument("-C", "--rule-cache-name", type=str, default="", help='''
     Name of the rule cache
     ''')
@@ -127,6 +130,7 @@ def main():
     exe_full_path = os.path.abspath(args.exe_path)
     run_dir = os.path.join(output_dir,
                            "isp-run-{}-{}".format(exe_name, policy_name))
+
     if args.rule_cache_name != "":
         run_dir = run_dir + "-{}-{}".format(args.rule_cache_name,
                                             args.rule_cache_size)
@@ -154,6 +158,7 @@ def main():
                             (args.rule_cache_name, args.rule_cache_size),
                             args.gdb,
                             args.tag_only,
+                            args.tagfile,
                             soc_path,
                             use_validator,
                             args.extra)

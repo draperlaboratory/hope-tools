@@ -31,7 +31,7 @@ logger = logging.getLogger()
 #  tag_only - run the tagging tools without running the simulator
 #  extra - extra command line arguments to the simulator
 
-def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, soc_cfg, use_validator, extra):
+def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, tagfile, soc_cfg, use_validator, extra):
     exe_name = os.path.basename(exe_path)
 
     if not os.path.isfile(exe_path):
@@ -45,7 +45,7 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
     doMkDir(run_dir)
 
     if "stock_" not in runtime and use_validator == True:
-        doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg)
+        doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg, tagfile)
         doEntitiesFile(run_dir, exe_name)
 
         if tag_only is True:
@@ -79,11 +79,14 @@ def doEntitiesFile(run_dir, name):
         open(filename, "a").close()
 
 
-def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg):
+def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg, tagfile):
     rule_cache_name = rule_cache[0]
     rule_cache_size = rule_cache[1]
 
     logger.info("Using soc_cfg file: {}".format(soc_cfg))
+
+    if tagfile == None:
+        tagfile = os.path.join(run_dir, "bininfo", exe_name + ".taginfo")
 
     validatorCfg =  """\
 ---
@@ -91,7 +94,7 @@ def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg):
    tags_file: {tagfile}
    soc_cfg_path: {soc_cfg}
 """.format(policyDir=policy_dir,
-           tagfile=os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
+           tagfile=os.path.abspath(tagfile),
            soc_cfg=soc_cfg)
 
     if rule_cache_name != "":
