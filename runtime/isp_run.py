@@ -53,7 +53,7 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
 
     sim_module = __import__("isp_" + sim)
     ret_val = sim_module.runSim(exe_path, run_dir, policy_dir, runtime,
-                                gdb, soc_cfg, extra, use_validator)
+                                gdb, tagfile, soc_cfg, extra, use_validator)
 
     return ret_val
 

@@ -121,7 +121,7 @@ def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, runtime, use
 
 
 def runSim(exe_path, run_dir, policy_dir, runtime,
-           gdb_port, soc_cfg, extra, use_validator=True):
+           gdb_port, tagfile, soc_cfg, extra, use_validator=True):
     global run_cmd
     global uart_log_file
     global status_log_file
@@ -131,8 +131,10 @@ def runSim(exe_path, run_dir, policy_dir, runtime,
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'stock-tools','bin','qemu-system-riscv32')
     else:
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'bin','qemu-system-riscv32')
-        if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir) is False:
-            return isp_utils.retVals.TAG_FAIL
+
+        if tagfile is None:
+            if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir) is False:
+                return isp_utils.retVals.TAG_FAIL
 
     try:
         logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
