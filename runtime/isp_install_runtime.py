@@ -60,8 +60,6 @@ def doInstall(build_dir, template_dir, runtime):
 
     shutil.copy(os.path.join(template_dir, "isp_utils.h"),
                 os.path.join(runtime_dir, "isp_utils.h"))
-    shutil.copy(os.path.join(template_dir, "mem.h"),
-                os.path.join(runtime_dir, "mem.h"))
 
     if "frtos" == runtime:
         frtos_dir = os.path.join(runtime_dir, "frtos")
@@ -78,12 +76,20 @@ def doInstall(build_dir, template_dir, runtime):
         shutil.copy(os.path.join(template_dir, "sel4.mk"),
                     os.path.join(build_dir, "isp-runtime-sel4.mk"))
 
-    elif "bare" == runtime:
-        shutil.copy(os.path.join(template_dir, "bare.c"),
+    elif "hifive" == runtime:
+        shutil.copy(os.path.join(template_dir, "hifive.c"),
                     os.path.join(runtime_dir, "bare.c"))
         shutil.copy(os.path.join(template_dir, "bare.mk"),
                     os.path.join(build_dir, "isp-runtime-bare.mk"))
         shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "hifive_bsp"),
+                        os.path.join(runtime_dir, "bsp"))
+
+    elif "vcu118" == runtime:
+        shutil.copy(os.path.join(template_dir, "hifive.c"),
+                    os.path.join(runtime_dir, "bare.c"))
+        shutil.copy(os.path.join(template_dir, "vcu118.mk"),
+                    os.path.join(build_dir, "isp-runtime-bare.mk"))
+        shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "vcu118_bsp"),
                         os.path.join(runtime_dir, "bsp"))
 
     elif "stock_frtos" == runtime:
@@ -119,7 +125,7 @@ def main():
     Install ISP runtime into standalone C project
     ''')
     parser.add_argument("runtime", type=str, help='''
-    Currently supported: frtos, sel4, bare (bare metal) (default), stock_frtos, stock_sel4, stock_bare
+    Currently supported: frtos, sel4, hifive, vcu118, stock_frtos, stock_sel4, stock_bare
     ''')
     parser.add_argument("-b", "--build-dir", type=str, default=".", help='''
     Directory containing the Makefile for the main executable.
