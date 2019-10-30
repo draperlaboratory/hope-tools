@@ -3,19 +3,26 @@
 #include "platform.h"
 #include "isp_utils.h"
 
-uint32_t get_usec_time()
+#define SIFIVE_TEST_ADDR 0x100000
+
+#define SIFIVE_TEST_FAIL 0x3333
+#define SIFIVE_TEST_PASS 0x5555
+
+extern int isp_main(void);
+
+void isp_test_device_pass(void)
 {
-  return (uint32_t)get_timer_value();
+  volatile uint32_t *test_device = SIFIVE_TEST_ADDR;
+  *test_device = SIFIVE_TEST_PASS;
 }
 
-uint32_t get_inst_ret()
+void isp_test_device_fail(void)
 {
-  uint64_t instret;
-  asm volatile ("csrr %0, 0xc02 " : "=r"(instret));
-  return instret;
+  volatile uint32_t *test_device = SIFIVE_TEST_ADDR;
+  *test_device = SIFIVE_TEST_FAIL;
 }
 
-uint32_t uiPortGetWallTimestampUs()
+uint32_t isp_get_time_usec()
 {
   return (uint32_t)get_timer_value();
 }
