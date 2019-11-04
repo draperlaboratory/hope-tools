@@ -54,7 +54,7 @@ POLICY_ENGINE_DIR = $(SYMLINK_DIR)/policy-engine/
 .PHONY: all install clean uninstall kernels symlinks install-isp-scripts install-gdb-scripts install-runtime
 all: $(ISP_SCRIPTS)
 
-install: install-runtime install-isp-scripts install-gdb-scripts install-modules install-stock-tools install-sel4-template $(VENV_DONE) $(SYMLINK_DSTS)
+install: install-runtime install-isp-scripts install-gdb-scripts install-modules $(VENV_DONE) $(SYMLINK_DSTS)
 
 install-runtime:
 	mkdir -p $(RUNTIME_DIR)
