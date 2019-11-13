@@ -64,7 +64,7 @@ documentation:
 	$(MAKE) -C documentation
 
 test-bare:
-	$(MAKE) -C ../policies/policy_tests bare
+	$(MAKE) -C ../policies/policy_tests bare-qemu
 
 test-frtos:
 	$(MAKE) -C ../policies/policy_tests frtos
