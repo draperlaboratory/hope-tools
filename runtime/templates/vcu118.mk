@@ -35,11 +35,15 @@ ISP_LDFLAGS			 := -T $(BSP_BASE)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K
 ISP_LDFLAGS			 += -Wl,--wrap=isatty
 ISP_LDFLAGS      += -Wl,--wrap=printf
 ISP_LDFLAGS      += -Wl,--wrap=puts
+ISP_LDFLAGS      += -Wl,--wrap=read
 ISP_LDFLAGS      += -Wl,--wrap=write
 ISP_LDFLAGS      += -Wl,--wrap=malloc
 ISP_LDFLAGS      += -Wl,--wrap=free
 ISP_LDFLAGS 		 += -Wl,--undefined=pvPortMalloc
 ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
+
+ISP_LDFLAGS      += -lvcu118 -L$(BSP_BASE)
+ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
 
 all:
 
