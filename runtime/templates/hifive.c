@@ -8,17 +8,15 @@
 #define SIFIVE_TEST_FAIL 0x3333
 #define SIFIVE_TEST_PASS 0x5555
 
-extern int isp_main(void);
-
 void isp_test_device_pass(void)
 {
-  volatile uint32_t *test_device = SIFIVE_TEST_ADDR;
+  volatile uint32_t *test_device = (uint32_t *)SIFIVE_TEST_ADDR;
   *test_device = SIFIVE_TEST_PASS;
 }
 
 void isp_test_device_fail(void)
 {
-  volatile uint32_t *test_device = SIFIVE_TEST_ADDR;
+  volatile uint32_t *test_device = (uint32_t *)SIFIVE_TEST_ADDR;
   *test_device = SIFIVE_TEST_FAIL;
 }
 
@@ -43,9 +41,3 @@ int t_printf(const char *s, ...)
   return 0;
 }
 
-int main(void)
-{
-  isp_main();
-
-  return 0;
-}

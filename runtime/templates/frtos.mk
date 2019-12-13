@@ -17,13 +17,29 @@ ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedo
 ISP_INCLUDES += -I$(ISP_PREFIX)/riscv32-unknown-elf/include
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
+ISP_HEADERS      += $(wildcard $(ISP_RUNTIME)/*.h)
+ISP_C_SRCS       += $(wildcard $(ISP_RUNTIME)/*.c)
+ISP_ASM_SRCS     += $(wildcard $(ISP_RUNTIME)/*.S)
+
+ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
+ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
+
+ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
+ISP_LDFLAGS      += -lfreertos -L$(FREERTOS_BUILD_DIR)
+
+LIBISP           := $(ISP_RUNTIME)/libisp.a
+
 MALLOC_VERSION ?= heap_2
 
 ifeq ($(MALLOC_VERSION), heap_2)
-ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos.a
+LIBFREERTOS := $(FREERTOS_BUILD_DIR)/libfreertos.a
 else
-ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos-$(MALLOC_VERSION).a
+LIBFREERTOS := $(FREERTOS_BUILD_DIR)/libfreertos-$(MALLOC_VERSION).a
 endif
+
+LIBISP := $(ISP_RUNTIME)/libisp.a
+ISP_LIBS := $(LIBFREERTOS)
+ISP_LIBS += $(LIBISP)
 
 RISCV_PATH    ?= $(ISP_PREFIX)
 RISCV_CLANG   ?= $(abspath $(RISCV_PATH)/bin/clang)
@@ -36,17 +52,19 @@ CC=$(RISCV_CLANG)
 
 all:
 
-$(ISP_LIBS):
+$(LIBFREERTOS):
 	@echo $(MALLOC_VERSION)
 ifeq ($(MALLOC_VERSION), heap_2)
-	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) clean-libfreertos-objs
 	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) lib
 else
-	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) clean-libfreertos-objs
 	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) build/libfreertos-$(MALLOC_VERSION).a
 endif
 
+$(LIBISP): $(ISP_OBJECTS)
+	$(RISCV_AR) rcs $@ $(ISP_OBJECTS)
+
+$(ISP_RUNTIME)/%.o: $(ISP_RUNTIME)/%.c
+	$(CC) $(ISP_CFLAGS) $(ISP_INCLUDES) -c $< -o $@
+
 .PHONY: isp-runtime-common
 isp-runtime-common: $(ISP_LIBS) $(ISP_OBJECTS)
-
-include $(FREERTOS_RVDEMO_DIR)/BuildEnvironment.mk

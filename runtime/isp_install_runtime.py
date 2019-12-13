@@ -63,13 +63,17 @@ def doInstall(build_dir, template_dir, runtime, sim):
 
     if "frtos" == runtime:
         if "qemu" == sim:
-            frtos_dir = os.path.join(runtime_dir, "frtos")
-            isp_utils.doMkDir(frtos_dir)
+            shutil.copy(os.path.join(template_dir, "hifive.c"),
+                        os.path.join(runtime_dir, "hifive.c"))
+            shutil.copy(os.path.join(template_dir, "frtos.c"),
+                        os.path.join(runtime_dir, "frtos.c"))
             shutil.copy(os.path.join(template_dir, "frtos.mk"),
                         os.path.join(build_dir, "isp-runtime-frtos.mk"))
         if "stock_qemu" == sim:
-            frtos_dir = os.path.join(runtime_dir, "stock_frtos")
-            isp_utils.doMkDir(frtos_dir)
+            shutil.copy(os.path.join(template_dir, "hifive.c"),
+                        os.path.join(runtime_dir, "hifive.c"))
+            shutil.copy(os.path.join(template_dir, "frtos.c"),
+                        os.path.join(runtime_dir, "frtos.c"))
             shutil.copy(os.path.join(template_dir, "stock_frtos.mk"),
                         os.path.join(build_dir, "isp-runtime-stock_frtos.mk"))
         return retVals.SUCCESS
@@ -77,12 +81,16 @@ def doInstall(build_dir, template_dir, runtime, sim):
     if "bare" == runtime:
         if "qemu" == sim:
             shutil.copy(os.path.join(template_dir, "hifive.c"),
+                        os.path.join(runtime_dir, "hifive.c"))
+            shutil.copy(os.path.join(template_dir, "bare.c"),
                         os.path.join(runtime_dir, "bare.c"))
             shutil.copy(os.path.join(template_dir, "hifive.mk"),
                         os.path.join(build_dir, "isp-runtime-bare.mk"))
             shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "hifive_bsp"),
                             os.path.join(runtime_dir, "bsp"))
         if "stock_qemu" == sim:
+            shutil.copy(os.path.join(template_dir, "hifive.c"),
+                        os.path.join(runtime_dir, "hifive.c"))
             shutil.copy(os.path.join(template_dir, "bare.c"),
                         os.path.join(runtime_dir, "bare.c"))
             shutil.copy(os.path.join(template_dir, "stock_bare.mk"),
@@ -91,6 +99,8 @@ def doInstall(build_dir, template_dir, runtime, sim):
                             os.path.join(runtime_dir, "bsp"))
         if "vcu118" == sim:
             shutil.copy(os.path.join(template_dir, "vcu118.c"),
+                        os.path.join(runtime_dir, "vcu118.c"))
+            shutil.copy(os.path.join(template_dir, "bare.c"),
                         os.path.join(runtime_dir, "bare.c"))
             shutil.copy(os.path.join(template_dir, "vcu118.mk"),
                         os.path.join(build_dir, "isp-runtime-bare.mk"))

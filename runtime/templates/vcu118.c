@@ -2,8 +2,6 @@
 #include <stdarg.h>
 #include "isp_utils.h"
 
-extern int isp_main(void);
-
 void isp_test_device_pass(void)
 {
   return;
@@ -30,9 +28,3 @@ int t_printf(const char *s, ...)
   return 0;
 }
 
-int main(void)
-{
-  isp_main();
-
-  return 0;
-}
