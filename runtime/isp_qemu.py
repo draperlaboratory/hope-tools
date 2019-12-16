@@ -127,6 +127,12 @@ def runSim(exe_path, run_dir, policy_dir, runtime,
     global status_log_file
     global sim_log_file
 
+    if soc_cfg is None:
+        soc_cfg = os.path.join(policy_dir, "soc_cfg", "hifive_e_cfg.yml")
+    else:
+        soc_cfg = os.path.realpath(soc_cfg)
+    logger.debug("Using SOC config {}".format(soc_cfg))
+
     if use_validator == False:
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'stock-tools','bin','qemu-system-riscv32')
     else:

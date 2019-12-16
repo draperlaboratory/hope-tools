@@ -12,7 +12,6 @@ import logging
 from isp_utils import *
 
 # backend helper to run an ISP simulation with a binary & kernel
-# TODO: runFPGA support
 
 logger = logging.getLogger()
 
@@ -82,8 +81,6 @@ def doEntitiesFile(run_dir, name):
 def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg, tagfile):
     rule_cache_name = rule_cache[0]
     rule_cache_size = rule_cache[1]
-
-    logger.info("Using soc_cfg file: {}".format(soc_cfg))
 
     if tagfile == None:
         tagfile = os.path.join(run_dir, "bininfo", exe_name + ".taginfo")
