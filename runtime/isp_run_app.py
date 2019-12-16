@@ -78,7 +78,7 @@ def main():
     Extra suffix to add to the test directory name
     ''')
     parser.add_argument("--soc", type=str, help='''
-    SOC configuration YAML file (default is <policy_dir>/soc_cfg/hifive_e_cfg.yml)
+    SOC configuration YAML file
     ''')
     parser.add_argument("-N", "--no_validator", action="store_true", help='''
     Do not use the validator and run the stock version of the simulator (which
@@ -138,10 +138,6 @@ def main():
     if args.suffix:
         run_dir = run_dir + "-" + args.suffix
 
-    soc_path = os.path.join(policy_dir, "soc_cfg", "hifive_e_cfg.yml")
-    if args.soc is not None:
-        soc_path = os.path.abspath(args.soc)
-
     use_validator = True
     if args.no_validator == True:
         use_validator = False
@@ -159,7 +155,7 @@ def main():
                             args.gdb,
                             args.tag_only,
                             args.tagfile,
-                            soc_path,
+                            args.soc,
                             use_validator,
                             args.extra)
 
