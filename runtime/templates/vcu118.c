@@ -2,10 +2,10 @@
 #include <stdarg.h>
 #include "isp_utils.h"
 
-#define VCU118_TEST_ADDR 0xa0000000
+#define VCU118_TEST_ADDR 0x50000000
 
-#define VCU118_TEST_FAIL 0x0
-#define VCU118_TEST_PASS 0x1
+#define VCU118_TEST_FAIL 0x3333
+#define VCU118_TEST_PASS 0x5555
 
 void isp_test_device_pass(void)
 {
