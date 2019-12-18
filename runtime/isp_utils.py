@@ -10,7 +10,8 @@ class retVals:
     NO_BIN = "No binary found to run"
     NO_POLICY = "No policy found"
     TAG_FAIL = "Tagging tools did not produce expected output"
-    SUCCESS   = "Simulator run successfully"
+    SUCCESS = "Simulator run successfully"
+    FAILURE = "Simulator failed to run to completion"
 
 
 def doMkDir(dir):
