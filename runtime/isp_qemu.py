@@ -52,6 +52,7 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
 
     return opts
 
+
 def qemuEnv(use_validator, policy_dir):
     env = {"PATH": os.environ["PATH"]}
 
@@ -59,6 +60,35 @@ def qemuEnv(use_validator, policy_dir):
         env["LD_LIBRARY_PATH"] = policy_dir
 
     return env
+
+
+def doValidatorCfg(policy_dir, run_dir, exe_path, rule_cache, soc_cfg, tagfile):
+    exe_name = os.path.basename(exe_path)
+    rule_cache_name = rule_cache[0]
+    rule_cache_size = rule_cache[1]
+
+    if tagfile == None:
+        tagfile = os.path.join(run_dir, "bininfo", exe_name + ".taginfo")
+
+    validatorCfg =  """\
+---
+   policy_dir: {policyDir}
+   tags_file: {tagfile}
+   soc_cfg_path: {soc_cfg}
+""".format(policyDir=policy_dir,
+           tagfile=os.path.abspath(tagfile),
+           soc_cfg=soc_cfg)
+
+    if rule_cache_name != "":
+        validatorCfg += """\
+   rule_cache:
+      name: {rule_cache_name}
+      capacity: {rule_cache_size}
+        """.format(rule_cache_name=rule_cache_name, rule_cache_size=rule_cache_size)
+
+    with open(os.path.join(run_dir, "validator_cfg.yml"), 'w') as f:
+        f.write(validatorCfg)
+
 
 def watchdog():
     global process_exit
@@ -69,6 +99,7 @@ def watchdog():
             return
     logger.warn("Watchdog timeout")
     process_exit = True
+
 
 def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True):
     global process_exit
@@ -110,6 +141,7 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True
         logger.error("QEMU run failed for exception {}.\n".format(e))
         raise
 
+
 def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, runtime, use_validator):
     sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
     opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port)
@@ -120,7 +152,7 @@ def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, runtime, use
     rc.wait()
 
 
-def runSim(exe_path, run_dir, policy_dir, runtime,
+def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
            gdb_port, tagfile, soc_cfg, extra, use_validator=True):
     global run_cmd
     global uart_log_file
@@ -137,6 +169,8 @@ def runSim(exe_path, run_dir, policy_dir, runtime,
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'stock-tools','bin','qemu-system-riscv32')
     else:
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'bin','qemu-system-riscv32')
+
+        doValidatorCfg(policy_dir, run_dir, exe_path, rule_cache, soc_cfg, tagfile)
 
         if tagfile is None:
             if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir) is False:
