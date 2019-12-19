@@ -44,14 +44,10 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
     doMkDir(run_dir)
 
     if "stock_" not in runtime and use_validator == True:
-        doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg, tagfile)
         doEntitiesFile(run_dir, exe_name)
 
-        if tag_only is True:
-            return retVals.SUCCESS
-
     sim_module = __import__("isp_" + sim)
-    ret_val = sim_module.runSim(exe_path, run_dir, policy_dir, runtime,
+    ret_val = sim_module.runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
                                 gdb, tagfile, soc_cfg, extra, use_validator)
 
     return ret_val
@@ -76,30 +72,3 @@ def doEntitiesFile(run_dir, name):
     filename = os.path.join(run_dir, (name + ".entities.yml"))
     if os.path.exists(filename) is False:
         open(filename, "a").close()
-
-
-def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg, tagfile):
-    rule_cache_name = rule_cache[0]
-    rule_cache_size = rule_cache[1]
-
-    if tagfile == None:
-        tagfile = os.path.join(run_dir, "bininfo", exe_name + ".taginfo")
-
-    validatorCfg =  """\
----
-   policy_dir: {policyDir}
-   tags_file: {tagfile}
-   soc_cfg_path: {soc_cfg}
-""".format(policyDir=policy_dir,
-           tagfile=os.path.abspath(tagfile),
-           soc_cfg=soc_cfg)
-
-    if rule_cache_name != "":
-        validatorCfg += """\
-   rule_cache:
-      name: {rule_cache_name}
-      capacity: {rule_cache_size}
-        """.format(rule_cache_name=rule_cache_name, rule_cache_size=rule_cache_size)
-
-    with open(os.path.join(run_dir, "validator_cfg.yml"), 'w') as f:
-        f.write(validatorCfg)

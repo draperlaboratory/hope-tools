@@ -108,7 +108,7 @@ def launchRenode(run_dir):
             pass
 
 
-def runSim(exe_path, run_dir, policy_dir, runtime,
+def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
            gdb_port, extra, soc_cfg, use_validator=True):
     global process_exit
     global connecting
