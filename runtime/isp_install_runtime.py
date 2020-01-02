@@ -29,12 +29,18 @@ class retVals:
 #  $(ISP_CLEAN) removed in the clean target
 #  main() renamed to isp_main()
 
+bare_bsp = {
+    "qemu": "hifive_bsp",
+    "vcu118": "vcu118_bsp"
+}
+
 def getTemplatesDir():
     isp_prefix = isp_utils.getIspPrefix()
     return os.path.join(isp_prefix, "sources",
                                     "tools",
                                     "runtime",
                                     "templates")
+
 
 def sel4_setup_source(build_dir, template_dir):
     sel4_prefix_source_dir = os.path.join(isp_utils.getIspPrefix(), "hope-seL4-app-template")
@@ -46,7 +52,7 @@ def sel4_setup_source(build_dir, template_dir):
         logging.warn("WARNING - seL4 copy failed with message: {}".format(e))
 
 
-def doInstall(build_dir, template_dir, runtime, sim):
+def doInstall(build_dir, template_dir, runtime, sim, stock):
     if not os.path.isdir(build_dir):
         return retVals.NO_TEST
 
@@ -61,74 +67,35 @@ def doInstall(build_dir, template_dir, runtime, sim):
     shutil.copy(os.path.join(template_dir, "isp_utils.h"),
                 os.path.join(runtime_dir, "isp_utils.h"))
 
-    if "frtos" == runtime:
-        if "qemu" == sim:
-            shutil.copy(os.path.join(template_dir, "hifive.c"),
-                        os.path.join(runtime_dir, "hifive.c"))
-            shutil.copy(os.path.join(template_dir, "frtos.c"),
-                        os.path.join(runtime_dir, "frtos.c"))
-            shutil.copy(os.path.join(template_dir, "frtos.mk"),
-                        os.path.join(build_dir, "isp-runtime-frtos.mk"))
-        if "stock_qemu" == sim:
-            shutil.copy(os.path.join(template_dir, "hifive.c"),
-                        os.path.join(runtime_dir, "hifive.c"))
-            shutil.copy(os.path.join(template_dir, "frtos.c"),
-                        os.path.join(runtime_dir, "frtos.c"))
-            shutil.copy(os.path.join(template_dir, "stock_frtos.mk"),
-                        os.path.join(build_dir, "isp-runtime-stock_frtos.mk"))
-        return retVals.SUCCESS
+    runtime_main_c = os.path.join(template_dir, (runtime + "_main.c"))   
+    sim_utils_c = os.path.join(template_dir, sim, "isp_utils.c")
+    
+    makefile_path = os.path.join(template_dir, sim)
+    if stock:
+        makefile_path = os.path.join(makefile_path, "stock")
 
-    if "bare" == runtime:
-        if "qemu" == sim:
-            shutil.copy(os.path.join(template_dir, "hifive.c"),
-                        os.path.join(runtime_dir, "hifive.c"))
-            shutil.copy(os.path.join(template_dir, "bare.c"),
-                        os.path.join(runtime_dir, "bare.c"))
-            shutil.copy(os.path.join(template_dir, "hifive.mk"),
-                        os.path.join(build_dir, "isp-runtime-bare.mk"))
-            shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "hifive_bsp"),
-                            os.path.join(runtime_dir, "bsp"))
-        if "stock_qemu" == sim:
-            shutil.copy(os.path.join(template_dir, "hifive.c"),
-                        os.path.join(runtime_dir, "hifive.c"))
-            shutil.copy(os.path.join(template_dir, "bare.c"),
-                        os.path.join(runtime_dir, "bare.c"))
-            shutil.copy(os.path.join(template_dir, "stock_bare.mk"),
-                        os.path.join(build_dir, "isp-runtime-stock_bare.mk"))
-            shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "hifive_bsp"),
-                            os.path.join(runtime_dir, "bsp"))
-        if "vcu118" == sim:
-            shutil.copy(os.path.join(template_dir, "vcu118.c"),
-                        os.path.join(runtime_dir, "vcu118.c"))
-            shutil.copy(os.path.join(template_dir, "bare.c"),
-                        os.path.join(runtime_dir, "bare.c"))
-            shutil.copy(os.path.join(template_dir, "vcu118.mk"),
-                        os.path.join(build_dir, "isp-runtime-bare.mk"))
-            shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "vcu118_bsp"),
-                            os.path.join(runtime_dir, "bsp"))
-        return retVals.SUCCESS
+    makefile = os.path.join(makefile_path, (runtime + ".mk"))
 
-    elif "sel4" == runtime:
-        if "qemu" == sim:
+    try:
+        shutil.copy(runtime_main_c, runtime_dir)
+        shutil.copy(sim_utils_c, runtime_dir)
+        shutil.copy(makefile, os.path.join(build_dir, ("isp-runtime-" + runtime + ".mk")))
+
+        if "bare" == runtime:
+            shutil.copytree(os.path.join(isp_utils.getIspPrefix(), bare_bsp[sim]),
+                            os.path.join(runtime_dir, "bsp"))
+
+        if "sel4" == runtime:
             sel4_setup_source(build_dir, template_dir)
-
             sel4_dir = os.path.join(runtime_dir, "sel4")
+            if stock:
+                sel4_dir = os.path.join(runtime_dir, "stock_sel4")
             isp_utils.doMkDir(sel4_dir)
+    except:
+        logging.error("Runtime {} is incompatible with sim {}".format(runtime, sim))
+        return retVals.NO_RUNTIME
 
-            shutil.copy(os.path.join(template_dir, "sel4.mk"),
-                        os.path.join(build_dir, "isp-runtime-sel4.mk"))
-        if "stock_qemu" == sim:
-            sel4_setup_source(build_dir, template_dir)
-
-            sel4_dir = os.path.join(runtime_dir, "stock_sel4")
-            isp_utils.doMkDir(sel4_dir)
-            shutil.copy(os.path.join(template_dir, "stock_sel4.mk"),
-                        os.path.join(build_dir, "isp-runtime-stock_sel4.mk"))
-
-        return retVals.SUCCESS
-
-    logging.error("Runtime {} is incompatible with sim {}".format(runtime, sim))
-    return retVals.NO_RUNTIME
+    return retVals.SUCCESS
 
 
 def main():
@@ -145,6 +112,9 @@ def main():
     Directory containing the Makefile for the main executable.
     Default is current working directory.
     ''')
+    parser.add_argument("-s", "--stock", action="store_true", help='''
+    Use a stock build configuration
+    ''')
     parser.add_argument("--disable-colors", action="store_true", help='''
     Disable colored logging
     ''')
@@ -159,10 +129,11 @@ def main():
     result = doInstall(build_dir_full,
                        getTemplatesDir(),
                        args.runtime,
-                       args.sim)
+                       args.sim,
+                       args.stock)
 
     if result is not retVals.SUCCESS:
-        logger.error("Failed to build application: {}".format(result))
+        logger.error("Failed to install runtime: {}".format(result))
 
 
 if __name__ == "__main__":

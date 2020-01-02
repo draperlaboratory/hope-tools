@@ -1,6 +1,6 @@
 ISP_PREFIX ?= $(HOME)/.local/isp/
 
-ISP_RUNTIME := $(basename $(filter /%/isp-runtime-stock_frtos.mk, $(abspath $(MAKEFILE_LIST))))
+ISP_RUNTIME := $(basename $(filter /%/isp-runtime-frtos.mk, $(abspath $(MAKEFILE_LIST))))
 FREERTOS_DIR := $(ISP_PREFIX)/FreeRTOS
 FREERTOS_RVDEMO_DIR := $(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio
 SDK_DIR := $(FREERTOS_RVDEMO_DIR)/freedom-e-sdk
