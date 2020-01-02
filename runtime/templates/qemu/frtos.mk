@@ -5,7 +5,9 @@ FREERTOS_DIR := $(ISP_PREFIX)/FreeRTOS
 FREERTOS_INCLUDE_DIR := $(FREERTOS_DIR)/include
 FREERTOS_LIB_DIR := $(FREERTOS_DIR)/lib
 
-include $(FREERTOS_DIR)/BuildEnvironment.mk
+LINKER_SCRIPT := $(FREERTOS_DIR)/build/flash.lds
+
+include $(FREERTOS_DIR)/build/BuildEnvironment.mk
 
 ISP_INCLUDES := -I$(FREERTOS_INCLUDE_DIR)/Source/include
 ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Source/portable/GCC/RISC-V
