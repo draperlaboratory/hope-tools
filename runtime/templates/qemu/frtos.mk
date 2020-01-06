@@ -26,7 +26,7 @@ ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
-ISP_LDFLAGS      += -lfreertos -L$(FREERTOS_LIB_DIR)
+ISP_LDFLAGS      += -lfreertos-hifive -L$(FREERTOS_LIB_DIR)
 
 LIBISP           := $(ISP_RUNTIME)/libisp.a
 LIBFREERTOS 		 := $(FREERTOS_LIB_DIR)/libfreertos.a
