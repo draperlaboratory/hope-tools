@@ -5,16 +5,16 @@ FREERTOS_DIR := $(ISP_PREFIX)/FreeRTOS
 FREERTOS_INCLUDE_DIR := $(FREERTOS_DIR)/include
 FREERTOS_LIB_DIR := $(FREERTOS_DIR)/lib
 
-LINKER_SCRIPT := $(FREERTOS_DIR)/build/flash.lds
+LINKER_SCRIPT := $(FREERTOS_DIR)/build/hifive/flash.lds
 
-include $(FREERTOS_DIR)/build/BuildEnvironment.mk
+include $(FREERTOS_DIR)/build/hifive/BuildEnvironment.mk
 
 ISP_INCLUDES := -I$(FREERTOS_INCLUDE_DIR)/Source/include
 ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Source/portable/GCC/RISC-V
-ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/RISC-V-Qemu-sifive_e-FreedomStudio
-ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/include
-ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env
-ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env/freedom-e300-hifive1
+ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio
+ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/include
+ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env
+ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env/freedom-e300-hifive1
 ISP_INCLUDES += -I$(ISP_PREFIX)/riscv32-unknown-elf/include
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
@@ -25,11 +25,11 @@ ISP_ASM_SRCS     += $(wildcard $(ISP_RUNTIME)/*.S)
 ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 
-ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
-ISP_LDFLAGS      += -lfreertos-hifive -L$(FREERTOS_LIB_DIR)
+ISP_LDFLAGS      += -L$(ISP_RUNTIME) -L$(FREERTOS_LIB_DIR)
+ISP_LDFLAGS      += -Wl,--start-group -lfreertos-hifive -lisp -lc -Wl,--end-group
 
 LIBISP           := $(ISP_RUNTIME)/libisp.a
-LIBFREERTOS 		 := $(FREERTOS_LIB_DIR)/libfreertos.a
+LIBFREERTOS 		 := $(FREERTOS_LIB_DIR)/libfreertos-hifive.a
 
 ISP_LIBS := $(LIBFREERTOS)
 ISP_LIBS += $(LIBISP)
