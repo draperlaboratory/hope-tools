@@ -1,4 +1,6 @@
 coloredlogs==10.0.0
 pyelftools==0.25
+pexpect-serial
+pypathlib
 pyyaml==5.1.2
 yamlordereddictloader==0.4.0
