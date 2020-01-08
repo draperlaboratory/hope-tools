@@ -106,7 +106,7 @@ def main():
     Currently supported: frtos, sel4, bare
     ''')
     parser.add_argument("sim", type=str, help='''
-    Currently supported: qemu, stock_qemu, vcu118
+    Currently supported: qemu, vcu118
     ''')
     parser.add_argument("-b", "--build-dir", type=str, default=".", help='''
     Directory containing the Makefile for the main executable.
