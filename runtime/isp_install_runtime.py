@@ -34,6 +34,10 @@ bare_bsp = {
     "vcu118": "vcu118_bsp"
 }
 
+sim_aliases = {
+    "vcs": "vcu118"
+}
+
 def getTemplatesDir():
     isp_prefix = isp_utils.getIspPrefix()
     return os.path.join(isp_prefix, "sources",
@@ -106,7 +110,7 @@ def main():
     Currently supported: frtos, sel4, bare
     ''')
     parser.add_argument("sim", type=str, help='''
-    Currently supported: qemu, vcu118
+    Currently supported: qemu, vcu118, vcs
     ''')
     parser.add_argument("-b", "--build-dir", type=str, default=".", help='''
     Directory containing the Makefile for the main executable.
@@ -126,10 +130,14 @@ def main():
 
     build_dir_full = os.path.abspath(args.build_dir)
 
+    sim = args.sim
+    if args.sim in sim_aliases:
+        sim = sim_aliases[args.sim]
+
     result = doInstall(build_dir_full,
                        getTemplatesDir(),
                        args.runtime,
-                       args.sim,
+                       sim,
                        args.stock)
 
     if result is not retVals.SUCCESS:
