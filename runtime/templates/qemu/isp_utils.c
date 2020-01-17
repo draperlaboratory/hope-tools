@@ -25,6 +25,12 @@ uint32_t isp_get_time_usec()
   return (uint32_t)get_timer_value();
 }
 
+uint32_t isp_get_timer_freq()
+{
+  return (uint32_t)get_timer_freq();
+}
+
+
 int t_printf(const char *s, ...)
 {
   char buf[128];
