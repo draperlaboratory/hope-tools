@@ -24,6 +24,11 @@ uint32_t isp_get_time_usec()
   return 0;
 }
 
+uint32_t isp_get_timer_freq()
+{
+  return 32768;
+}
+
 int t_printf(const char *s, ...)
 {
   va_list vl;
