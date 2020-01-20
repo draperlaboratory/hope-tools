@@ -102,8 +102,8 @@ def main():
     if args.output == "":
         output_dir = os.getcwd()
 
-    if args.runtime not in ["frtos", "sel4", "bare", "stock_frtos", "stock_sel4", "stock_bare"]:
-        logger.error("Invalid choice of runtime. Valid choices: frtos, sel4, bare, stock_frtos, stock_sel4, stock_bare")
+    if args.runtime not in ["bare64", "frtos64", "frtos", "sel4", "bare", "stock_frtos", "stock_sel4", "stock_bare"]:
+        logger.error("Invalid choice of runtime. Valid choices: frtos, frtos64, sel4, bare, bare64, stock_frtos, stock_sel4, stock_bare")
         return
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
@@ -117,6 +117,11 @@ def main():
         policy_full_name = 'osv.bare.main.none'
     else:
         policy_name = args.policy
+
+    rv64 = False
+    if "64" in args.runtime:
+        logger.info("64-bit Operating Environment")
+        rv64 = True
 
     policy_full_name = isp_utils.getPolicyFullName(policy_name, args.runtime)
     if os.path.isdir(policy_name):
@@ -156,8 +161,9 @@ def main():
                             args.tag_only,
                             args.tagfile,
                             args.soc,
-                            use_validator,
-                            args.extra)
+                            args.extra,
+                            rv64,
+                            use_validator)
 
     if result != isp_run.retVals.SUCCESS:
         logger.error(result)
