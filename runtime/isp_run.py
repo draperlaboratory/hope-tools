@@ -30,7 +30,7 @@ logger = logging.getLogger()
 #  tag_only - run the tagging tools without running the simulator
 #  extra - extra command line arguments to the simulator
 
-def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, tagfile, soc_cfg, use_validator, extra):
+def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, tagfile, soc_cfg, extra, rv64, use_validator):
     exe_name = os.path.basename(exe_path)
 
     if not os.path.isfile(exe_path):
@@ -43,12 +43,16 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
 
     doMkDir(run_dir)
 
+    logger.debug("Doing entities")
+    logger.debug(runtime)
+    logger.debug(use_validator)
     if "stock_" not in runtime and use_validator == True:
+        logger.debug("Doing entities2:  " + run_dir + exe_name)
         doEntitiesFile(run_dir, exe_name)
 
     sim_module = __import__("isp_" + sim)
     ret_val = sim_module.runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
-                                gdb, tagfile, soc_cfg, extra, use_validator)
+                                gdb, tagfile, soc_cfg, extra, rv64, use_validator)
 
     return ret_val
 

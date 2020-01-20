@@ -61,7 +61,7 @@ def setupLogger(level, colors=True):
     return logger
 
 
-def generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=None):
+def generateTagInfo(exe_path, run_dir, policy_dir, rv64, soc_cfg=None):
     policy = os.path.basename(policy_dir).split("-debug")[0]
     exe_name = os.path.basename(exe_path)
     doMkDir(os.path.join(run_dir, "bininfo"))
@@ -73,6 +73,9 @@ def generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=None):
             os.path.join(run_dir, exe_name + ".entities.yml")]
     if soc_cfg is not None:
         args += ["-s", soc_cfg]
+
+    if rv64:
+        args += ["--rv64"]
 
     with open(os.path.join(run_dir, "inits.log"), "w+") as initlog:
         subprocess.Popen(args, stdout=initlog,
@@ -98,11 +101,11 @@ def processExtraArgs(extra):
 
 
 def terminateMessage(runtime):
-    if runtime == "frtos":
+    if runtime == "frtos" or runtime == "frtos64":
         return "Main task has completed with code:"
     if runtime == "sel4":
         return "seL4 root server abort()ed"
-    elif runtime == "bare":
+    elif runtime == "bare" or runtime == "bare64":
         return "Program has exited with code:"
 
     return ""
