@@ -99,7 +99,9 @@ def buildPolicyKernel(policy, policies_dir, entities_dir, output_dir):
     if not os.path.isfile(validator_path):
         return False
 
-    shutil.move(validator_path, output_dir)
+    validator_output_path = output_dir + "/librv32-renode-validator.so"
+
+    shutil.move(validator_path, validator_output_path)
     shutil.rmtree(engine_output_dir)
 
     return True
