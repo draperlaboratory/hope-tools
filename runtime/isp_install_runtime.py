@@ -19,7 +19,8 @@ class retVals:
 # Arguments:
 #  build_dir - path to the build directory. Must contain the user's Makefile
 #  template_dir - path to ISP generic runtime code and template Makefiles
-#  runtime - Currently supported: frtos, sel4, bare (bare metal), stock_frtos, stock_sel4, stock_bare
+#  runtime - Currently supported: frtos, frtos64, sel4, bare (bare metal),
+#            bare64, stock_frtos, stock_sel4, stock_bare
 
 # User must have:
 #  include isp-build.mk in Makefile
@@ -79,13 +80,12 @@ def doInstall(build_dir, template_dir, runtime, sim, stock):
         makefile_path = os.path.join(makefile_path, "stock")
 
     makefile = os.path.join(makefile_path, (runtime + ".mk"))
-
     try:
         shutil.copy(runtime_main_c, runtime_dir)
         shutil.copy(sim_utils_c, runtime_dir)
         shutil.copy(makefile, os.path.join(build_dir, ("isp-runtime-" + runtime + ".mk")))
 
-        if "bare" == runtime:
+        if "bare" == runtime or "bare64" == runtime:
             shutil.copytree(os.path.join(isp_utils.getIspPrefix(), bare_bsp[sim]),
                             os.path.join(runtime_dir, "bsp"))
 
@@ -107,7 +107,7 @@ def main():
     Install ISP runtime into standalone C project
     ''')
     parser.add_argument("runtime", type=str, help='''
-    Currently supported: frtos, sel4, bare
+    Currently supported: frtos, frtos64, sel4, bare, bare64
     ''')
     parser.add_argument("sim", type=str, help='''
     Currently supported: qemu, vcu118, vcs
