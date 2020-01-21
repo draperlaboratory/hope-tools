@@ -19,6 +19,8 @@ PROJECTS += freedom-e-sdk
 PROJECTS += riscv-newlib
 PROJECTS += llvm-project
 PROJECTS += qemu
+PROJECTS += riscv-fesvr
+PROJECTS += riscv-openocd
 
 STOCK_TOOLCHAIN := stock-riscv-gnu-toolchain
 STOCK_TOOLCHAIN += stock-llvm-project
