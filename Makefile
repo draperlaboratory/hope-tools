@@ -71,6 +71,12 @@ test-bare:
 test-frtos:
 	$(MAKE) -C ../policies/policy_tests frtos-qemu
 
+test-bare64:
+	$(MAKE) -C ../policies/policy_tests bare64-qemu
+
+test-frtos64:
+	$(MAKE) -C ../policies/policy_tests frtos64
+
 clean-runtime:
 	$(MAKE) -C runtime clean
 
