@@ -8,7 +8,6 @@ extern volatile uint64_t tohost;
 void write_tohost(uint64_t val)
 {
   tohost = val;
-  while (1);
 }
 
 void tohost_exit(uint64_t val)
