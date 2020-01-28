@@ -27,7 +27,7 @@ void isp_test_device_fail(void)
 
 uint32_t isp_get_time_usec()
 {
-  return 0;
+  return get_current_mtime_usec();
 }
 
 uint32_t isp_get_timer_freq()
