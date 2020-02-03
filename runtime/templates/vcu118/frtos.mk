@@ -15,7 +15,7 @@ ISP_ASM_SRCS     += $(wildcard $(ISP_RUNTIME)/*.S)
 ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 
-ISP_CFLAGS			 := -march=rv32i -mabi=ilp32 -mcmodel=medium
+ISP_CFLAGS			 := -march=rv32im -mabi=ilp32 -mcmodel=medium
 ISP_CFLAGS			 += -Wall -Wextra -O0 -g3 -std=gnu11
 ISP_CFLAGS			 += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_CFLAGS 			 += -Dmalloc\(x\)=pvPortMalloc\(x\) -Dfree\(x\)=vPortFree\(x\)
