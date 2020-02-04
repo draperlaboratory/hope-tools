@@ -45,6 +45,8 @@ ISP_LDFLAGS  		 += -Wl,--gc-sections
 
 ISP_LDFLAGS      += -lfreertos-vcu118 -L$(FREERTOS_LIB_DIR)
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
+ISP_LDFLAGS      += -Wl,--wrap=puts
+ISP_LDFLAGS      += -Wl,--wrap=printf
 
 all:
 
