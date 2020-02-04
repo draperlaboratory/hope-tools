@@ -123,6 +123,8 @@ void isp_main_task(void *argument)
 
 int main(void)
 {
+  prvSetupHardware();
+
 	xTaskCreate(isp_main_task, "Main task", 1000, NULL, 1, &xIspTask);
 
 	vTaskStartScheduler();
