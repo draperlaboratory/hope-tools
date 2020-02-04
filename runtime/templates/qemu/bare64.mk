@@ -21,6 +21,9 @@ CC=$(RISCV_CLANG)
 RISCV_ARCH ?= rv64imafd
 RISCV_ABI ?= lp64d
 
+ISP_CFLAGS += -mcmodel=medany
+ISP_LDFLAGS += -mcmodel=medany
+
 BOARD ?= freedom-e300-hifive1
 LINK_TARGET ?= flash
 
