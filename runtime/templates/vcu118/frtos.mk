@@ -18,6 +18,7 @@ ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 ISP_CFLAGS			 := -march=rv32i -mabi=ilp32 -mcmodel=medium
 ISP_CFLAGS			 += -Wall -Wextra -O0 -g3 -std=gnu11
 ISP_CFLAGS			 += -ffunction-sections -fdata-sections -fno-builtin-printf
+ISP_CFLAGS 			 += -Dmalloc\(x\)=pvPortMalloc\(x\) -Dfree\(x\)=vPortFree\(x\)
 
 ISP_INCLUDES 		 := -I$(FREERTOS_INCLUDE_DIR)/Source/include
 ISP_INCLUDES 		 += -I$(FREERTOS_INCLUDE_DIR)/Source/portable/GCC/RISC-V
