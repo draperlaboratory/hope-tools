@@ -20,6 +20,9 @@ ISP_CFLAGS			 += -Wall -Wextra -O0 -g3 -std=gnu11
 ISP_CFLAGS			 += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_CFLAGS 			 += -Dmalloc\(x\)=pvPortMalloc\(x\) -Dfree\(x\)=vPortFree\(x\)
 
+# flag to initialize hardware if running on FPGA
+ISP_CFLAGS 			 += -DFPGA=1
+
 ISP_INCLUDES 		 := -I$(FREERTOS_INCLUDE_DIR)/Source/include
 ISP_INCLUDES 		 += -I$(FREERTOS_INCLUDE_DIR)/Source/portable/GCC/RISC-V
 ISP_INCLUDES 		 += -I$(FREERTOS_INCLUDE_DIR)/Demo/Common/include
