@@ -35,7 +35,6 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
 	return read_csr(mcycle);
 #else
 	uint32_t cycle_lo, cycle_hi;
-  uint64_t result;
 	asm volatile(
 		"%=:\n\t"
 		"csrr %1, mcycleh\n\t"
@@ -45,7 +44,6 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
 		: "=r"(cycle_lo), "=r"(cycle_hi)
 		: // No inputs.
 		: "t1");
-	 result = (((uint64_t)cycle_hi) << 32) | (uint64_t)cycle_lo;
 
    // XXX: pass back hi/lo to get around unreliable 64-bit intrinsics
    if(result_hi != NULL) {
@@ -54,7 +52,7 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
    if(result_lo != NULL) {
      *result_lo = cycle_lo;
    }
-   return result;
+	 return (((uint64_t)cycle_hi) << 32) | (uint64_t)cycle_lo;
 #endif
 }
 
@@ -69,7 +67,7 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
  */
 uint32_t isp_get_time_usec(void)
 {
-	return (uint32_t)(isp_get_cycle_count() / (CPU_CLOCK_HZ / 1000000));
+	return (uint32_t)(isp_get_cycle_count(NULL, NULL) / (CPU_CLOCK_HZ / 1000000));
 }
 
 uint32_t isp_get_timer_freq()
