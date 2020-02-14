@@ -29,12 +29,13 @@ void isp_test_device_fail(void)
 /**
  * Capture the current 64-bit cycle count.
  */
-uint64_t isp_get_cycle_count(void)
+uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
 {
 #if __riscv_xlen == 64
 	return read_csr(mcycle);
 #else
 	uint32_t cycle_lo, cycle_hi;
+  uint64_t result;
 	asm volatile(
 		"%=:\n\t"
 		"csrr %1, mcycleh\n\t"
@@ -44,7 +45,16 @@ uint64_t isp_get_cycle_count(void)
 		: "=r"(cycle_lo), "=r"(cycle_hi)
 		: // No inputs.
 		: "t1");
-	return (((uint64_t)cycle_hi) << 32) | (uint64_t)cycle_lo;
+	 result = (((uint64_t)cycle_hi) << 32) | (uint64_t)cycle_lo;
+
+   // XXX: pass back hi/lo to get around unreliable 64-bit intrinsics
+   if(result_hi != NULL) {
+     *result_hi = cycle_hi;
+   }
+   if(result_lo != NULL) {
+     *result_lo = cycle_lo;
+   }
+   return result;
 #endif
 }
 
@@ -64,7 +74,7 @@ uint32_t isp_get_time_usec(void)
 
 uint32_t isp_get_timer_freq()
 {
-  return 32768;
+  return CPU_CLOCK_HZ;
 }
 
 int t_printf(const char *s, ...)
