@@ -37,12 +37,12 @@ ISP_LIBS += $(LIBISP)
 
 RISCV_PATH    ?= $(ISP_PREFIX)
 RISCV_CLANG   ?= $(abspath $(RISCV_PATH)/bin/clang)
-RISCV_GXX     ?= $(RISCV_CLANG)
+RISCV_GXX     ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-gcc)
 RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-objdump)
 RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-gdb)
 RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-ar)
 
-CC=$(RISCV_CLANG)
+CC=$(RISCV_GXX)
 
 all:
 
