@@ -13,10 +13,10 @@ include $(FREERTOS_RVDEMO_DIR)/BuildEnvironment.mk
 
 ISP_INCLUDES := -I$(FREERTOS_DIR)/Source/include
 ISP_INCLUDES += -I$(FREERTOS_DIR)/Source/portable/GCC/RISC-V
-ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio
-ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/include
-ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env
-ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env/freedom-e300-hifive1
+ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio_Galois
+ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio_Galois/freedom-e-sdk/include
+ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio_Galois/freedom-e-sdk/env
+ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio_Galois/freedom-e-sdk/env/freedom-e300-hifive1
 ISP_INCLUDES += -I$(STOCK_TOOLS)/$(TOOLCHAIN_TRIPLE)/include
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
