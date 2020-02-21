@@ -47,8 +47,7 @@ def main():
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
     Currently supported: qemu (default), renode
     ''')
-    parser.add_argument("--rv64", action="store_true", default=False, required=False,
-                        help='''
+    parser.add_argument("--rv64", action="store_true", required=False, help='''
     Use 64-bit tools
     ''')
 
