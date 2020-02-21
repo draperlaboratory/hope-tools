@@ -166,9 +166,9 @@ def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
     logger.debug("Using SOC config {}".format(soc_cfg))
 
     if rv64:
-        qemu_cmd = qemu_base_cmd + '64';
+        qemu_cmd = qemu_base_cmd + '64'
     else:
-        qemu_cmd = qemu_base_cmd + '32';
+        qemu_cmd = qemu_base_cmd + '32'
 
     if use_validator == False:
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'stock-tools','bin', qemu_cmd)

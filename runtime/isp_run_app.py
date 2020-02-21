@@ -118,10 +118,10 @@ def main():
     else:
         policy_name = args.policy
 
-    rv64 = False;
+    rv64 = False
     if "64" in args.runtime:
         logger.info("64-bit Operating Environment")
-        rv64 = True;
+        rv64 = True
 
     policy_full_name = isp_utils.getPolicyFullName(policy_name, args.runtime)
     if os.path.isdir(policy_name):
