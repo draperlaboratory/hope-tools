@@ -18,9 +18,9 @@ def getGdbScriptPath(sim):
 
 def startGdb(exe_path, port, sim, rv64):
     if (rv64):
-        gdb_command = gdb32_command
-    else:
         gdb_command = gdb64_command
+    else:
+        gdb_command = gdb32_command
 
     args = [gdb_command, "-q", "-ix", getGdbScriptPath(sim),
                          "-ex", "target remote :{}".format(port),
@@ -47,8 +47,10 @@ def main():
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
     Currently supported: qemu (default), renode
     ''')
-    parser.add_argument("", "--rv64", action="store_true", required=false,
-                        help="Use 64-bit tools")
+    parser.add_argument("--rv64", action="store_true", default=False, required=False,
+                        help='''
+    Use 64-bit tools
+    ''')
 
     args = parser.parse_args()
     exe_full_path = os.path.abspath(args.exe_path)
