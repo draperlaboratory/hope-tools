@@ -15,8 +15,6 @@ SYMLINKS := policies
 SYMLINKS += policy-engine
 SYMLINKS += tools
 
-POLICY_NAMES := $(shell python policy_names.py)
-
 ISP_SCRIPTS := isp_install_runtime
 ISP_SCRIPTS += isp_run_app
 ISP_SCRIPTS += isp_debug
@@ -35,22 +33,18 @@ BARE_PREFIX := osv.bare.main.
 FRTOS_PREFIX := osv.frtos.main.
 SEL4_PREFIX := osv.sel4.main.
 
-KERNELS := $(patsubst %,$(BARE_PREFIX)%,$(POLICY_NAMES))
-KERNELS += $(patsubst %,$(FRTOS_PREFIX)%,$(POLICY_NAMES))
-KERNELS += $(patsubst %,$(SEL4_PREFIX)%,$(POLICY_NAMES))
-KERNELS := $(patsubst %,$(KERNEL_DIR)/%,$(KERNELS))
-
 INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
 
 PYTHON_SCRIPTS := $(patsubst %,%.py,$(ISP_SCRIPTS))
 PYTHON_SCRIPTS += $(ISP_BACKEND)
 
-.PHONY: all install clean uninstall kernels symlink install-isp-scripts install-gdb-scripts install-runtime
+.PHONY: all install clean uninstall symlink install-isp-scripts install-gdb-scripts install-runtime
 all: $(ISP_SCRIPTS)
 
 install: install-runtime install-isp-scripts install-gdb-scripts install-modules $(VENV_DONE) $(HOPE_SRC_SYMLINK)
 
 install-runtime:
+	mkdir -p $(KERNEL_DIR)
 	mkdir -p $(RUNTIME_DIR)
 	install $(PYTHON_SCRIPTS) $(RUNTIME_DIR)
 
@@ -86,22 +80,17 @@ install-stock-tools:
             fi
         endif
 
-kernels: $(KERNELS)
-
 symlink: $(HOPE_SRC_SYMLINK)
 
 $(ISP_SCRIPTS): %: %.py
 	printf '#!/bin/sh\n$(VENV) python $(RUNTIME_DIR)/$< "$$@"' > $@
 	chmod +x $@
 
-$(KERNELS): $(SYMLINK_DSTS) $(KERNEL_DIR) isp_kernel
-	./isp_kernel $(notdir $@) -o $(KERNEL_DIR)
-
 $(HOPE_SRC_SYMLINK):
 	ln -s $(HOPE_SRC) $@
 
 clean:
-	rm -rf $(ISP_SCRIPTS) $(KERNELS) *.pyc *.spec build/
+	rm -rf $(ISP_SCRIPTS) *.pyc *.spec build/
 
 uninstall:
 	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNEL_DIR) $(HOPE_SRC_SYMLINK) $(RUNTIME_DIR) $(MODULE_DIR)
