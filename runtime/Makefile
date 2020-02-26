@@ -1,6 +1,6 @@
 include ../venv.mk
 
-SYMLINK_DIR = $(ISP_PREFIX)/sources/
+HOPE_SRC_SYMLINK = $(ISP_PREFIX)/sources
 KERNEL_DIR = $(ISP_PREFIX)/kernels/
 BIN_DIR = $(ISP_PREFIX)/bin/
 GDB_DIR = $(ISP_PREFIX)/gdb-scripts/
@@ -9,7 +9,7 @@ MODULE_DIR = $(ISP_PREFIX)/runtime/modules/
 
 CLANG_PATH := $(shell command -v clang 2> /dev/null;)
 
-ROOT = $(realpath ../../)
+HOPE_SRC = $(realpath ../../)
 
 SYMLINKS := policies
 SYMLINKS += policy-engine
@@ -35,9 +35,6 @@ BARE_PREFIX := osv.bare.main.
 FRTOS_PREFIX := osv.frtos.main.
 SEL4_PREFIX := osv.sel4.main.
 
-SYMLINK_SRCS := $(patsubst %,$(ROOT)/%,$(SYMLINKS))
-SYMLINK_DSTS := $(patsubst %,$(SYMLINK_DIR)/%,$(SYMLINKS))
-
 KERNELS := $(patsubst %,$(BARE_PREFIX)%,$(POLICY_NAMES))
 KERNELS += $(patsubst %,$(FRTOS_PREFIX)%,$(POLICY_NAMES))
 KERNELS += $(patsubst %,$(SEL4_PREFIX)%,$(POLICY_NAMES))
@@ -48,13 +45,10 @@ INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
 PYTHON_SCRIPTS := $(patsubst %,%.py,$(ISP_SCRIPTS))
 PYTHON_SCRIPTS += $(ISP_BACKEND)
 
-POLICIES_DIR = $(SYMLINK_DIR)/policies/
-TEMPLATE_DIR = $(POLICIES_DIR)/policy_tests/template/
-POLICY_ENGINE_DIR = $(SYMLINK_DIR)/policy-engine/
-.PHONY: all install clean uninstall kernels symlinks install-isp-scripts install-gdb-scripts install-runtime
+.PHONY: all install clean uninstall kernels symlink install-isp-scripts install-gdb-scripts install-runtime
 all: $(ISP_SCRIPTS)
 
-install: install-runtime install-isp-scripts install-gdb-scripts install-modules $(VENV_DONE) $(SYMLINK_DSTS)
+install: install-runtime install-isp-scripts install-gdb-scripts install-modules $(VENV_DONE) $(HOPE_SRC_SYMLINK)
 
 install-runtime:
 	mkdir -p $(RUNTIME_DIR)
@@ -94,7 +88,7 @@ install-stock-tools:
 
 kernels: $(KERNELS)
 
-symlinks: $(SYMLINK_DSTS)
+symlink: $(HOPE_SRC_SYMLINK)
 
 $(ISP_SCRIPTS): %: %.py
 	printf '#!/bin/sh\n$(VENV) python $(RUNTIME_DIR)/$< "$$@"' > $@
@@ -103,12 +97,11 @@ $(ISP_SCRIPTS): %: %.py
 $(KERNELS): $(SYMLINK_DSTS) $(KERNEL_DIR) isp_kernel
 	./isp_kernel $(notdir $@) -o $(KERNEL_DIR)
 
-$(SYMLINK_DSTS): $(SYMLINK_DIR)/%: $(ROOT)/%
-	mkdir -p $(SYMLINK_DIR)
-	ln -sf $< $@
+$(HOPE_SRC_SYMLINK):
+	ln -s $(HOPE_SRC) $@
 
 clean:
 	rm -rf $(ISP_SCRIPTS) $(KERNELS) *.pyc *.spec build/
 
 uninstall:
-	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNEL_DIR) $(SYMLINK_DIR) $(RUNTIME_DIR) $(MODULE_DIR)
+	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNEL_DIR) $(HOPE_SRC_SYMLINK) $(RUNTIME_DIR) $(MODULE_DIR)
