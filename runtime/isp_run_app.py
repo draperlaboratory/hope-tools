@@ -1,12 +1,18 @@
 #! /usr/bin/python3
 
-import isp_run
 import os
 import re
 import argparse
 import isp_utils
 import logging
 import sys
+import subprocess
+
+isp_prefix = isp_utils.getIspPrefix()
+sys.path.append(os.path.join(isp_prefix, "runtime", "modules"))
+sim_module = None
+
+logger = logging.getLogger()
 
 def printUartOutput(run_dir):
     process_log = open(os.path.join(run_dir, "uart.log"))
@@ -31,13 +37,64 @@ def getProcessExitCode(run_dir, runtime):
     return -1
 
 
+# TODO: external entities file currently unused
+def doEntitiesFile(run_dir, name):
+    filename = os.path.join(run_dir, (name + ".entities.yml"))
+    if os.path.exists(filename) is False:
+        open(filename, "a").close()
+
+
+def compileMissingPex(policy_dir, pex_path, sim):
+    logger.info("Attempting to compile missing PEX binary")
+    install_path = os.path.dirname(pex_path)
+    args = ["isp_install_policy",
+             "-p", policy_dir,
+             "-s", sim,
+             "-o", install_path]
+
+    result = subprocess.call(args)
+
+    if result != 0:
+        return False
+
+    logger.info("Successfully compiled missing PEX binary")
+    return True
+
+
+def compileMissingPolicy(policies, global_policies, debug):
+    logger.info("Attempting to compile missing policy")
+    args = ["isp_install_policy",
+            "-O", os.path.join(isp_prefix, "policies"),
+             "-p"] + policies
+
+    if global_policies:
+        args += ["-P"] + global_policies
+
+    if debug:
+        args += ["-D"]
+
+    result = subprocess.call(args)
+
+    if result != 0:
+        return False
+
+    logger.info("Successfully compiled missing policy")
+    return True
+
+
 def main():
+    global sim_module
     parser = argparse.ArgumentParser(description="Run standalone ISP applications")
     parser.add_argument("exe_path", type=str, help='''
     Path of the executable to run
     ''')
-    parser.add_argument("-p", "--policy", type=str, default="none", help='''
-    Name of the installed policy to run or directory containing policy. Default is none
+    parser.add_argument("-p", "--policies", nargs='+', default=["none"], help='''
+    List of policies to apply to run, or path to a policy directory
+    Default is none
+    ''')
+    parser.add_argument("-P", "--global-policies", nargs='+', help='''
+    List of global policies to apply to run
+    Default is none
     ''')
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
     Module for simulating/running application. Must be installed to $ISP_PREFIX/runtime_modules
@@ -57,7 +114,10 @@ def main():
     Start the simulator in gdbserver mode on specified port
     ''')
     parser.add_argument("-d", "--debug", action="store_true", help='''
-    Enable debug logging
+    Enable debug logging in this script
+    ''')
+    parser.add_argument("-D", "--policy-debug", action="store_true", help='''
+    Use a debug policy
     ''')
     parser.add_argument("-t", "--tag-only", action="store_true", help='''
     Run the tagging tools without running the application
@@ -87,6 +147,9 @@ def main():
     parser.add_argument("--disable-colors", action="store_true", help='''
     Disable colored logging
     ''')
+    parser.add_argument("--pex", type=str, help='''
+    Path to a custom PEX implementation (validator lib, kernel, etc)
+    ''')
 
     args = parser.parse_args()
 
@@ -96,7 +159,11 @@ def main():
 
     logger = isp_utils.setupLogger(log_level, (not args.disable_colors))
 
-    sys.path.append(os.path.join(isp_utils.getIspPrefix(), "runtime", "modules"))
+    sim_module = __import__("isp_" + args.simulator)
+
+    if not os.path.isfile(args.exe_path):
+        logger.error("No binary found to run")
+        exit(1)
 
     output_dir = args.output
     if args.output == "":
@@ -108,26 +175,36 @@ def main():
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
+        return
+
+    policies = args.policies
+    policy_dir = ""
+    policy_name = ""
+
+    use_validator = not args.no_validator
 
     # Policy Directory Building
     # Force policy to none if we're using stock
     if "stock_" in args.simulator or "stock_" in args.runtime:
         logger.info("Using a stock simulator or runtime, setting policy to 'none'")
-        policy_name = 'none'
-        policy_full_name = 'osv.bare.main.none'
+        policies = ["none"]
+
+    # use exiting policy directory if -p arg refers to path
+    if (len(policies) == 1 and 
+        "/" in args.policies[0] and
+        os.path.isdir(policies[0])):
+        policy_dir = os.path.abspath(policies[0])
+        policy_name = os.path.basename(policy_dir)
     else:
-        policy_name = args.policy
+        policy_name = isp_utils.getPolicyFullName(policies, args.global_policies, args.policy_debug)
+        policy_dir = os.path.join(isp_prefix, "policies", policy_name)
 
-    policy_full_name = isp_utils.getPolicyFullName(policy_name, args.runtime)
-    if os.path.isdir(policy_name):
-        policy_full_name = os.path.abspath(policy_name)
-        policy_name = os.path.basename(policy_full_name)
+    pex_path = args.pex
+    if not pex_path:
+        pex_path = sim_module.defaultPexPath(policy_name)
 
-    kernels_dir = os.path.join(isp_utils.getIspPrefix(), "kernels")
-    policy_dir = os.path.join(kernels_dir, policy_full_name)
-
+    args.exe_path = os.path.realpath(args.exe_path)
     exe_name = os.path.basename(args.exe_path)
-    exe_full_path = os.path.abspath(args.exe_path)
     run_dir = os.path.join(output_dir,
                            "isp-run-{}-{}".format(exe_name, policy_name))
 
@@ -138,28 +215,27 @@ def main():
     if args.suffix:
         run_dir = run_dir + "-" + args.suffix
 
-    use_validator = True
-    if args.no_validator == True:
-        use_validator = False
+    isp_utils.removeIfExists(run_dir)
+    isp_utils.doMkDir(run_dir)
 
-    run_dir_full_path = os.path.abspath(run_dir)
-    isp_utils.removeIfExists(run_dir_full_path)
+    if "stock_" not in args.runtime and use_validator == True:
+        if not os.path.isdir(policy_dir):
+            if compileMissingPolicy(policies, args.global_policies, args.policy_debug) is False:
+                logger.error("Failed to compile missing policy")
+                sys.exit(1)
+
+        if not os.path.isfile(pex_path):
+            if compileMissingPex(policy_dir, pex_path, args.simulator) is False:
+                logger.error("Failed to compile missing PEX binary")
+                sys.exit(1)
+
+        doEntitiesFile(run_dir, exe_name)
 
     logger.debug("Starting simulator...")
-    result = isp_run.runSim(exe_full_path,
-                            policy_dir,
-                            run_dir_full_path,
-                            args.simulator,
-                            args.runtime,
-                            (args.rule_cache_name, args.rule_cache_size),
-                            args.gdb,
-                            args.tag_only,
-                            args.tagfile,
-                            args.soc,
-                            use_validator,
-                            args.extra)
 
-    if result != isp_run.retVals.SUCCESS:
+    result = sim_module.runSim(args.exe_path, run_dir, policy_dir, pex_path, args.runtime, (args.rule_cache_name, args.rule_cache_size), args.gdb, args.tagfile, args.soc, args.extra, use_validator)
+
+    if result != isp_utils.retVals.SUCCESS:
         logger.error(result)
         sys.exit(-1)
 
@@ -172,7 +248,7 @@ def main():
     process_exit_code = getProcessExitCode(run_dir, args.runtime)
     logger.debug("Process exited with code {}".format(process_exit_code))
 
-    if result is not isp_run.retVals.SUCCESS:
+    if result is not isp_utils.retVals.SUCCESS:
         logger.error("Failed to run application: {}".format(result))
 
 

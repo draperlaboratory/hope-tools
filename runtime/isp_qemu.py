@@ -7,6 +7,8 @@ import subprocess
 import os
 import logging
 import isp_utils
+import shutil
+import multiprocessing
 
 # set timeout seconds
 timeout_seconds = 3600
@@ -18,6 +20,112 @@ process_exit = False
 qemu_cmd = "qemu-system-riscv32"
 
 logger = logging.getLogger()
+
+isp_prefix = isp_utils.getIspPrefix()
+
+#################################
+# Build/Install validator
+# Invoked by isp_install_policy
+#################################
+
+def copyEngineSources(engine_dir, output_dir):
+    logger.info("Copying policy-engine sources")
+    engine_output_dir = os.path.join(output_dir, "engine")
+    isp_utils.doMkDir(engine_output_dir)
+
+    try:
+        shutil.copytree(os.path.join(engine_dir, "validator"), os.path.join(engine_output_dir, "validator"))
+        shutil.copytree(os.path.join(engine_dir, "tagging_tools"), os.path.join(engine_output_dir, "tagging_tools"))
+        shutil.copy(os.path.join(engine_dir, "Makefile.isp"), engine_output_dir)
+        shutil.copy(os.path.join(engine_dir, "CMakeLists.txt"), engine_output_dir)
+
+    except Exception as e:
+        logger.error("Copying engine sources failed with error: {}".format(str(e)))
+        return False
+
+    return True
+
+
+def copyPolicySources(policy_dir, output_dir):
+    engine_output_dir = os.path.join(output_dir, "engine", "policy")
+    try:
+        shutil.copytree(policy_dir, engine_output_dir)
+    except Exception as e:
+        logger.error("Copying policy sources failed with error: {}".format(str(e)))
+        return False
+
+    return True
+
+
+def buildValidator(policy_name, output_dir):
+    logger.info("Building validator library")
+    engine_output_dir = os.path.join(output_dir, "engine")
+
+    num_cores = str(multiprocessing.cpu_count())
+    build_log_path = os.path.join(output_dir, "build.log")
+    build_log = open(build_log_path, "w+")
+
+    result = subprocess.call(["make", "-j"+num_cores, "-f", "Makefile.isp"], stdout=build_log, stderr=subprocess.STDOUT, cwd=engine_output_dir)
+    build_log.close()
+
+    if result != 0:
+        logger.error("Policy engine build failed. See {} for more info".format(build_log_path))
+        return False
+
+    return True
+
+
+def moveValidator(policy_name, output_dir):
+    engine_output_dir = os.path.join(output_dir, "engine")
+    validator_path = os.path.join(engine_output_dir, "build", "librv32-sim-validator.so")
+
+    try:
+        validator_out_name = validatorName(policy_name)
+        validator_out_path = os.path.join(os.path.dirname(output_dir), validator_out_name) 
+        shutil.move(validator_path, validator_out_path)
+        shutil.rmtree(output_dir)
+    except Exception as e:
+        logger.error("Moving validator to output dir failed with error: {}".format(e))
+        return False
+
+    return True
+
+
+def validatorName(policy_name):
+    return "-".join(["rv32", policy_name, "validator"]) + ".so"
+
+
+def defaultPexPath(policy_name):
+    return os.path.join(isp_prefix, "validator", validatorName(policy_name))
+
+
+def installPex(policy_dir, output_dir):
+    logger.info("Installing policy validator for QEMU")
+    engine_dir = os.path.join(isp_prefix, "sources", "policy-engine")
+    policy_name = os.path.basename(policy_dir)
+    
+    if not copyEngineSources(engine_dir, output_dir):
+        logger.error("Failed to copy policy engine sources")
+        return False
+
+    if not copyPolicySources(policy_dir, output_dir):
+        logger.error("Failed to copy policy engine sources")
+
+    if not buildValidator(policy_name, output_dir):
+        logger.error("Failed to build validator")
+        return False
+
+    if not moveValidator(policy_name, output_dir):
+        logger.error("Failed to move validator")
+        return False
+
+    return True
+
+
+#################################
+# Run QEMU
+# Invoked by isp_run_app
+#################################
 
 def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=0):
     # Base options for any runtime
@@ -49,15 +157,6 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
         opts += isp_utils.processExtraArgs(extra)
 
     return opts
-
-
-def qemuEnv(use_validator, policy_dir):
-    env = {"PATH": os.environ["PATH"]}
-
-    if use_validator:
-        env["LD_LIBRARY_PATH"] = policy_dir
-
-    return env
 
 
 def doValidatorCfg(policy_dir, run_dir, exe_path, rule_cache, soc_cfg, tagfile):
@@ -99,14 +198,24 @@ def watchdog():
     process_exit = True
 
 
-def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True):
+def qemuSetupValidatorEnvironment(pex_path, run_dir):
+    os.symlink(pex_path, os.path.join(run_dir, "librv32-sim-validator.so"))
+    env = dict(os.environ)
+    env["LD_LIBRARY_PATH"] = run_dir
+
+    return env
+
+
+def launchQEMU(exe_path, run_dir, policy_dir, pex_path, runtime, extra, use_validator=True):
     global process_exit
     terminate_msg = isp_utils.terminateMessage(runtime)
     status_log = open(os.path.join(run_dir, status_log_file), "w+")
 
     opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port=0)
 
-    env = qemuEnv(use_validator, policy_dir)
+    env = dict(os.environ)
+    if use_validator:
+        env = qemuSetupValidatorEnvironment(pex_path, run_dir)
 
     try:
         logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + opts)))
@@ -151,24 +260,27 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True
         raise
 
 
-def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, runtime, use_validator):
+def launchQEMUDebug(exe_path, run_dir, policy_dir, pex_path, gdb_port, extra, runtime, use_validator):
     status_log = open(os.path.join(run_dir, status_log_file), "w+")
     opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port)
     logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + opts)))
 
-    env = qemuEnv(use_validator, policy_dir)
+    env = dict(os.environ)
+    if use_validator:
+        env = qemuSetupValidatorEnvironment(pex_path, run_dir)
+
     rc = subprocess.Popen([run_cmd] + opts, env=env, stdout=status_log)
     rc.wait()
 
 
-def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
+def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
            gdb_port, tagfile, soc_cfg, extra, use_validator=True):
     global run_cmd
     global uart_log_file
     global status_log_file
 
     if soc_cfg is None:
-        soc_cfg = os.path.join(policy_dir, "soc_cfg", "hifive_e_cfg.yml")
+        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "hifive_e_cfg.yml")
     else:
         soc_cfg = os.path.realpath(soc_cfg)
     logger.debug("Using SOC config {}".format(soc_cfg))
@@ -187,13 +299,13 @@ def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
     try:
         logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
         if gdb_port is not 0:
-            launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra,
+            launchQEMUDebug(exe_path, run_dir, policy_dir, pex_path, gdb_port, extra,
                             runtime, use_validator)
         else:
             wd = threading.Thread(target=watchdog)
             wd.start()
             qemu = threading.Thread(target=launchQEMU, args=(exe_path, run_dir,
-                                                             policy_dir, runtime,
+                                                             policy_dir, pex_path, runtime,
                                                              extra, use_validator))
             qemu.start()
             wd.join()

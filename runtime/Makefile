@@ -1,7 +1,7 @@
 include ../venv.mk
 
 HOPE_SRC_SYMLINK = $(ISP_PREFIX)/sources
-KERNEL_DIR = $(ISP_PREFIX)/kernels/
+POLICY_DIR = $(ISP_PREFIX)/policies/
 BIN_DIR = $(ISP_PREFIX)/bin/
 GDB_DIR = $(ISP_PREFIX)/gdb-scripts/
 RUNTIME_DIR = $(ISP_PREFIX)/runtime/
@@ -18,13 +18,12 @@ SYMLINKS += tools
 ISP_SCRIPTS := isp_install_runtime
 ISP_SCRIPTS += isp_run_app
 ISP_SCRIPTS += isp_debug
-ISP_SCRIPTS += isp_kernel
+ISP_SCRIPTS += isp_install_policy
 
 GDB_SCRIPTS := qemu.gdb
 GDB_SCRIPTS += renode.gdb
 
-ISP_BACKEND := isp_run.py
-ISP_BACKEND += isp_utils.py
+ISP_BACKEND := isp_utils.py
 
 MODULES := isp_qemu.py
 MODULES += isp_renode.py
@@ -44,7 +43,7 @@ all: $(ISP_SCRIPTS)
 install: install-runtime install-isp-scripts install-gdb-scripts install-modules $(VENV_DONE) $(HOPE_SRC_SYMLINK)
 
 install-runtime:
-	mkdir -p $(KERNEL_DIR)
+	mkdir -p $(POLICY_DIR)
 	mkdir -p $(RUNTIME_DIR)
 	install $(PYTHON_SCRIPTS) $(RUNTIME_DIR)
 
