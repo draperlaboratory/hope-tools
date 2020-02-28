@@ -13,7 +13,6 @@ timeout_seconds = 3600
 
 uart_log_file = "uart.log"
 status_log_file = "pex.log"
-sim_log_file = "sim.log"
 
 process_exit = False
 qemu_cmd = "qemu-system-riscv32"
@@ -25,7 +24,6 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
     opts = [ "-nographic",
              "-kernel", exe_path,
              "-serial", "file:{}".format(os.path.join(run_dir, uart_log_file)),
-             "-D", os.path.join(run_dir, status_log_file),
              "-d", "nochain"]
 
     # ISP validator specific flags
@@ -104,7 +102,7 @@ def watchdog():
 def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True):
     global process_exit
     terminate_msg = isp_utils.terminateMessage(runtime)
-    sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
+    status_log = open(os.path.join(run_dir, status_log_file), "w+")
 
     opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port=0)
 
@@ -143,12 +141,12 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True
 
 
 def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, runtime, use_validator):
-    sim_log = open(os.path.join(run_dir, sim_log_file), "w+")
+    status_log = open(os.path.join(run_dir, status_log_file), "w+")
     opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port)
     logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + opts)))
 
     env = qemuEnv(use_validator, policy_dir)
-    rc = subprocess.Popen([run_cmd] + opts, env=env, stdout=sim_log)
+    rc = subprocess.Popen([run_cmd] + opts, env=env, stdout=status_log)
     rc.wait()
 
 
@@ -157,7 +155,6 @@ def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
     global run_cmd
     global uart_log_file
     global status_log_file
-    global sim_log_file
 
     if soc_cfg is None:
         soc_cfg = os.path.join(policy_dir, "soc_cfg", "hifive_e_cfg.yml")
