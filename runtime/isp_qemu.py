@@ -110,19 +110,30 @@ def launchQEMU(exe_path, run_dir, policy_dir, runtime, extra, use_validator=True
 
     try:
         logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + opts)))
-        rc = subprocess.Popen([run_cmd] + opts, env=env, stdout=sim_log,
+        rc = subprocess.Popen([run_cmd] + opts, env=env, stdout=status_log,
                               stderr=subprocess.STDOUT)
         while rc.poll() is None:
             time.sleep(1)
+            uart_log = open(os.path.join(run_dir, uart_log_file), 'r')
+            status_log = open(os.path.join(run_dir, status_log_file), 'r')
+            uart_output = uart_log.read()
+            status_output = status_log.read()
+            uart_log.close()
+            status_log.close()
             try:
-                if terminate_msg in open(os.path.join(run_dir, uart_log_file), 'r').read() or process_exit:
+                if terminate_msg in uart_output or process_exit:
                     rc.terminate()
                     process_exit = True
                     return
-                if "Policy Violation:" in open(os.path.join(run_dir, status_log_file), 'r').read() or process_exit:
+                if "Policy Violation" in status_output or process_exit:
                     rc.terminate()
                     process_exit = True
                     logger.warn("Process exited due to policy violation")
+                    return
+                if "TMT miss" in status_output or process_exit:
+                    rc.terminate()
+                    process_exit = True
+                    logger.warn("Process exited due to TMT miss")
                     return
             except IOError:
                 #keep trying if fail to open uart log
