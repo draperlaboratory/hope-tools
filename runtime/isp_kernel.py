@@ -88,7 +88,7 @@ def runPolicyTool(policy, policies_dir, entities_dir, output_dir, debug):
     
     return True
 
-def buildPolicyKernel(policy, policies_dir, entities_dir, output_dir, rv64):
+def buildPolicyKernel(policy, policies_dir, entities_dir, output_dir, arch):
     engine_output_dir = os.path.join(output_dir, "engine")
 
     num_cores = str(multiprocessing.cpu_count())
@@ -96,7 +96,7 @@ def buildPolicyKernel(policy, policies_dir, entities_dir, output_dir, rv64):
         subprocess.Popen(["make", "-j"+num_cores, "-f", "Makefile.isp"], stdout=buildlog, stderr=subprocess.STDOUT, cwd=engine_output_dir).wait()
 
     val_name = "librv32-renode-validator.so"
-    if rv64:
+    if arch == "rv64":
         val_name = "librv64-renode-validator.so"
 
     validator_path = os.path.join(engine_output_dir, "build", val_name)
@@ -123,8 +123,9 @@ def main():
     parser.add_argument("-d", "--debug", action="store_true", help='''
     Enable debug logging
     ''')
-    parser.add_argument("--rv64", action="store_true",
-                        help="Use 64-bit tools")
+    parser.add_argument("--arch", type=str, default="rv32", help='''
+    Currently supported: rv32 (default), rv64
+    ''')
 
     args = parser.parse_args()
 
@@ -157,7 +158,7 @@ def main():
         print("Failed to run policy tool")
         sys.exit(1)
 
-    if buildPolicyKernel(args.policy, policies_dir, entities_dir, output_dir, args.rv64) is False:
+    if buildPolicyKernel(args.policy, policies_dir, entities_dir, output_dir, args.arch) is False:
         print("Failed to build policy kernel")
         sys.exit(1)
 
