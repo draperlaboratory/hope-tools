@@ -162,7 +162,7 @@ def launchQEMUDebug(exe_path, run_dir, policy_dir, gdb_port, extra, runtime, use
 
 
 def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
-           gdb_port, tagfile, soc_cfg, extra, rv64, use_validator=True):
+           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=True):
     global run_cmd
     global uart_log_file
     global status_log_file
@@ -173,10 +173,9 @@ def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
         soc_cfg = os.path.realpath(soc_cfg)
     logger.debug("Using SOC config {}".format(soc_cfg))
 
-    if rv64:
+    qemu_cmd = qemu_base_cmd + '32'
+    if arch == 'rv64':
         qemu_cmd = qemu_base_cmd + '64'
-    else:
-        qemu_cmd = qemu_base_cmd + '32'
 
     if use_validator == False:
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'stock-tools','bin', qemu_cmd)
@@ -186,7 +185,7 @@ def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
         doValidatorCfg(policy_dir, run_dir, exe_path, rule_cache, soc_cfg, tagfile)
 
         if tagfile is None:
-            if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, rv64) is False:
+            if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, arch) is False:
                 return isp_utils.retVals.TAG_FAIL
 
     try:

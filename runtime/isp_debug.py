@@ -16,8 +16,8 @@ def getGdbScriptPath(sim):
     return os.path.join(isp_prefix, "gdb-scripts", "{}.gdb".format(sim))
 
 
-def startGdb(exe_path, port, sim, rv64):
-    if (rv64):
+def startGdb(exe_path, port, sim, arch):
+    if (arch == 'rv64'):
         gdb_command = gdb64_command
     else:
         gdb_command = gdb32_command
@@ -47,14 +47,14 @@ def main():
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
     Currently supported: qemu (default), renode
     ''')
-    parser.add_argument("--rv64", action="store_true", required=False, help='''
-    Use 64-bit tools
+    parser.add_argument("--arch", type=str, default="rv32", help='''
+    Currently supported: rv32 (default), rv64
     ''')
 
     args = parser.parse_args()
     exe_full_path = os.path.abspath(args.exe_path)
 
-    startGdb(exe_full_path, args.port, args.simulator, args.rv64)
+    startGdb(exe_full_path, args.port, args.simulator, args.arch)
 
 
 if __name__ == "__main__":

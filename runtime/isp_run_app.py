@@ -45,6 +45,9 @@ def main():
     parser.add_argument("-r", "--runtime", type=str, default="bare", help='''
     Currently supported: frtos, sel4, bare (bare metal) (default), stock_frtos, stock_sel4, stock_bare
     ''')
+    parser.add_argument("--arch", type=str, default="rv32", help='''
+    Currently supported: rv32 (default), rv64
+    ''')
     parser.add_argument("-o", "--output", type=str, default="", help='''
     Location of simulator output directory. Contains supporting files and
     runtime logs.
@@ -118,11 +121,6 @@ def main():
     else:
         policy_name = args.policy
 
-    rv64 = False
-    if "64" in args.runtime:
-        logger.info("64-bit Operating Environment")
-        rv64 = True
-
     policy_full_name = isp_utils.getPolicyFullName(policy_name, args.runtime)
     if os.path.isdir(policy_name):
         policy_full_name = os.path.abspath(policy_name)
@@ -161,8 +159,8 @@ def main():
                             args.tag_only,
                             args.tagfile,
                             args.soc,
+                            args.arch,
                             args.extra,
-                            rv64,
                             use_validator)
 
     if result != isp_run.retVals.SUCCESS:

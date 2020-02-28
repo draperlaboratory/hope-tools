@@ -30,7 +30,7 @@ logger = logging.getLogger()
 #  tag_only - run the tagging tools without running the simulator
 #  extra - extra command line arguments to the simulator
 
-def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, tagfile, soc_cfg, extra, rv64, use_validator):
+def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, tagfile, soc_cfg, arch, extra, use_validator):
     exe_name = os.path.basename(exe_path)
 
     if not os.path.isfile(exe_path):
@@ -48,7 +48,7 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
 
     sim_module = __import__("isp_" + sim)
     ret_val = sim_module.runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
-                                gdb, tagfile, soc_cfg, extra, rv64, use_validator)
+                                gdb, tagfile, soc_cfg, arch, extra, use_validator)
 
     return ret_val
 
