@@ -23,6 +23,9 @@ void isp_test_device_fail(void)
 
 uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
 {
+#if __riscv_xlen == 64
+	return read_csr(mcycle);
+#else
   uint32_t cycle_hi, cycle_lo;
 
   cycle_hi = read_csr(mcycleh);
@@ -35,6 +38,7 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
      *result_lo = cycle_lo;
    }
 	 return (((uint64_t)cycle_hi) << 32) | (uint64_t)cycle_lo;
+#endif
 }
 
 uint32_t isp_get_time_usec()
