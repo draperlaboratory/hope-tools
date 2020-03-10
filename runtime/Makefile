@@ -93,4 +93,5 @@ clean:
 	rm -rf $(ISP_SCRIPTS) *.pyc *.spec build/
 
 uninstall:
-	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNEL_DIR) $(HOPE_SRC_SYMLINK) $(RUNTIME_DIR) $(MODULE_DIR) $(VENV_DIR)
+	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(POLICY_DIR) $(RUNTIME_DIR) $(MODULE_DIR) $(VENV_DIR)
+	rm -f $(HOPE_SRC_SYMLINK)
