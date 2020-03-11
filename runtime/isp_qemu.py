@@ -185,7 +185,7 @@ def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
         doValidatorCfg(policy_dir, run_dir, exe_path, rule_cache, soc_cfg, tagfile)
 
         if tagfile is None:
-            if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, arch) is False:
+            if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, arch=arch) is False:
                 return isp_utils.retVals.TAG_FAIL
 
     try:
