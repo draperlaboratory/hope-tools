@@ -98,3 +98,49 @@ While `isp_run_app` is started with the `-g` option, use the `isp_debug` script 
 ```
 isp_debug <executable> <port> -s <simulator>
 ```
+
+### Tool structure
+
+This section describes the design of the runtime tools and serves as a set of guidelines for extending them.
+
+##### Simulator modules
+
+The runtime tools are modular with respect to the simulator/hardware in use (chosen with the `-s` option in all tools).
+Each simulator module is named `isp_<simulator>.py` (e.g. `isp_qemu.py`).
+Each simulator module must contain the following functions:
+
+-`installPex(policy_dir, output_dir)`: Using the policy in `policy_dir`, builds a PEX binary (kernel, validator, etc) and stores it in `output_dir`
+-`defaultPexPath(policy_name)`: given `policy_name`, returns the default path in `ISP_PREFIX` where the corresponding PEX binary would exist (e.g. for a `heap-rwx-stack` policy, `isp_qemu.py` returns `$ISP_PREFIX/validator/rv32-heap-rwx-stack-validator.so`)
+- `runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache, gdb_port, tagfile, soc_cfg, extra, use_validator=True)`: runs the simulator/hardware, generating any required tagging info
+  - *TODO*: this should be split up into separate tagging and running functions
+
+##### Extending `isp_install_runtime`
+
+`isp_install_runtime` pulls its runtime assets from the `templates` directory. For each simulator, these assets are as follows:
+
+-`isp_utils.c`: a library containing utilities that may have board-specific functionality. See `isp_utils.h` for functions to implement.
+-`<runtime>.mk`: For each runtime supported by the simulator, include a Makefile that defines `ISP_CFLAGS`, `ISP_INCLUDES`, and `ISP_LDFLAGS`.
+
+For each runtime, there is a `<runtime>_main.c` file that defines `main()`.
+
+##### Python Virtual Environment
+
+When the runtime tools are installed, a Python Virtual Environment is created in `$ISP_PREFIX/venv`.
+The tools are called via wrapper scripts which source this Virtual Environment.
+
+*This means that you will never need to pip install any python dependency to run the tools.*
+
+If you need to add a python dependency to the tools, do so by adding it to `python-requirements.txt` in this directory.
+
+##### ISP_PREFIX directories
+
+The runtime tools install a number of resources to the user's `$ISP_PREFIX` directory. They are as follows:
+
+-`$ISP_PREFIX/bin`: contains wrapper scripts which call the runtime Python scripts.
+-`$ISP_PREFIX/runtime`: contains the runtime Python scripts.
+-`$ISP_PREFIX/runtime/modules`: contains simulator modules for the runtime
+-`$ISP_PREFIX/stock_tools`: contains stock (non-PIPE) versions of some dependencies
+-`$ISP_PREFIX/gdb-scripts`: contains GDB scripts used by `isp_debug` to inspect tag state in GDB
+-`$ISP_PREFIX/policies`: default path for compiled policies
+-`$ISP_PREFIX/validator`: default path used by `isp_qemu.py` for PEX validator libraries
+-`$ISP_PREFIX/venv`: Python Virtual Environment
