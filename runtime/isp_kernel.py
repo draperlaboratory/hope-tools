@@ -95,15 +95,14 @@ def buildPolicyKernel(policy, policies_dir, entities_dir, output_dir, arch):
     with open(os.path.join(output_dir, "build.log"), "w+") as buildlog:
         subprocess.Popen(["make", "-j"+num_cores, "-f", "Makefile.isp"], stdout=buildlog, stderr=subprocess.STDOUT, cwd=engine_output_dir).wait()
 
-    val_name = "librv32-renode-validator.so"
-    if arch == "rv64":
-        val_name = "librv64-renode-validator.so"
+    val_name = "".join(["lib", arch, "-renode-validator.so"])
 
     validator_path = os.path.join(engine_output_dir, "build", val_name)
     if not os.path.isfile(validator_path):
         return False
 
-    validator_output_path = output_dir + "/librv32-renode-validator.so"
+    validator_output_path = output_dir + "".join(["/lib", arch,
+                                                  "-renode-validator.so"])
 
     shutil.move(validator_path, validator_output_path)
     shutil.rmtree(engine_output_dir)
