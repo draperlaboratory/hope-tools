@@ -33,8 +33,6 @@ MODULES += isp_renode.py
 
 BARE_PREFIX := osv.bare.main.
 FRTOS_PREFIX := osv.frtos.main.
-BARE64_PREFIX := osv.bare64.main.
-FRTOS64_PREFIX := osv.frtos64.main.
 SEL4_PREFIX := osv.sel4.main.
 
 SYMLINK_SRCS := $(patsubst %,$(ROOT)/%,$(SYMLINKS))
@@ -42,8 +40,6 @@ SYMLINK_DSTS := $(patsubst %,$(SYMLINK_DIR)/%,$(SYMLINKS))
 
 KERNELS := $(patsubst %,$(BARE_PREFIX)%,$(POLICY_NAMES))
 KERNELS += $(patsubst %,$(FRTOS_PREFIX)%,$(POLICY_NAMES))
-KERNELS := $(patsubst %,$(BARE64_PREFIX)%,$(POLICY_NAMES))
-KERNELS += $(patsubst %,$(FRTOS64_PREFIX)%,$(POLICY_NAMES))
 KERNELS += $(patsubst %,$(SEL4_PREFIX)%,$(POLICY_NAMES))
 KERNELS := $(patsubst %,$(KERNEL_DIR)/%,$(KERNELS))
 

@@ -99,11 +99,11 @@ def processExtraArgs(extra):
 
 
 def terminateMessage(runtime):
-    if runtime == "frtos" or runtime == "frtos64":
+    if runtime == "frtos":
         return "Main task has completed with code:"
     if runtime == "sel4":
         return "seL4 root server abort()ed"
-    elif runtime == "bare" or runtime == "bare64":
+    elif runtime == "bare":
         return "Program has exited with code:"
 
     return ""

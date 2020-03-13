@@ -105,8 +105,12 @@ def main():
     if args.output == "":
         output_dir = os.getcwd()
 
-    if args.runtime not in ["bare64", "frtos64", "frtos", "sel4", "bare", "stock_frtos", "stock_sel4", "stock_bare"]:
-        logger.error("Invalid choice of runtime. Valid choices: frtos, frtos64, sel4, bare, bare64, stock_frtos, stock_sel4, stock_bare")
+    if args.runtime not in ["frtos", "sel4", "bare", "stock_frtos", "stock_sel4", "stock_bare"]:
+        logger.error("Invalid choice of runtime. Valid choices: frtos, sel4, bare, stock_frtos, stock_sel4, stock_bare")
+        return
+
+    if args.arch not in ["rv32", "rv64"]:
+        logger.error("Invalid choice of architecture. Valid choices: rv32, rv64")
         return
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
