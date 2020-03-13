@@ -1,4 +1,6 @@
 ISP_PREFIX ?= $(HOME)/.local/isp/
+ARCH ?= rv32
+ARCH_XLEN = $(subst rv,,$(ARCH))
 
 ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-frtos\.mk"))
 FREERTOS_DIR := $(ISP_PREFIX)/FreeRTOS
@@ -7,10 +9,7 @@ FREERTOS_LIB_DIR := $(FREERTOS_DIR)/lib
 
 LINKER_SCRIPT := $(FREERTOS_DIR)/build/hifive/flash.lds
 
-TOOLCHAIN = riscv32-unknown-elf
-ifeq ($(RVXX), RV64)
-   TOOLCHAIN = riscv64-unknown-elf
-endif
+TOOLCHAIN = riscv$(ARCH_XLEN)-unknown-elf
 
 include $(FREERTOS_DIR)/build/hifive/BuildEnvironment.mk
 
@@ -31,19 +30,10 @@ ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 
 ISP_LDFLAGS      += -L$(ISP_RUNTIME) -L$(FREERTOS_LIB_DIR)
-
-ifeq ($(RVXX), RV64)
-   ISP_LDFLAGS      += -Wl,--start-group -lfreertos-hifive64 -lisp -lc -Wl,--end-group
-else
-   ISP_LDFLAGS      += -Wl,--start-group -lfreertos-hifive -lisp -lc -Wl,--end-group
-endif
-
+ISP_LDFLAGS      += -Wl,--start-group -lfreertos-hifive$(ARCH_XLEN) -lisp -lc -Wl,--end-group
 
 LIBISP           := $(ISP_RUNTIME)/libisp.a
-LIBFREERTOS 		 := $(FREERTOS_LIB_DIR)/libfreertos-hifive.a
-ifeq ($(RVXX), RV64)
-   LIBFREERTOS 		 := $(FREERTOS_LIB_DIR)/libfreertos-hifive64.a
-endif
+LIBFREERTOS      := $(FREERTOS_LIB_DIR)/libfreertos-hifive$(ARCH_XLEN).a
 
 ISP_LIBS := $(LIBFREERTOS)
 ISP_LIBS += $(LIBISP)
@@ -56,7 +46,7 @@ RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-gdb)
 RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-ar)
 
 CC = $(RISCV_CLANG)
-ifeq ($(RVXX), RV64)
+ifeq ($(ARCH), rv64)
    CC = $(RISCV_GXX)
 endif
 
