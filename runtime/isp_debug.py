@@ -8,19 +8,14 @@ import time
 import isp_utils
 import signal
 
-gdb32_command = "riscv32-unknown-elf-gdb"
-gdb64_command = "riscv64-unknown-elf-gdb"
-
 def getGdbScriptPath(sim):
     isp_prefix = isp_utils.getIspPrefix()
     return os.path.join(isp_prefix, "gdb-scripts", "{}.gdb".format(sim))
 
 
 def startGdb(exe_path, port, sim, arch):
-    if (arch == 'rv64'):
-        gdb_command = gdb64_command
-    else:
-        gdb_command = gdb32_command
+    long_arch = arch.replace("rv", "riscv")
+    gdb_command = "-".join([long_arch, "unknown", "elf", "gdb"])
 
     args = [gdb_command, "-q", "-ix", getGdbScriptPath(sim),
                          "-ex", "target remote :{}".format(port),
