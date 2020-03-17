@@ -29,7 +29,7 @@ ISP's currently supported runtimes: FreeRTOS, seL4, Bare (bare metal). Use the s
 isp_install_runtime <frtos/sel4/bare> -b <project directory (default .)>
 ```
 
-The `--stock` flag installs the runtime using a non-ISP toolchain. It looks for `clang` and `riscv32-unknown-elf-*` binaries to be located in `ISP_PREFIX/stock-tools/bin`. When `hope-tools` is installed, the stock toolchain in `hope-src` is linked into this location by default, and if there is an installed copy of `clang`, it is linked as well. 
+The `stock` variants build the runtime using a non-ISP toolchain. It looks for `clang`, `riscv32-unknown-elf-*`, `riscv64-unknown-elf-*`  binaries to be located in `ISP_PREFIX/stock-tools/bin`. When `hope-tools` is installed, the stock toolchain in `hope-src` is linked into this location by default, and if there is an installed copy of `clang`, it is linked as well.
 
 This will generate the `isp-runtime` directory in the project directory, as well as a Makefile `isp-runtime.mk`.
 This Makefile sets `CC` to the ISP or stock version of Clang and exposes the following variables:

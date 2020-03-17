@@ -69,6 +69,7 @@ install-stock-tools:
 	if [ ! -d $(ISP_PREFIX)/stock-tools ]; then\
 		mkdir -p $(ISP_PREFIX)/stock-tools/bin; \
 		ln -s $(ISP_PREFIX)/bin/riscv32-unknown-elf-* $(ISP_PREFIX)/stock-tools/bin/; \
+		ln -s $(ISP_PREFIX)/bin/riscv64-unknown-elf-* $(ISP_PREFIX)/stock-tools/bin/; \
 	fi
 
         ifndef CLANG_PATH

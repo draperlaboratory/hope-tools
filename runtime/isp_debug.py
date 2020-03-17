@@ -8,17 +8,19 @@ import time
 import isp_utils
 import signal
 
-gdb_command = "riscv32-unknown-elf-gdb"
-
 def getGdbScriptPath(sim):
     isp_prefix = isp_utils.getIspPrefix()
     return os.path.join(isp_prefix, "gdb-scripts", "{}.gdb".format(sim))
 
 
-def startGdb(exe_path, port, sim):
+def startGdb(exe_path, port, sim, arch):
+    long_arch = arch.replace("rv", "riscv")
+    gdb_command = "-".join([long_arch, "unknown", "elf", "gdb"])
+
     args = [gdb_command, "-q", "-ix", getGdbScriptPath(sim),
                          "-ex", "target remote :{}".format(port),
                          exe_path]
+
     if sim == "renode":
         args.insert(6, "-ex")
         args.insert(7, "monitor start")
@@ -40,11 +42,14 @@ def main():
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
     Simulator being used in isp_run_app
     ''')
+    parser.add_argument("--arch", type=str, default="rv32", help='''
+    Currently supported: rv32 (default), rv64
+    ''')
 
     args = parser.parse_args()
     exe_full_path = os.path.abspath(args.exe_path)
 
-    startGdb(exe_full_path, args.port, args.simulator)
+    startGdb(exe_full_path, args.port, args.simulator, args.arch)
 
 
 if __name__ == "__main__":

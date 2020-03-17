@@ -102,6 +102,9 @@ def main():
     parser.add_argument("-r", "--runtime", type=str, default="bare", help='''
     Currently supported: frtos, sel4, bare (bare metal) (default), stock_frtos, stock_sel4, stock_bare
     ''')
+    parser.add_argument("--arch", type=str, default="rv32", help='''
+    Currently supported: rv32 (default), rv64
+    ''')
     parser.add_argument("-o", "--output", type=str, default="", help='''
     Location of simulator output directory. Contains supporting files and
     runtime logs.
@@ -173,6 +176,10 @@ def main():
         logger.error("Invalid choice of runtime. Valid choices: frtos, sel4, bare, stock_frtos, stock_sel4, stock_bare")
         return
 
+    if args.arch not in ["rv32", "rv64"]:
+        logger.error("Invalid choice of architecture. Valid choices: rv32, rv64")
+        return
+
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
         return
@@ -232,8 +239,18 @@ def main():
         doEntitiesFile(run_dir, exe_name)
 
     logger.debug("Starting simulator...")
-
-    result = sim_module.runSim(args.exe_path, run_dir, policy_dir, pex_path, args.runtime, (args.rule_cache_name, args.rule_cache_size), args.gdb, args.tagfile, args.soc, args.extra, use_validator)
+    result = sim_module.runSim(args.exe_path,
+                               run_dir,
+                               policy_dir,
+                               pex_path,
+                               args.runtime,
+                               (args.rule_cache_name, args.rule_cache_size),
+                               args.gdb,
+                               args.tagfile,
+                               args.soc,
+                               args.arch,
+                               args.extra,
+                               use_validator)
 
     if result != isp_utils.retVals.SUCCESS:
         logger.error(result)
