@@ -43,6 +43,11 @@ def copyEngineSources(engine_dir, output_dir):
         logger.error("Copying engine sources failed with error: {}".format(str(e)))
         return False
 
+    result = subprocess.call(["make", "-f", "Makefile.isp", "clean"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT, cwd=engine_output_dir)
+    if result != 0:
+        logger.error("Failed to clean engine directory")
+        return False
+
     return True
 
 
