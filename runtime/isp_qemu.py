@@ -75,12 +75,12 @@ def buildValidator(policy_name, output_dir):
     return True
 
 
-def moveValidator(policy_name, output_dir):
+def moveValidator(policy_name, output_dir, arch):
     engine_output_dir = os.path.join(output_dir, "engine")
-    validator_path = os.path.join(engine_output_dir, "build", "librv32-sim-validator.so")
+    validator_path = os.path.join(engine_output_dir, "build", "lib{}-sim-validator.so".format(arch))
 
     try:
-        validator_out_name = validatorName(policy_name)
+        validator_out_name = validatorName(policy_name, arch)
         validator_out_path = os.path.join(os.path.dirname(output_dir), validator_out_name) 
         shutil.move(validator_path, validator_out_path)
         shutil.rmtree(output_dir)
@@ -91,15 +91,15 @@ def moveValidator(policy_name, output_dir):
     return True
 
 
-def validatorName(policy_name):
-    return "-".join(["rv32", policy_name, "validator"]) + ".so"
+def validatorName(policy_name, arch):
+    return "-".join([arch, policy_name, "validator"]) + ".so"
 
 
-def defaultPexPath(policy_name):
-    return os.path.join(isp_prefix, "validator", validatorName(policy_name))
+def defaultPexPath(policy_name, arch):
+    return os.path.join(isp_prefix, "validator", validatorName(policy_name, arch))
 
 
-def installPex(policy_dir, output_dir):
+def installPex(policy_dir, output_dir, arch):
     logger.info("Installing policy validator for QEMU")
     engine_dir = os.path.join(isp_prefix, "sources", "policy-engine")
     policy_name = os.path.basename(policy_dir)
@@ -115,7 +115,7 @@ def installPex(policy_dir, output_dir):
         logger.error("Failed to build validator")
         return False
 
-    if not moveValidator(policy_name, output_dir):
+    if not moveValidator(policy_name, output_dir, arch):
         logger.error("Failed to move validator")
         return False
 
@@ -198,28 +198,22 @@ def watchdog():
     process_exit = True
 
 
-def qemuSetupValidatorEnvironment(pex_path, run_dir):
-    os.symlink(pex_path, os.path.join(run_dir, "librv32-sim-validator.so"))
+def qemuSetupValidatorEnvironment(pex_path, run_dir, arch):
+    os.symlink(pex_path, os.path.join(run_dir, "lib{}-sim-validator.so".format(arch)))
     env = dict(os.environ)
     env["LD_LIBRARY_PATH"] = run_dir
 
     return env
 
 
-def launchQEMU(exe_path, run_dir, policy_dir, pex_path, runtime, extra, use_validator=True):
+def launchQEMU(run_dir, runtime, env, options):
     global process_exit
     terminate_msg = isp_utils.terminateMessage(runtime)
     status_log = open(os.path.join(run_dir, status_log_file), "w+")
 
-    opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port=0)
-
-    env = dict(os.environ)
-    if use_validator:
-        env = qemuSetupValidatorEnvironment(pex_path, run_dir)
-
     try:
-        logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + opts)))
-        rc = subprocess.Popen([run_cmd] + opts, env=env, stdout=status_log,
+        logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + options)))
+        rc = subprocess.Popen([run_cmd] + options, env=env, stdout=status_log,
                               stderr=subprocess.STDOUT)
         while rc.poll() is None:
             time.sleep(1)
@@ -260,16 +254,11 @@ def launchQEMU(exe_path, run_dir, policy_dir, pex_path, runtime, extra, use_vali
         raise
 
 
-def launchQEMUDebug(exe_path, run_dir, policy_dir, pex_path, gdb_port, extra, runtime, use_validator):
+def launchQEMUDebug(run_dir, env, options):
     status_log = open(os.path.join(run_dir, status_log_file), "w+")
-    opts = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port)
-    logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + opts)))
+    logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + options)))
 
-    env = dict(os.environ)
-    if use_validator:
-        env = qemuSetupValidatorEnvironment(pex_path, run_dir)
-
-    rc = subprocess.Popen([run_cmd] + opts, env=env, stdout=status_log)
+    rc = subprocess.Popen([run_cmd] + options, env=env, stdout=status_log)
     rc.wait()
 
 
@@ -289,10 +278,13 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     if arch == 'rv64':
         qemu_cmd = qemu_base_cmd + '64'
 
+    env = dict(os.environ)
+
     if use_validator == False:
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'stock-tools','bin', qemu_cmd)
     else:
         run_cmd = os.path.join(os.environ['ISP_PREFIX'],'bin', qemu_cmd)
+        env = qemuSetupValidatorEnvironment(pex_path, run_dir, arch)
 
         doValidatorCfg(policy_dir, run_dir, exe_path, rule_cache, soc_cfg, tagfile)
 
@@ -300,17 +292,16 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
             if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, arch=arch) is False:
                 return isp_utils.retVals.TAG_FAIL
 
+    options = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port)
+
     try:
         logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
         if gdb_port is not 0:
-            launchQEMUDebug(exe_path, run_dir, policy_dir, pex_path, gdb_port, extra,
-                            runtime, use_validator)
+            launchQEMUDebug(run_dir, env, options)
         else:
             wd = threading.Thread(target=watchdog)
             wd.start()
-            qemu = threading.Thread(target=launchQEMU, args=(exe_path, run_dir,
-                                                             policy_dir, pex_path, runtime,
-                                                             extra, use_validator))
+            qemu = threading.Thread(target=launchQEMU, args=(run_dir, runtime, env, options))
             qemu.start()
             wd.join()
             qemu.join()

@@ -95,6 +95,9 @@ def main():
     parser.add_argument("--disable-colors", action="store_true", help='''
     Disable colored logging
     ''')
+    parser.add_argument("--arch", type=str, default="rv32", help='''
+    Currently supported: rv32 (default), rv64
+    ''')
 
     args = parser.parse_args()
 
@@ -147,7 +150,7 @@ def main():
         shutil.rmtree(output_dir, ignore_errors=True)
         isp_utils.doMkDir(output_dir)
         sim_module = __import__("isp_" + args.sim)
-        sim_module.installPex(policy_out_dir, output_dir)
+        sim_module.installPex(policy_out_dir, output_dir, args.arch)
 
 
 if __name__ == "__main__":

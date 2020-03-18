@@ -44,12 +44,13 @@ def doEntitiesFile(run_dir, name):
         open(filename, "a").close()
 
 
-def compileMissingPex(policy_dir, pex_path, sim):
+def compileMissingPex(policy_dir, pex_path, sim, arch):
     logger.info("Attempting to compile missing PEX binary")
     install_path = os.path.dirname(pex_path)
     args = ["isp_install_policy",
              "-p", policy_dir,
              "-s", sim,
+             "--arch", arch,
              "-o", install_path]
 
     result = subprocess.call(args)
@@ -208,7 +209,7 @@ def main():
 
     pex_path = args.pex
     if not pex_path:
-        pex_path = sim_module.defaultPexPath(policy_name)
+        pex_path = sim_module.defaultPexPath(policy_name, args.arch)
 
     args.exe_path = os.path.realpath(args.exe_path)
     exe_name = os.path.basename(args.exe_path)
@@ -232,7 +233,7 @@ def main():
                 sys.exit(1)
 
         if not os.path.isfile(pex_path):
-            if compileMissingPex(policy_dir, pex_path, args.simulator) is False:
+            if compileMissingPex(policy_dir, pex_path, args.simulator, args.arch) is False:
                 logger.error("Failed to compile missing PEX binary")
                 sys.exit(1)
 
