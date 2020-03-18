@@ -237,6 +237,8 @@ def main():
                 logger.error("Failed to compile missing PEX binary")
                 sys.exit(1)
 
+        logger.debug("Using PEX at path: {}".format(pex_path))
+
         doEntitiesFile(run_dir, exe_name)
 
     logger.debug("Starting simulator...")

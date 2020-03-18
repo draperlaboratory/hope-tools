@@ -126,6 +126,9 @@ def installPex(policy_dir, output_dir, arch):
 # Run QEMU
 # Invoked by isp_run_app
 #################################
+def qemuCommand(run_cmd, env, options):
+    args = " ".join([run_cmd] + options)
+    return "LD_LIBRARY_PATH={} {}".format(env["LD_LIBRARY_PATH"], args)
 
 def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=0):
     # Base options for any runtime
@@ -212,7 +215,7 @@ def launchQEMU(run_dir, runtime, env, options):
     status_log = open(os.path.join(run_dir, status_log_file), "w+")
 
     try:
-        logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + options)))
+        logger.debug("Running qemu cmd: {}\n".format(qemuCommand(run_cmd, env, options)))
         rc = subprocess.Popen([run_cmd] + options, env=env, stdout=status_log,
                               stderr=subprocess.STDOUT)
         while rc.poll() is None:
@@ -256,7 +259,7 @@ def launchQEMU(run_dir, runtime, env, options):
 
 def launchQEMUDebug(run_dir, env, options):
     status_log = open(os.path.join(run_dir, status_log_file), "w+")
-    logger.debug("Running qemu cmd:{}\n".format(str([run_cmd] + options)))
+    logger.debug("Running qemu cmd: {}\n".format(qemuCommand(run_cmd, env, options)))
 
     rc = subprocess.Popen([run_cmd] + options, env=env, stdout=status_log)
     rc.wait()
