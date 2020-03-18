@@ -111,7 +111,7 @@ def main():
     policy_name = ""
     policy_out_dir = ""
 
-    # use exiting policy directory if -p arg refers to path
+    # use existing policy directory if -p arg refers to path
     if (len(args.policies) == 1 and
         "/" in args.policies[0] and
         os.path.isdir(args.policies[0])):
