@@ -7,33 +7,28 @@ ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /
 ISP_HEADERS += $(wildcard $(ISP_RUNTIME)/*.h)
 C_SRCS += $(wildcard $(ISP_RUNTIME)/*.c)
 
-TOOLCHAIN = riscv$(ARCH_XLEN)-unknown-elf
-
-ISP_CFLAGS   += -O2 -fno-builtin-printf
+ISP_CFLAGS   += -O2 -fno-builtin-printf -mno-relax
 ISP_INCLUDES += -I$(ISP_RUNTIME)
-ISP_INCLUDES += -I$(ISP_PREFIX)/$(TOOLCHAIN)/include
+ISP_INCLUDES += -I$(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/include
 
 RISCV_PATH    ?= $(ISP_PREFIX)
 RISCV_CLANG   ?= $(abspath $(RISCV_PATH)/bin/clang)
-RISCV_GXX     ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-gcc)
-RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-objdump)
-RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-gdb)
-RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-ar)
+RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/llvm-objdump)
+RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-gdb)
+RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/llvm-ar)
 
 CC = $(RISCV_CLANG)
 
 ifneq ($(ARCH), rv64)
    RISCV_ARCH ?= rv32ima
    RISCV_ABI ?= ilp32
+   ISP_CFLAGS += --target=riscv32-unknown-elf
 else
-   CC = $(RISCV_GXX)
-
    RISCV_ARCH ?= rv64imafd
    RISCV_ABI ?= lp64d
-
-   ISP_CFLAGS += -mcmodel=medany
-   ISP_LDFLAGS += -mcmodel=medany
+   ISP_CFLAGS += --target=riscv64-unknown-elf -mcmodel=medany
 endif
+ISP_LDFLAGS += -L $(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/lib -fuse-ld=lld
 
 BOARD ?= freedom-e300-hifive1
 LINK_TARGET ?= flash

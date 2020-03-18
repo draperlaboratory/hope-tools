@@ -9,8 +9,6 @@ FREERTOS_LIB_DIR := $(FREERTOS_DIR)/lib
 
 LINKER_SCRIPT := $(FREERTOS_DIR)/build/hifive/flash.lds
 
-TOOLCHAIN = riscv$(ARCH_XLEN)-unknown-elf
-
 include $(FREERTOS_DIR)/build/hifive/BuildEnvironment.mk
 
 ISP_INCLUDES := -I$(FREERTOS_INCLUDE_DIR)/Source/include
@@ -19,7 +17,7 @@ ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudi
 ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/include
 ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env
 ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env/freedom-e300-hifive1
-ISP_INCLUDES += -I$(ISP_PREFIX)/riscv32-unknown-elf/include
+ISP_INCLUDES += -I$(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/include
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
 ISP_HEADERS      += $(wildcard $(ISP_RUNTIME)/*.h)
@@ -29,7 +27,7 @@ ISP_ASM_SRCS     += $(wildcard $(ISP_RUNTIME)/*.S)
 ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 
-ISP_LDFLAGS      += -L$(ISP_RUNTIME) -L$(FREERTOS_LIB_DIR)
+ISP_LDFLAGS      += -L$(ISP_RUNTIME) -L$(FREERTOS_LIB_DIR) -L $(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/lib -fuse-ld=lld
 ISP_LDFLAGS      += -Wl,--start-group -lfreertos-hifive$(ARCH_XLEN) -lisp -lc -Wl,--end-group
 
 LIBISP           := $(ISP_RUNTIME)/libisp.a
@@ -40,15 +38,12 @@ ISP_LIBS += $(LIBISP)
 
 RISCV_PATH    ?= $(ISP_PREFIX)
 RISCV_CLANG   ?= $(abspath $(RISCV_PATH)/bin/clang)
-RISCV_GXX     ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-gcc)
-RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-objdump)
-RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-gdb)
-RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN)-ar)
+RISCV_GXX     ?= $(RISCV_CLANG)
+RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/llvm-objdump)
+RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-gdb)
+RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/llvm-ar)
 
 CC = $(RISCV_CLANG)
-ifeq ($(ARCH), rv64)
-   CC = $(RISCV_GXX)
-endif
 
 all:
 

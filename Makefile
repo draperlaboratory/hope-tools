@@ -21,6 +21,7 @@ PROJECTS += llvm-project
 PROJECTS += qemu
 PROJECTS += riscv-fesvr
 PROJECTS += riscv-openocd
+PROJECTS += llvm-project/compiler-rt
 
 PRIVATE_PROJECTS := pex-firmware
 PRIVATE_PROJECTS += pex-kernel
@@ -40,10 +41,12 @@ all: runtime
 	$(MAKE) $(PROJECTS)
 
 policy-engine: policy-tool
-llvm-project: riscv-gnu-toolchain
 qemu: policy-engine
 riscv-newlib: llvm-project
-FreeRTOS: riscv-newlib runtime
+llvm-project/compiler-rt: llvm-project riscv-newlib
+FreeRTOS: llvm-project/compiler-rt runtime
+pex-firmware: riscv-gnu-toolchain
+pex-kernel: pex-firmware
 stock-riscv-newlib: stock-llvm-project
 
 path_check:
@@ -64,7 +67,7 @@ $(ISP_PREFIX):
 $(CLEAN_PROJECTS):
 	$(MAKE) -f Makefile.isp -C ../$(@:clean-%=%) clean
 
-runtime: $(ISP_PREFIX) riscv-gnu-toolchain
+runtime: $(ISP_PREFIX) llvm-project/compiler-rt
 	$(MAKE) -C runtime install
 
 documentation:
