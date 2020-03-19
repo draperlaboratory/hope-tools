@@ -65,7 +65,7 @@ def generateCompositeEntities(policies, entities_dir, output):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build and install ISP kernels with policies")
+    parser = argparse.ArgumentParser(description="Build and install policies and PEX binaries")
     parser.add_argument("-p", "--policies", nargs='+', required=True, help='''
     List of policies to compose and install, or path to a policy directory
     ''')
