@@ -122,3 +122,20 @@ def terminateMessage(runtime):
         return "Program has exited with code:"
 
     return ""
+
+
+def checkDependency(path, logger, repo=None):
+    if not os.path.exists(path):
+        if repo:
+            logger.error('''
+            Could not find the runtime dependency {} from the {} repository.
+            If you have access to {}, re-install the dependency from this repo and try again.
+            '''.format(path, repo, repo))
+        else:
+            logger.error('''
+            Could not find the repository {}
+            If you have access to {}, please clone it and try again
+            '''.format(path, os.path.basename(path)))
+        return False
+
+    return True

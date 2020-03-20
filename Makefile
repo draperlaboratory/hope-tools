@@ -22,6 +22,11 @@ PROJECTS += qemu
 PROJECTS += riscv-fesvr
 PROJECTS += riscv-openocd
 
+PRIVATE_PROJECTS := pex-firmware
+PRIVATE_PROJECTS += pex-kernel
+
+PROJECTS += $(foreach project, $(PRIVATE_PROJECTS), $(if $(wildcard ../$(project)/Makefile.isp),$(project)))
+
 STOCK_TOOLCHAIN := stock-riscv-gnu-toolchain
 STOCK_TOOLCHAIN += stock-llvm-project
 STOCK_TOOLCHAIN += stock-qemu

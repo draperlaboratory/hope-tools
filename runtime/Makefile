@@ -24,9 +24,15 @@ GDB_SCRIPTS := qemu.gdb
 GDB_SCRIPTS += renode.gdb
 
 ISP_BACKEND := isp_utils.py
+ISP_BACKEND += isp_load_image.py
+ISP_BACKEND += isp_pex_kernel.py
 
-MODULES := isp_qemu.py
-MODULES += isp_renode.py
+MODULE_FILES := isp_qemu.py
+MODULE_FILES += isp_renode.py
+MODULE_FILES += isp_vcu118.py
+MODULE_FILES += isp_vcs.py
+
+MODULES := $(patsubst %,modules/%,$(MODULE_FILES))
 
 BARE_PREFIX := osv.bare.main.
 FRTOS_PREFIX := osv.frtos.main.
