@@ -42,8 +42,21 @@ def getIspPrefix():
     return isp_prefix
 
 
-def getPolicyFullName(policy, runtime="{}"):
-    return "osv." + runtime + ".main." + policy
+def getPolicyFullName(policies, global_policies, debug):
+    composed_policies = "-".join(sorted(policies))
+
+    if global_policies:
+        composed_global_policies = "-".join(sorted(global_policies))
+        composed_policies = "-".join([composed_global_policies, composed_policies])
+
+    if debug:
+        return "-".join([composed_policies, "debug"])
+    else:
+        return composed_policies
+
+
+def getPolicyModuleName(policy):
+    return ".".join(["osv", policy, (policy + "Pol")])
 
 
 def setupLogger(level, colors=True):
@@ -69,7 +82,8 @@ def generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=None, arch=None):
             "-d", policy_dir,
             "-t", os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
             "-b", exe_path,
-            "-e", os.path.join(policy_dir, policy + ".entities.yml"),
+            "-e", os.path.join(policy_dir, "policy_entities.yml"),
+            os.path.join(policy_dir, "composite_entities.yml"),
             os.path.join(run_dir, exe_name + ".entities.yml")]
     if soc_cfg is not None:
         args += ["-s", soc_cfg]

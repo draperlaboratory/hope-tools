@@ -40,7 +40,7 @@ def main():
     Port of the gdbserver session
     ''')
     parser.add_argument("-s", "--simulator", type=str, default="qemu", help='''
-    Currently supported: qemu (default), renode
+    Simulator being used in isp_run_app
     ''')
     parser.add_argument("--arch", type=str, default="rv32", help='''
     Currently supported: rv32 (default), rv64
