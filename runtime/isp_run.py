@@ -12,16 +12,9 @@ import logging
 from isp_utils import *
 
 # backend helper to run an ISP simulation with a binary & kernel
-# TODO: runFPGA support
 
 logger = logging.getLogger()
 
-# possible module outcomes
-class retVals:
-    NO_BIN = "No binary found to run"
-    NO_POLICY = "No policy found"
-    TAG_FAIL  = "Tagging tools did not produce expected output"
-    SUCCESS   = "Simulator run successfully"
 
 # -- MAIN MODULE FUNCTIONALITY
 
@@ -37,7 +30,7 @@ class retVals:
 #  tag_only - run the tagging tools without running the simulator
 #  extra - extra command line arguments to the simulator
 
-def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, soc_cfg, use_validator, extra):
+def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_only, tagfile, soc_cfg, use_validator, extra):
     exe_name = os.path.basename(exe_path)
 
     if not os.path.isfile(exe_path):
@@ -50,26 +43,17 @@ def runSim(exe_path, policy_dir, run_dir, sim, runtime, rule_cache, gdb, tag_onl
 
     doMkDir(run_dir)
 
+    print("Rebuilding...")
+    rebuildValidator(policy_dir)
+    
     if "stock_" not in runtime and use_validator == True:
-        doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg)
         doEntitiesFile(run_dir, exe_name)
-        generateTagInfo(exe_path, run_dir, policy_dir)
-        rebuildValidator(policy_dir)
-
-        bininfo_base_path = os.path.join(run_dir, "bininfo", exe_name) + ".{}"
-
-        if not os.path.isfile(bininfo_base_path.format("taginfo")) or \
-           not os.path.isfile(bininfo_base_path.format("text"))    or \
-           not os.path.isfile(bininfo_base_path.format("text.tagged")):
-            return retVals.TAG_FAIL
-
-        if tag_only is True:
-            return retVals.SUCCESS
 
     sim_module = __import__("isp_" + sim)
-    sim_module.runSim(exe_path, run_dir, policy_dir, runtime, gdb, extra, use_validator)
+    ret_val = sim_module.runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
+                                gdb, tagfile, soc_cfg, extra, use_validator)
 
-    return retVals.SUCCESS
+    return ret_val
 
 # After running the policy-specific parts of the toolflow (e.g., generateTagInfo),
 # we do another Make on the validator. This gives the toolflow a chance to
@@ -78,15 +62,24 @@ def rebuildValidator(kernel_dir):
     
     # Run make in the engine directory
     engine_dir = os.path.join(kernel_dir, "engine")
-          
+
+    # Shouldn't need to clean
+    #subprocess.Popen(["make", "-f", "Makefile.isp", "clean"],
+    #                 stdout=subprocess.PIPE,
+    #                 stderr=subprocess.STDOUT,
+    #                 cwd=engine_dir).wait()
+    
     subprocess.Popen(["make", "-f", "Makefile.isp"],
                      stdout=subprocess.PIPE,
                      stderr=subprocess.STDOUT,
                      cwd=engine_dir).wait()
 
+    print("Calling make in " + engine_dir)
+
     # Then copy the new validator .so up to the top level
     build_dir = os.path.join(engine_dir, "build")
     for so_file in glob.glob(build_dir + "/*.so"):
+        print("Copying " + so_file + " into " + kernel_dir)
         shutil.copy(so_file, kernel_dir)
 
 def compileMissingPolicy(policy_dir):
@@ -104,47 +97,7 @@ def compileMissingPolicy(policy_dir):
     return True
 
 
-def generateTagInfo(exe_path, run_dir, policy_dir):
-    policy = os.path.basename(policy_dir).split("-debug")[0]
-    exe_name = os.path.basename(exe_path)
-    doMkDir(os.path.join(run_dir, "bininfo"))
-    with open(os.path.join(run_dir, "inits.log"), "w+") as initlog:
-        subprocess.Popen(["gen_tag_info",
-                          "-d", policy_dir,
-                          "-t", os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
-                          "-b", exe_path,
-                          "-e", os.path.join(policy_dir, policy + ".entities.yml"),
-                          os.path.join(run_dir, exe_name + ".entities.yml")],
-                          stdout=initlog, stderr=subprocess.STDOUT, cwd=run_dir).wait()
-
-
 def doEntitiesFile(run_dir, name):
     filename = os.path.join(run_dir, (name + ".entities.yml"))
     if os.path.exists(filename) is False:
         open(filename, "a").close()
-
-
-def doValidatorCfg(policy_dir, run_dir, exe_name, rule_cache, soc_cfg):
-    rule_cache_name = rule_cache[0]
-    rule_cache_size = rule_cache[1]
-
-    logger.info("Using soc_cfg file: {}".format(soc_cfg))
-
-    validatorCfg =  """\
----
-   policy_dir: {policyDir}
-   tags_file: {tagfile}
-   soc_cfg_path: {soc_cfg}
-""".format(policyDir=policy_dir,
-           tagfile=os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
-           soc_cfg=soc_cfg)
-
-    if rule_cache_name != "":
-        validatorCfg += """\
-   rule_cache:
-      name: {rule_cache_name}
-      capacity: {rule_cache_size}
-        """.format(rule_cache_name=rule_cache_name, rule_cache_size=rule_cache_size)
-
-    with open(os.path.join(run_dir, "validator_cfg.yml"), 'w') as f:
-        f.write(validatorCfg)

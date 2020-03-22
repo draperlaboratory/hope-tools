@@ -4,7 +4,10 @@ SYMLINK_DIR = $(ISP_PREFIX)/sources/
 KERNEL_DIR = $(ISP_PREFIX)/kernels/
 BIN_DIR = $(ISP_PREFIX)/bin/
 GDB_DIR = $(ISP_PREFIX)/gdb-scripts/
-MODULE_DIR = $(ISP_PREFIX)/runtime_modules/
+RUNTIME_DIR = $(ISP_PREFIX)/runtime/
+MODULE_DIR = $(ISP_PREFIX)/runtime/modules/
+
+CLANG_PATH := $(shell command -v clang 2> /dev/null;)
 
 ROOT = $(realpath ../../)
 
@@ -42,46 +45,70 @@ KERNELS := $(patsubst %,$(KERNEL_DIR)/%,$(KERNELS))
 
 INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
 
+PYTHON_SCRIPTS := $(patsubst %,%.py,$(ISP_SCRIPTS))
+PYTHON_SCRIPTS += $(ISP_BACKEND)
+
 POLICIES_DIR = $(SYMLINK_DIR)/policies/
 TEMPLATE_DIR = $(POLICIES_DIR)/policy_tests/template/
 POLICY_ENGINE_DIR = $(SYMLINK_DIR)/policy-engine/
-INSTALL_DIRS = $(BIN_DIR) $(GDB_DIR) $(KERNEL_DIR) $(SYMLINK_DIR) $(MODULE_DIR)
-
-.PHONY: all install clean uninstall kernels symlinks install-isp-scripts install-gdb-scripts
+.PHONY: all install clean uninstall kernels symlinks install-isp-scripts install-gdb-scripts install-runtime
 all: $(ISP_SCRIPTS)
 
-install: install-isp-scripts install-gdb-scripts install-modules
+install: install-runtime install-isp-scripts install-gdb-scripts install-modules $(VENV_DONE) $(SYMLINK_DSTS)
 
-install-isp-scripts: $(ISP_SCRIPTS) $(BIN_DIR)
+install-runtime:
+	mkdir -p $(RUNTIME_DIR)
+	install $(PYTHON_SCRIPTS) $(RUNTIME_DIR)
+
+install-isp-scripts: $(ISP_SCRIPTS)
+	mkdir -p $(BIN_DIR)
 	install $(ISP_SCRIPTS) $(BIN_DIR)
 
-install-gdb-scripts: $(GDB_SCRIPTS) $(GDB_DIR)
+install-gdb-scripts: $(GDB_SCRIPTS)
+	mkdir -p $(GDB_DIR)
 	install $(GDB_SCRIPTS) $(GDB_DIR)
 
-install-modules: $(MODULES) $(MODULE_DIR)
+install-modules: $(MODULES)
+	mkdir -p $(MODULE_DIR)
 	install $(MODULES) $(MODULE_DIR)
+
+install-sel4-template:
+	if [ ! -d $(ISP_PREFIX)/hope-seL4-app-template ]; then \
+		git clone https://github.com/draperlaboratory/hope-seL4-app-template.git $(ISP_PREFIX)/hope-seL4-app-template; \
+	fi
+	bash $(ISP_PREFIX)/hope-seL4-app-template/setup.sh
+
+install-stock-tools:
+	if [ ! -d $(ISP_PREFIX)/stock-tools ]; then\
+		mkdir -p $(ISP_PREFIX)/stock-tools/bin; \
+		ln -s $(ISP_PREFIX)/bin/riscv32-unknown-elf-* $(ISP_PREFIX)/stock-tools/bin/; \
+	fi
+
+        ifndef CLANG_PATH
+            $(info "No clang in $(PATH), unable to automatically link into stock-tools")
+        else 
+	    if [ ! -f $(ISP_PREFIX)/stock-tools/bin/clang ]; then \
+		    ln -s $(CLANG_PATH) $(ISP_PREFIX)/stock-tools/bin/clang; \
+            fi
+        endif
 
 kernels: $(KERNELS)
 
 symlinks: $(SYMLINK_DSTS)
 
-$(ISP_SCRIPTS): %: %.py $(SYMLINK_DSTS) $(ISP_BACKEND) $(VENV_DONE)
-	$(VENV) pyinstaller --onefile --distpath . $<
+$(ISP_SCRIPTS): %: %.py
+	printf '#!/bin/sh\n$(VENV) python $(RUNTIME_DIR)/$< "$$@"' > $@
+	chmod +x $@
 
 $(KERNELS): $(SYMLINK_DSTS) $(KERNEL_DIR) isp_kernel
 	./isp_kernel $(notdir $@) -o $(KERNEL_DIR)
 
 $(SYMLINK_DSTS): $(SYMLINK_DIR)/%: $(ROOT)/%
-	@echo $(SYMLINK_DSTS)
+	mkdir -p $(SYMLINK_DIR)
 	ln -sf $< $@
-
-$(SYMLINK_DSTS): $(SYMLINK_DIR)
-
-$(INSTALL_DIRS):
-	mkdir -p $@
 
 clean:
 	rm -rf $(ISP_SCRIPTS) $(KERNELS) *.pyc *.spec build/
 
 uninstall:
-	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNELS)
+	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(KERNEL_DIR) $(SYMLINK_DIR) $(RUNTIME_DIR) $(MODULE_DIR)

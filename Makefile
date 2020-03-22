@@ -19,6 +19,8 @@ PROJECTS += freedom-e-sdk
 PROJECTS += riscv-newlib
 PROJECTS += llvm-project
 PROJECTS += qemu
+PROJECTS += riscv-fesvr
+PROJECTS += riscv-openocd
 
 STOCK_TOOLCHAIN := stock-riscv-gnu-toolchain
 STOCK_TOOLCHAIN += stock-llvm-project
@@ -57,17 +59,17 @@ $(ISP_PREFIX):
 $(CLEAN_PROJECTS):
 	$(MAKE) -f Makefile.isp -C ../$(@:clean-%=%) clean
 
-runtime: $(ISP_PREFIX)
+runtime: $(ISP_PREFIX) riscv-gnu-toolchain
 	$(MAKE) -C runtime install
 
 documentation:
 	$(MAKE) -C documentation
 
 test-bare:
-	$(MAKE) -C ../policies/policy_tests bare
+	$(MAKE) -C ../policies/policy_tests bare-qemu
 
 test-frtos:
-	$(MAKE) -C ../policies/policy_tests frtos
+	$(MAKE) -C ../policies/policy_tests frtos-qemu
 
 clean-runtime:
 	$(MAKE) -C runtime clean
@@ -79,4 +81,4 @@ clean: $(CLEAN_PROJECTS) clean-test clean-runtime
 
 distclean: clean
 	rm -rf $(ISP_PREFIX)
-	rm -rf tools/venv
+	rm -rf $(VENV_DIR)

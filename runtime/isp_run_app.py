@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import isp_run
 import os
 import re
@@ -13,7 +15,10 @@ def printUartOutput(run_dir):
 
 
 def getProcessExitCode(run_dir, runtime):
-    process_log = open(os.path.join(run_dir, "uart.log"))
+    try:
+        process_log = open(os.path.join(run_dir, "uart.log"))
+    except:
+        return
     process_out = process_log.readlines()
     hex_pattern = r"0x[0-9A-Fa-f]+$"
     for line in process_out:
@@ -57,33 +62,41 @@ def main():
     parser.add_argument("-t", "--tag-only", action="store_true", help='''
     Run the tagging tools without running the application
     ''')
+    parser.add_argument("-T", "--tagfile", default=None, help='''
+    Path of tag file to use rather than generating it based on policy
+    ''')
     parser.add_argument("-C", "--rule-cache-name", type=str, default="", help='''
     Name of the rule cache
     ''')
     parser.add_argument("-c", "--rule-cache-size", type=int, default=16, help='''
     Size of the rule cache (if name is provided). Default is 16
     ''')
-    parser.add_argument("-e", "--extra", type=str, help='''
+    parser.add_argument("-e", "--extra", nargs="+", help='''
     Extra command line arguments for the simulator
     ''')
     parser.add_argument("-S", "--suffix", type=str, help='''
     Extra suffix to add to the test directory name
     ''')
     parser.add_argument("--soc", type=str, help='''
-    SOC configuration YAML file (default is <policy_dir>/soc_cfg/hifive_e_cfg.yml)
+    SOC configuration YAML file
     ''')
     parser.add_argument("-N", "--no_validator", action="store_true", help='''
-    Do not use the validator and run the stock version of the simulator.
+    Do not use the validator and run the stock version of the simulator (which
+    must be located at ISP_PREFIX/stock-tools/bin/qemu-system-riscv32.
+    ''')
+    parser.add_argument("--disable-colors", action="store_true", help='''
+    Disable colored logging
     ''')
 
     args = parser.parse_args()
 
-    logger = isp_utils.setupLogger()
-    logger.setLevel(logging.INFO)
+    log_level = logging.INFO
     if args.debug is True:
-        logger.setLevel(logging.DEBUG)
+        log_level = logging.DEBUG
 
-    sys.path.append(os.path.join(isp_utils.getIspPrefix(), "runtime_modules"))
+    logger = isp_utils.setupLogger(log_level, (not args.disable_colors))
+
+    sys.path.append(os.path.join(isp_utils.getIspPrefix(), "runtime", "modules"))
 
     output_dir = args.output
     if args.output == "":
@@ -95,9 +108,6 @@ def main():
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
-
-    if args.simulator not in ["qemu", "renode"]:
-        logger.error("Invalid choice of simulator. Valid choices are: qemu, renode")
 
     # Policy Directory Building
     # Force policy to none if we're using stock
@@ -120,16 +130,13 @@ def main():
     exe_full_path = os.path.abspath(args.exe_path)
     run_dir = os.path.join(output_dir,
                            "isp-run-{}-{}".format(exe_name, policy_name))
+
     if args.rule_cache_name != "":
         run_dir = run_dir + "-{}-{}".format(args.rule_cache_name,
                                             args.rule_cache_size)
 
     if args.suffix:
         run_dir = run_dir + "-" + args.suffix
-
-    soc_path = os.path.join(policy_dir, "soc_cfg", "hifive_e_cfg.yml")
-    if args.soc is not None:
-        soc_path = os.path.abspath(args.soc)
 
     use_validator = True
     if args.no_validator == True:
@@ -147,7 +154,8 @@ def main():
                             (args.rule_cache_name, args.rule_cache_size),
                             args.gdb,
                             args.tag_only,
-                            soc_path,
+                            args.tagfile,
+                            args.soc,
                             use_validator,
                             args.extra)
 

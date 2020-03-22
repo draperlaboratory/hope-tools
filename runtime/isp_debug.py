@@ -1,9 +1,12 @@
+#! /usr/bin/python3
+
 import argparse
 import subprocess
 import os
 import sys
 import time
 import isp_utils
+import signal
 
 gdb_command = "riscv32-unknown-elf-gdb"
 
@@ -20,6 +23,9 @@ def startGdb(exe_path, port, sim):
         args.insert(6, "-ex")
         args.insert(7, "monitor start")
 
+    # Ignore ctrl-c so it's possible to interrupt gdb in a loop
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+        
     proc = subprocess.call(args)
 
 

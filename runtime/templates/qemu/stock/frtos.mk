@@ -1,10 +1,13 @@
 ISP_PREFIX ?= $(HOME)/.local/isp/
 
-ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-frtos\.mk"))
+ISP_RUNTIME := $(basename $(filter /%/isp-runtime-frtos.mk, $(abspath $(MAKEFILE_LIST))))
 FREERTOS_DIR := $(ISP_PREFIX)/FreeRTOS
 FREERTOS_RVDEMO_DIR := $(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio
 SDK_DIR := $(FREERTOS_RVDEMO_DIR)/freedom-e-sdk
 FREERTOS_BUILD_DIR := $(FREERTOS_RVDEMO_DIR)/build
+
+STOCK_TOOLS      ?= $(abspath $(ISP_PREFIX)/stock-tools)
+TOOLCHAIN_TRIPLE ?= riscv32-unknown-elf
 
 include $(FREERTOS_RVDEMO_DIR)/BuildEnvironment.mk
 
@@ -14,37 +17,24 @@ ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio
 ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/include
 ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env
 ISP_INCLUDES += -I$(FREERTOS_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env/freedom-e300-hifive1
-ISP_INCLUDES += -I$(ISP_PREFIX)/riscv32-unknown-elf/include
+ISP_INCLUDES += -I$(STOCK_TOOLS)/$(TOOLCHAIN_TRIPLE)/include
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
-MALLOC_VERSION ?= heap_2
-
-ifeq ($(MALLOC_VERSION), heap_2)
-ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos.a
-else
-ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos-$(MALLOC_VERSION).a
-endif
-
-RISCV_PATH    ?= $(ISP_PREFIX)
-RISCV_CLANG   ?= $(abspath $(RISCV_PATH)/bin/clang)
+ISP_LIBS := $(FREERTOS_BUILD_DIR)/libfreertos-stock.a
+RISCV_PATH    ?= $(STOCK_TOOLS)
+RISCV_CLANG   ?= $(abspath $(STOCK_TOOLS)/bin/clang)
 RISCV_GXX     ?= $(RISCV_CLANG)
-RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-objdump)
-RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-gdb)
-RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/riscv32-unknown-elf-ar)
+RISCV_OBJDUMP ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN_TRIPLE)-objdump)
+RISCV_GDB     ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN_TRIPLE)-gdb)
+RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/$(TOOLCHAIN_TRIPLE)-ar)
 
 CC=$(RISCV_CLANG)
 
 all:
 
 $(ISP_LIBS):
-	@echo $(MALLOC_VERSION)
-ifeq ($(MALLOC_VERSION), heap_2)
 	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) clean-libfreertos-objs
-	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) lib
-else
-	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) clean-libfreertos-objs
-	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) build/libfreertos-$(MALLOC_VERSION).a
-endif
+	$(MAKE) -C $(FREERTOS_RVDEMO_DIR) build/libfreertos-stock.a MALLOC_VERSION=stock_heap_2
 
 .PHONY: isp-runtime-common
 isp-runtime-common: $(ISP_LIBS) $(ISP_OBJECTS)
