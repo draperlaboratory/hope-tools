@@ -139,7 +139,6 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
     # Base options for any runtime
     opts = [ "-nographic",
              "-kernel", exe_path,
-             "-serial", "file:{}".format(os.path.join(run_dir, uart_log_file)),
              "-d", "nochain"]
 
     # ISP validator specific flags
@@ -150,10 +149,13 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
 
     # Machine selection
     if "sel4" in runtime:
-        opts += ["-machine", "virt"]
+        opts += ["-machine", "sifive_u"]
+        opts += ["-serial", "tcp::4445,server,nodelay"]
+        timeout_seconds = 36000
     else:
         opts += ["-machine", "sifive_e"]
 
+    opts += ["-serial", "file:{}".format(os.path.join(run_dir, uart_log_file))]
     # Runtime specific options
     if "sel4" in runtime:
         opts += ["-m", "size=2000M"]
@@ -225,13 +227,13 @@ def launchQEMU(run_dir, runtime, env, options):
                               stderr=subprocess.STDOUT)
         while rc.poll() is None:
             time.sleep(1)
-            uart_log = open(os.path.join(run_dir, uart_log_file), 'r')
-            status_log = open(os.path.join(run_dir, status_log_file), 'r')
-            uart_output = uart_log.read()
-            status_output = status_log.read()
-            uart_log.close()
-            status_log.close()
             try:
+                uart_log = open(os.path.join(run_dir, uart_log_file), 'r')
+                status_log = open(os.path.join(run_dir, status_log_file), 'r')
+                uart_output = uart_log.read()
+                status_output = status_log.read()
+                uart_log.close()
+                status_log.close()
                 if terminate_msg in uart_output or process_exit:
                     rc.terminate()
                     process_exit = True
