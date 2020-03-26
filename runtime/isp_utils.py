@@ -5,6 +5,8 @@ import logging
 import coloredlogs
 import subprocess
 
+from elftools.elf.elffile import ELFFile
+
 # possible module outcomes
 class retVals:
     NO_BIN = "No binary found to run"
@@ -13,6 +15,13 @@ class retVals:
     SUCCESS = "Simulator run successfully"
     FAILURE = "Simulator failed to run to completion"
 
+
+elf_archs = {
+    ("EM_RISCV", 32) : "rv32",
+    ("EM_RISCV", 64) : "rv64",
+}
+
+supportedArchs = list(elf_archs.values())
 
 def doMkDir(dir):
     try:
@@ -139,3 +148,15 @@ def checkDependency(path, logger, repo=None):
         return False
 
     return True
+
+
+def getArch(exe_path):
+    exe = open(exe_path, "rb")
+    elf_file = ELFFile(exe)
+
+    elf_arch = (elf_file.header["e_machine"], elf_file.elfclass)
+
+    if elf_arch in elf_archs:
+        return elf_archs[elf_arch]
+
+    return None
