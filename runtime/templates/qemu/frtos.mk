@@ -13,10 +13,10 @@ include $(FREERTOS_DIR)/build/hifive/BuildEnvironment.mk
 
 ISP_INCLUDES := -I$(FREERTOS_INCLUDE_DIR)/Source/include
 ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Source/portable/GCC/RISC-V
-ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio
-ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/include
-ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env
-ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-Qemu-sifive_e-FreedomStudio/freedom-e-sdk/env/freedom-e300-hifive1
+ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-ISP
+ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-ISP/freedom-e-sdk/include
+ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-ISP/freedom-e-sdk/env
+ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-ISP/freedom-e-sdk/env/freedom-e300-hifive1
 ISP_INCLUDES += -I$(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/include
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
