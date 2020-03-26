@@ -107,7 +107,7 @@ def main():
     parser.add_argument("-r", "--runtime", type=str, default="bare", help='''
     Currently supported: frtos, sel4, bare (bare metal) (default), stock_frtos, stock_sel4, stock_bare
     ''')
-    parser.add_argument("--arch", type=str, help='''
+    parser.add_argument("-a", "--arch", type=str, help='''
     Architecture of executable. Currently supported: {}. Autodetect by default
     '''.format(isp_utils.supportedArchs))
     parser.add_argument("-o", "--output", type=str, default="", help='''
