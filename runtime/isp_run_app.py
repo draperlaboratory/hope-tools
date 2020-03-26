@@ -107,9 +107,9 @@ def main():
     parser.add_argument("-r", "--runtime", type=str, default="bare", help='''
     Currently supported: frtos, sel4, bare (bare metal) (default), stock_frtos, stock_sel4, stock_bare
     ''')
-    parser.add_argument("--arch", type=str, default="rv32", help='''
-    Currently supported: rv32 (default), rv64
-    ''')
+    parser.add_argument("--arch", type=str, help='''
+    Architecture of executable. Currently supported: {}. Autodetect by default
+    '''.format(isp_utils.supportedArchs))
     parser.add_argument("-o", "--output", type=str, default="", help='''
     Location of simulator output directory. Contains supporting files and
     runtime logs.
@@ -181,9 +181,15 @@ def main():
         logger.error("Invalid choice of runtime. Valid choices: frtos, sel4, bare, stock_frtos, stock_sel4, stock_bare")
         return
 
-    if args.arch not in ["rv32", "rv64"]:
-        logger.error("Invalid choice of architecture. Valid choices: rv32, rv64")
-        return
+    if not args.arch:
+        arch = isp_utils.getArch(args.exe_path)
+        if not arch:
+            logger.error("Invalid choice of architecture. Valid choices: {}".format(isp_utils.supportedArchs))
+            return
+
+        logger.debug("Executable has architecture {}".format(arch))
+    else:
+        arch = args.arch
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
