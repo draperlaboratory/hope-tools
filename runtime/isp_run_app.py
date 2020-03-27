@@ -261,7 +261,7 @@ def main():
                                args.gdb,
                                args.tagfile,
                                args.soc,
-                               args.arch,
+                               arch,
                                args.extra,
                                use_validator)
 
