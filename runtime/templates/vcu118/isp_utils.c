@@ -32,7 +32,13 @@ void isp_test_device_fail(void)
 uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
 {
 #if __riscv_xlen == 64
-	return read_csr(mcycle);
+	uint64_t cycle;
+	asm volatile(
+		"%=:\n\t"
+		"csrr %0, mcycle\n\t"
+		: "=r"(cycle));
+
+  return cycle;
 #else
 	uint32_t cycle_lo, cycle_hi;
 	asm volatile(

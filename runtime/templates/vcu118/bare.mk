@@ -11,12 +11,6 @@ ISP_ASM_SRCS     += $(wildcard $(ISP_RUNTIME)/*.S)
 ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 
-ifneq ($(ARCH), rv64)
-ISP_CFLAGS			 := -march=rv32im -mabi=ilp32 --target=riscv32-unknown-elf -mcmodel=medium
-else
-ISP_CFLAGS			 := -march=rv64imafd -mabi=ilp32 --target=riscv64-unknown-elf -mcmodel=medium
-endif
-
 ISP_CFLAGS			 += -Wall -Wextra -O0 -g3 -std=gnu11 -mno-relax
 ISP_CFLAGS			 += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/include
@@ -29,7 +23,21 @@ RISCV_OBJDUMP		 ?= $(abspath  $(RISCV_PATH)/bin/llvm-objdump)
 RISCV_GDB				 ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-gdb)
 RISCV_AR				 ?= $(abspath  $(RISCV_PATH)/bin/llvm-ar)
 
+ifneq ($(ARCH), rv64)
+RISCV_ARCH 			 ?= rv32ima
+RISCV_ABI        ?= ilp32
+RISCV_TARGET	?= riscv32-unknown-elf
+else
+RISCV_ARCH ?= rv64imafd
+RISCV_ABI ?= lp64d
+RISCV_TARGET ?= riscv64-unknown-elf
+
+ISP_CFLAGS += -mcmodel=medany
+ISP_LDFLAGS += -mcmodel=medany
+endif
 CC 							 := $(RISCV_CLANG)
+
+ISP_CFLAGS			 += -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI) --target=$(RISCV_TARGET)
 
 BSP_BASE				 := $(ISP_RUNTIME)/bsp
 
@@ -55,7 +63,10 @@ ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
 all:
 
 $(LIBVCU118):
-	make -C $(BSP_BASE)
+	ARCH=$(ARCH) make -C $(BSP_BASE)
+
+debug:
+	echo $(CC)
 
 $(LIBISP): $(ISP_OBJECTS)
 	$(RISCV_AR) rcs $@ $(ISP_OBJECTS)
