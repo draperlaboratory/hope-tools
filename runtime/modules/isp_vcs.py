@@ -47,6 +47,7 @@ def installTagMemHexdump(policy_name, output_dir):
                              cwd=pex_kernel_output_dir, env=env)
 
     if result != 0:
+        logger.error("Failed to install tag_mem_hexdump")
         return False
 
     return True
