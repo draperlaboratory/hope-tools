@@ -211,6 +211,9 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     pex_hex_dump_path = os.path.join(run_dir, os.path.basename(pex_load_image_path) + ".hex")
     policy_name = os.path.basename(policy_dir)
 
+    if not soc_cfg:
+        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "gfe-vcu118.yml")
+
     if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=soc_cfg, arch=arch) is False:
         return isp_utils.retVals.TAG_FAIL
 
