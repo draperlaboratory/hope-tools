@@ -157,8 +157,9 @@ def start_openocd(log_file=None):
     return openocd_proc
 
 
-def gdb_thread(exe_path, log_file=None):
-    child = pexpect.spawn("riscv32-unknown-elf-gdb", [exe_path], encoding="utf-8", timeout=None)
+def gdb_thread(exe_path, log_file=None, arch="rv32"):
+    xlen = 64 if arch == "rv64" else 32
+    child = pexpect.spawn("riscv{}-unknown-elf-gdb".format(xlen), [exe_path], encoding="utf-8", timeout=None)
     if log_file is None:
         child.logfile = sys.stdout
     else:
@@ -225,7 +226,7 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
 
 
 def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
-            gdb_log_file, flash_init_image_path, gdb_port, no_log):
+            gdb_log_file, flash_init_image_path, gdb_port, no_log, arch):
     logger.debug("Connecting to {}".format(pex_tty))
     pex_serial = serial.Serial(pex_tty, 115200, timeout=3000000,
             bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
@@ -235,6 +236,7 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
     
     logger.info("Sending flash init file {} to {}".format(flash_init_image_path, pex_tty))
     pex_serial.write(open(flash_init_image_path, "rb").read())
+    logger.info("Done writing init file")
 
     pex_expect.expect("Entering idle loop.")
     pex_expect.close()
@@ -249,7 +251,7 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
         return isp_utils.retVals.FAILURE
 
     logger.debug("Spawning gdb")
-    gdb = multiprocessing.Process(target=gdb_thread, args=(exe_path, gdb_log_file))
+    gdb = multiprocessing.Process(target=gdb_thread, args=(exe_path, gdb_log_file, arch))
 
     if gdb_port == 0:
         gdb.start()
@@ -259,6 +261,7 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
         while True:
             pass
 
+    logger.info("waiting for pex and ap to finish")
     while pex.is_alive() and ap.is_alive():
         pass
 
@@ -279,7 +282,7 @@ def runStock(exe_path, ap, openocd_log_file, gdb_log_file,
         return isp_utils.retVals.FAILURE
 
     logger.debug("Spawning gdb")
-    gdb = threading.Thread(target=gdb_thread, args=(exe_path, gdb_log_file))
+    gdb = threading.Thread(target=gdb_thread, args=(exe_path, gdb_log_file, "rv32"))
     if gdb_port == 0:
         gdb.start()
 
@@ -358,7 +361,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         result = runStock(exe_path, ap, openocd_log_file, gdb_log_file, gdb_port, extra_args.no_log)
     else:
         result = runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
-                         gdb_log_file, flash_init_image_path, gdb_port, extra_args.no_log)
+                         gdb_log_file, flash_init_image_path, gdb_port, extra_args.no_log, arch)
 
     pex_log.close()
     ap_log.close()
