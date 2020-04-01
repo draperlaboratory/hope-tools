@@ -119,7 +119,7 @@ def terminateMessage(runtime):
     if runtime == "sel4":
         return "seL4 root server abort()ed"
     elif runtime == "bare":
-        return "Program has exited with code:"
+        return "Program exited with code:"
 
     return ""
 
