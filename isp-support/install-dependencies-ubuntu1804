@@ -12,6 +12,6 @@ sudo apt-get install -y autoconf automake autogen autotools-dev curl \
     libyaml-cpp-dev libgflags-dev \
     python3-psutil xterm verilator virtualenv python3-pip \
     libftdi1-2 libusb-1.0-0-dev libtinfo5 \
-    libglib2.0-dev libpixman-1-dev pkg-config
+    libglib2.0-dev libpixman-1-dev pkg-config device-tree-compiler
 
 sudo stack upgrade --binary-only --allow-different-user --local-bin-path /usr/bin
