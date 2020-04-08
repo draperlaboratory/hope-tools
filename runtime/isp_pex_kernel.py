@@ -24,11 +24,11 @@ def copyPexKernelSources(source_dir, output_dir):
     return True
 
 
-def copyPolicySources(policy_dir, output_dir, fpga):
+def copyPolicySources(policy_dir, output_dir, fpga, processor):
     logger.debug("Copying policy source to pex kernel")
     policy_name = os.path.basename(policy_dir)
     pex_kernel_output_dir = os.path.join(output_dir, "pex-kernel")
-    build_dir_name = "-".join([fpga, policy_name])
+    build_dir_name = "-".join([fpga, processor, policy_name])
     gen_dir = os.path.join(pex_kernel_output_dir, "build", build_dir_name, "gen")
 
     try:
@@ -40,11 +40,12 @@ def copyPolicySources(policy_dir, output_dir, fpga):
     return True
 
 
-def buildPexKernel(policy_name, output_dir, fpga):
+def buildPexKernel(policy_name, output_dir, fpga, processor):
     logger.debug("Building PEX kernel")
     env = dict(os.environ)
 
     env["FPGA"] = fpga
+    env["PROCESSOR"] = processor
 
     if policy_name.endswith("-debug"):
         policy_name = policy_name.replace("-debug", "")
@@ -68,14 +69,14 @@ def buildPexKernel(policy_name, output_dir, fpga):
     return True
 
 
-def movePexKernel(policy_name, output_dir, fpga):
+def movePexKernel(policy_name, output_dir, fpga, processor):
     logger.debug("Moving PEX kernel to output dir")
     pex_kernel_output_dir = os.path.join(output_dir, "pex-kernel")
 
-    build_dir_name = "-".join([fpga, policy_name])
+    build_dir_name = "-".join([fpga, processor, policy_name])
     build_dir = os.path.join(pex_kernel_output_dir, "build", build_dir_name)
 
-    pex_kernel_name = pexKernelName(policy_name, fpga)
+    pex_kernel_name = pexKernelName(policy_name, fpga, processor)
     pex_kernel_path = os.path.join(build_dir, pex_kernel_name)
     pex_kernel_out_path = os.path.join(os.path.dirname(output_dir), pex_kernel_name)
 
@@ -89,5 +90,6 @@ def movePexKernel(policy_name, output_dir, fpga):
     return True
 
 
-def pexKernelName(policy_name, fpga):
-    return "-".join(["kernel", fpga, policy_name])
+def pexKernelName(policy_name, fpga, processor):
+    return "-".join(["kernel", fpga, processor, policy_name])
+

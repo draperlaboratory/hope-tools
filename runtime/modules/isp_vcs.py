@@ -23,8 +23,9 @@ fpga = "gfe-sim"
 # Invoked by isp_install_policy
 #################################
 
-def defaultPexPath(policy_name, arch):
-    return os.path.join(isp_prefix, "pex_kernel", isp_pex_kernel.pexKernelName(policy_name, "gfe-sim"))
+def defaultPexPath(policy_name, arch, extra):
+    extra_args = parseExtra(extra)
+    return os.path.join(isp_prefix, "pex_kernel", isp_pex_kernel.pexKernelName(policy_name, fpga, extra_args.processor))
 
 
 def installTagMemHexdump(policy_name, output_dir):
@@ -53,11 +54,13 @@ def installTagMemHexdump(policy_name, output_dir):
     return True
 
 
-def installPex(policy_dir, output_dir, arch):
+def installPex(policy_dir, output_dir, arch, extra):
     logger.info("Installing pex kernel for VCS")
     pex_kernel_source_dir = os.path.join(isp_prefix, "sources", "pex-kernel")
     pex_firmware_source_dir = os.path.join(isp_prefix, "sources", "pex-firmware")
     policy_name = os.path.basename(policy_dir)
+
+    extra_args = parseExtra(extra)
 
     if not isp_utils.checkDependency(pex_kernel_source_dir, logger):
         return False
@@ -68,16 +71,16 @@ def installPex(policy_dir, output_dir, arch):
     if not isp_pex_kernel.copyPexKernelSources(pex_kernel_source_dir, output_dir):
         return False
 
-    if not isp_pex_kernel.copyPolicySources(policy_dir, output_dir, fpga):
+    if not isp_pex_kernel.copyPolicySources(policy_dir, output_dir, fpga, extra_args.processor):
         return False
 
-    if not isp_pex_kernel.buildPexKernel(policy_name, output_dir, fpga):
+    if not isp_pex_kernel.buildPexKernel(policy_name, output_dir, fpga, extra_args.processor):
         return False
 
     if not installTagMemHexdump(policy_name, output_dir):
         return False
 
-    if not isp_pex_kernel.movePexKernel(policy_name, output_dir, fpga):
+    if not isp_pex_kernel.movePexKernel(policy_name, output_dir, fpga, extra_args.processor):
         return False
 
     return True
@@ -96,6 +99,7 @@ def parseExtra(extra):
     parser.add_argument("--timeout", type=int, default=0, help="Simulator timeout (in seconds)")
     parser.add_argument("--max-cycles", type=int, default=300000000, help="Maxmimum number of cycles to simulate")
     parser.add_argument("--init-only", action="store_true", help="Generate artifacts without running the simulator")
+    parser.add_argument("--processor", type=str, default="P1", help="GFE processor configuration (P1/P2/P3)")
 
     if extra is not None:
         extra_dashed = []

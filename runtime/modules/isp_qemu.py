@@ -100,11 +100,11 @@ def validatorName(policy_name, arch):
     return "-".join([arch, policy_name, "validator"]) + ".so"
 
 
-def defaultPexPath(policy_name, arch):
+def defaultPexPath(policy_name, arch, extra):
     return os.path.join(isp_prefix, "validator", validatorName(policy_name, arch))
 
 
-def installPex(policy_dir, output_dir, arch):
+def installPex(policy_dir, output_dir, arch, extra):
     logger.info("Installing policy validator for QEMU")
     engine_dir = os.path.join(isp_prefix, "sources", "policy-engine")
     policy_name = os.path.basename(policy_dir)
