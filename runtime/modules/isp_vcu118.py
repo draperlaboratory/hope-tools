@@ -246,7 +246,7 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
     pex_serial = serial.Serial(pex_tty, 115200, timeout=3000000,
             bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
 
-    pex_expect = pexpect_serial.SerialSpawn(pex_serial, timeout=3000000, encoding='utf-8')
+    pex_expect = pexpect_serial.SerialSpawn(pex_serial, timeout=3000000, encoding='utf-8', codec_errors='ignore')
     pex_expect.logfile = pex_log
     
     logger.info("Sending flash init file {} to {}".format(flash_init_image_path, pex_tty))
