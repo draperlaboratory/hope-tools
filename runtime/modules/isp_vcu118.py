@@ -190,8 +190,15 @@ def gdb_thread(exe_path, log_file=None, arch="rv32"):
         gdb_log.close()
 
 
-def ap_thread(ap_tty, ap_log, runtime):
-    ap_serial = serial.Serial(ap_tty, 115200, timeout=3000000, bytesize=serial.EIGHTBITS,
+def ap_thread(ap_tty, ap_log, runtime, processor):
+    baud_rate = 0
+
+    if processor == "P1":
+        baud_rate = 57600
+    elif processor == "P2":
+        baud_rate = 115200
+
+    ap_serial = serial.Serial(ap_tty, baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
                                parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
     ap_expect = pexpect_serial.SerialSpawn(ap_serial, timeout=3000000, encoding='utf-8', codec_errors='ignore')
     ap_expect.logfile = ap_log
@@ -360,7 +367,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         logger.error("Failed to autodetect PEX TTY file. If you know the symlink, re-run with the +pex_tty option")
         return isp_utils.retVals.FAILURE
 
-    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_log, runtime))
+    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_log, runtime, extra_args.processor))
     if not extra_args.no_log:
         logger.debug("Connecting to {}".format(ap_tty))
         ap.start()
