@@ -51,9 +51,11 @@ def compileMissingPex(policy_dir, pex_path, sim, arch, extra):
              "-p", policy_dir,
              "-s", sim,
              "--arch", arch,
-             "-e", " ".join(extra),
              "-o", install_path]
 
+    args += ["-e"] + extra
+
+    logger.debug("Building PEX kernel with command: {}".format(" ".join(args)))
     result = subprocess.call(args)
 
     if result != 0:
@@ -75,6 +77,7 @@ def compileMissingPolicy(policies, global_policies, debug):
     if debug:
         args += ["-D"]
 
+    logger.debug("Building policy with command: {}".format(" ".join(args)))
     result = subprocess.call(args)
 
     if result != 0:
