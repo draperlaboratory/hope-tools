@@ -53,7 +53,8 @@ def compileMissingPex(policy_dir, pex_path, sim, arch, extra):
              "--arch", arch,
              "-o", install_path]
 
-    args += ["-e"] + extra
+    if extra:
+        args += ["-e"] + extra
 
     logger.debug("Building PEX kernel with command: {}".format(" ".join(args)))
     result = subprocess.call(args)
