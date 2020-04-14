@@ -220,7 +220,9 @@ def main():
 
     pex_path = args.pex
     if not pex_path:
-        pex_path = sim_module.defaultPexPath(policy_name, args.arch, args.extra)
+        pex_path = sim_module.defaultPexPath(policy_name, arch, args.extra)
+    else:
+        pex_path = os.path.realpath(args.pex)
 
     args.exe_path = os.path.realpath(args.exe_path)
     exe_name = os.path.basename(args.exe_path)
