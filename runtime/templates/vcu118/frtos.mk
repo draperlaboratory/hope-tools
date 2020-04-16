@@ -35,7 +35,7 @@ ISP_INCLUDES 		 += -I$(FREERTOS_INCLUDE_DIR)/Source/portable/GCC/RISC-V
 ISP_INCLUDES 		 += -I$(FREERTOS_INCLUDE_DIR)/Demo/Common/include
 ISP_INCLUDES 		 += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V_Galois_P1
 ISP_INCLUDES 		 += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V_Galois_P1/bsp
-ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/include
+ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 ISP_INCLUDES     += -I$(ISP_RUNTIME)
 
 RISCV_PATH			 ?= $(ISP_PREFIX)
@@ -54,7 +54,7 @@ ISP_LIBS         := $(LIBISP)
 ISP_LDFLAGS			 := -T $(LINKER_SCRIPT) -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
 ISP_LDFLAGS  		 += -Wl,--gc-sections
 
-ISP_LDFLAGS      += -lfreertos-vcu118 -L$(FREERTOS_LIB_DIR) -L $(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/lib -fuse-ld=lld
+ISP_LDFLAGS      += -lfreertos-vcu118 -L$(FREERTOS_LIB_DIR) -L $(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/lib -fuse-ld=lld
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
 ISP_LDFLAGS      += -Wl,--wrap=puts
 ISP_LDFLAGS      += -Wl,--wrap=printf

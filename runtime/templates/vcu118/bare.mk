@@ -13,7 +13,7 @@ ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 
 ISP_CFLAGS			 += -Wall -Wextra -O0 -g3 -std=gnu11 -mno-relax
 ISP_CFLAGS			 += -ffunction-sections -fdata-sections -fno-builtin-printf
-ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/include
+ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 ISP_INCLUDES     += -I$(ISP_RUNTIME)
 
 RISCV_PATH			 ?= $(ISP_PREFIX)

@@ -9,7 +9,7 @@ C_SRCS += $(wildcard $(ISP_RUNTIME)/*.c)
 
 ISP_CFLAGS   += -O2 -fno-builtin-printf -mno-relax
 ISP_INCLUDES += -I$(ISP_RUNTIME)
-ISP_INCLUDES += -I$(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/include
+ISP_INCLUDES += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 
 RISCV_PATH    ?= $(ISP_PREFIX)
 RISCV_CLANG   ?= $(abspath $(RISCV_PATH)/bin/clang)
@@ -28,7 +28,7 @@ else
    RISCV_ABI ?= lp64d
    ISP_CFLAGS += --target=riscv64-unknown-elf -mcmodel=medany
 endif
-ISP_LDFLAGS += -L $(ISP_PREFIX)/clang_sysroot/riscv$(ARCH_XLEN)-unknown-elf/lib -fuse-ld=lld
+ISP_LDFLAGS += -L $(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/lib -fuse-ld=lld
 
 BOARD ?= freedom-e300-hifive1
 LINK_TARGET ?= flash
