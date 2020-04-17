@@ -27,7 +27,7 @@ ISP_ASM_SRCS     += $(wildcard $(ISP_RUNTIME)/*.S)
 ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 
-ISP_LDFLAGS      += -L$(ISP_RUNTIME) -L$(FREERTOS_LIB_DIR) -L $(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/lib -fuse-ld=lld
+ISP_LDFLAGS      += -L$(ISP_RUNTIME) -L$(FREERTOS_LIB_DIR) -fuse-ld=lld
 ISP_LDFLAGS      += -Wl,--start-group -lfreertos-hifive$(ARCH_XLEN) -lisp -lc -Wl,--end-group
 
 LIBISP           := $(ISP_RUNTIME)/libisp.a

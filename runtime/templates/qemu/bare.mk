@@ -28,7 +28,7 @@ else
    RISCV_ABI ?= lp64d
    ISP_CFLAGS += --target=riscv64-unknown-elf -mcmodel=medany
 endif
-ISP_LDFLAGS += -L $(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/lib -fuse-ld=lld
+ISP_LDFLAGS += -fuse-ld=lld
 
 BOARD ?= freedom-e300-hifive1
 LINK_TARGET ?= flash
