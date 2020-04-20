@@ -122,7 +122,7 @@ def detectTTY(symlink):
 
 def program_fpga(bit_file, ltx_file, log_file):
     tcl_script = os.path.join(isp_prefix, "vcu118", "tcl", "prog_bit.tcl")
-    args = ["vivado", "-mode", "batch", "-source", tcl_script, "-tclargs", bit_file, ltx_file]
+    args = ["vivado", "-mode", "batch", "-source", tcl_script, "-tclargs", bit_file, ltx_file, "vcu118"]
 
     if not isp_utils.checkDependency(tcl_script, logger, "hope-gfe"):
         return False
