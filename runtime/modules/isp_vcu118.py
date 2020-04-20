@@ -196,7 +196,7 @@ def ap_thread(ap_tty, ap_log, runtime, processor):
     if processor == "P1":
         baud_rate = 57600
     elif processor == "P2":
-        baud_rate = 115200
+        baud_rate = 230400
 
     ap_serial = serial.Serial(ap_tty, baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
                                parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
