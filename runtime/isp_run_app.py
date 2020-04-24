@@ -174,9 +174,10 @@ def main():
         logger.error("No binary found to run")
         exit(1)
 
-    output_dir = args.output
     if args.output == "":
         output_dir = os.getcwd()
+    else:
+        output_dir = os.path.abspath(args.output)
 
     if args.runtime not in ["frtos", "sel4", "bare", "stock_frtos", "stock_sel4", "stock_bare"]:
         logger.error("Invalid choice of runtime. Valid choices: frtos, sel4, bare, stock_frtos, stock_sel4, stock_bare")
