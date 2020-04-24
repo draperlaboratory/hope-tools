@@ -21,10 +21,6 @@ def startGdb(exe_path, port, sim, arch):
                          "-ex", "target remote :{}".format(port),
                          exe_path]
 
-    if sim == "renode":
-        args.insert(6, "-ex")
-        args.insert(7, "monitor start")
-
     # Ignore ctrl-c so it's possible to interrupt gdb in a loop
     signal.signal(signal.SIGINT, signal.SIG_IGN)
         

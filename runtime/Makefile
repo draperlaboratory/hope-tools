@@ -21,14 +21,12 @@ ISP_SCRIPTS += isp_debug
 ISP_SCRIPTS += isp_install_policy
 
 GDB_SCRIPTS := qemu.gdb
-GDB_SCRIPTS += renode.gdb
 
 ISP_BACKEND := isp_utils.py
 ISP_BACKEND += isp_load_image.py
 ISP_BACKEND += isp_pex_kernel.py
 
 MODULE_FILES := isp_qemu.py
-MODULE_FILES += isp_renode.py
 MODULE_FILES += isp_vcu118.py
 MODULE_FILES += isp_vcs.py
 
