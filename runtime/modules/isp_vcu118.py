@@ -290,7 +290,7 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
 
 
 def runStock(exe_path, ap, openocd_log_file, gdb_log_file,
-             gdb_port, no_log):
+             gdb_port, no_log, arch):
     logger.debug("Spawning openocd")
     openocd_proc = start_openocd(openocd_log_file)
     if not openocd_proc:
@@ -373,7 +373,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         ap.start()
 
     if extra_args.stock:
-        result = runStock(exe_path, ap, openocd_log_file, gdb_log_file, gdb_port, extra_args.no_log)
+        result = runStock(exe_path, ap, openocd_log_file, gdb_log_file, gdb_port, extra_args.no_log, arch)
     else:
         result = runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
                          gdb_log_file, flash_init_image_path, gdb_port, extra_args.no_log, arch)
