@@ -266,7 +266,8 @@ def main():
                                args.soc,
                                arch,
                                args.extra,
-                               use_validator)
+                               use_validator,
+                               args.tag_only)
 
     if result != isp_utils.retVals.SUCCESS:
         logger.error(result)
