@@ -18,6 +18,8 @@ isp_prefix = isp_utils.getIspPrefix()
 
 fpga = "gfe-sim"
 
+dbg_suffix = "-debug"
+
 #################################
 # Build/Install PEX kernel
 # Invoked by isp_install_policy
@@ -28,15 +30,16 @@ def defaultPexPath(policy_name, arch, extra):
     return os.path.join(isp_prefix, "pex_kernel", isp_pex_kernel.pexKernelName(policy_name, fpga, extra_args.processor))
 
 
-def installTagMemHexdump(policy_name, output_dir):
+def installTagMemHexdump(policy_name, output_dir, processor):
     logger.debug("Building tag_mem_hexdump utility for VCS")
 
     env = dict(os.environ)
 
     env["FPGA"] = "gfe-sim"
+    env["PROCESSOR"] = processor
 
-    if policy_name.endswith("-debug"):
-        policy_name = policy_name.replace("-debug", "")
+    if policy_name.endswith(dbg_suffix):
+        policy_name = policy_name[:-len(dbg_suffix)]
         env["DEBUG"] = "1"
 
     env["POLICY_NAME"] = policy_name
@@ -77,7 +80,7 @@ def installPex(policy_dir, output_dir, arch, extra):
     if not isp_pex_kernel.buildPexKernel(policy_name, output_dir, fpga, extra_args.processor):
         return False
 
-    if not installTagMemHexdump(policy_name, output_dir):
+    if not installTagMemHexdump(policy_name, output_dir, extra_args.processor):
         return False
 
     if not isp_pex_kernel.movePexKernel(policy_name, output_dir, fpga, extra_args.processor):
@@ -114,7 +117,8 @@ def parseExtra(extra):
 
 
 def generateTagMemHexdump(tag_file_path, policy):
-    policy = policy.strip("-debug")
+    if policy.endswith(dbg_suffix):
+        policy = policy[:-len(dbg_suffix)]
     output_path = tag_file_path + ".hex"
     subprocess.call(["tag_mem_hexdump-" + policy, tag_file_path, output_path])
     return output_path
@@ -139,7 +143,7 @@ def runVcsSim(exe_path, ap_hex_dump_path, pex_hex_dump_path, tag_mem_hexdump_pat
               ap_uart_log, pex_uart_log):
     sim_path = os.path.join(isp_prefix, "vcs", "simv-galois.system-{}".format(config))
     if debug is True:
-        sim_path += "-debug"
+        sim_path += dbg_suffix
 
     if not isp_utils.checkDependency(sim_path, logger, "hope-gfe"):
         return False
