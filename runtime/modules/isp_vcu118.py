@@ -182,9 +182,14 @@ def gdb_thread(exe_path, log_file=None, arch="rv32"):
     send_command("set confirm off")
     send_command("target remote :3333")
     send_command("load")
+    send_command("b terminate")
+    send_command("commands")
+    send_command("quit")
+    send_command("end")
     send_command("continue")
     logger.info("Process running in gdb")
-    child.expect_exact("[Inferior 1 (Remote target) detached]")
+    child.expect_exact("trap")
+    send_command("quit")
     logger.info("Program successfully exited")
     if log_file is not None:
         gdb_log.close()
@@ -272,7 +277,7 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
             pass
 
     logger.debug("waiting for pex and ap to finish")
-    while pex.is_alive() and ap.is_alive():
+    while pex.is_alive() and ap.is_alive() and gdb.is_alive():
         pass
 
     openocd_proc.terminate()
