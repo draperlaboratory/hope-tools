@@ -117,10 +117,9 @@ def processExtraArgs(extra):
     print("Extra: {}".format(extra))
     extra_stripped = []
     for e in extra:
-        extra_stripped.append(e.strip())
-
+        for ee in e.split():
+            extra_stripped.append(ee.strip())
     return extra_stripped
-
 
 def terminateMessage(runtime):
     if runtime == "frtos":
