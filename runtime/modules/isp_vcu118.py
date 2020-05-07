@@ -226,7 +226,7 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
     logger.debug("Using flash init file {}".format(flash_init_image_path))
     if not os.path.exists(flash_init_image_path):
         logger.info("Generating flash init")
-        isp_load_image.generate_load_image(exe_path, ap_load_image_path, tag_file_path)
+        isp_load_image.generate_tag_load_image(ap_load_image_path, tag_file_path)
         isp_load_image.generate_load_image(pex_kernel_path, pex_load_image_path)
 
         flash_init_map = {kernel_address:pex_load_image_path,

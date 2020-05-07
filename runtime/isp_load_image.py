@@ -115,6 +115,28 @@ def generate_load_image(elf_binary, output_image, tag_info=None):
                                     taginfo_offset,
                                     len(taginfo_bytes)))
 
+def generate_tag_load_image(output_image, tag_info):
+    with open(output_image, 'wb') as out:
+        out.write(load_image_t.pack(0xD04EA001,
+                                    0xffffffff,
+                                    0xffffffff,
+                                    0xffffffff,
+                                    0xffffffff))
+
+        taginfo_offset = out.tell()
+        taginfo_bytes = Path(tag_info).read_bytes()
+        out.write(taginfo_bytes)
+        if (len(taginfo_bytes) & 3 != 0):
+            pad = bytearray(4 - (len(taginfo_bytes) & 3))
+            out.write(pad)
+
+        out.seek(0)
+        out.write(load_image_t.pack(0xD04EA001,
+                                    0xffffffff,
+                                    0xffffffff,
+                                    taginfo_offset,
+                                    len(taginfo_bytes)))
+
 
 def generate_flash_init(output_image, input_images):
     out = open(output_image, 'wb')
