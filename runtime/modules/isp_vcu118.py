@@ -233,8 +233,7 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
         isp_load_image.generate_load_image(exe_path, ap_load_image_path, tag_file_path)
         isp_load_image.generate_load_image(pex_kernel_path, pex_load_image_path)
 
-        flash_init_map = {kernel_address:pex_load_image_path,
-                          ap_address:ap_load_image_path}
+        flash_init_map = {kernel_address:pex_load_image_path}
         isp_load_image.generate_flash_init(flash_init_image_path, flash_init_map)
 
     return True
