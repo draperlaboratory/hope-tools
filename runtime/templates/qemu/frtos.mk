@@ -20,6 +20,8 @@ ISP_INCLUDES += -I$(FREERTOS_INCLUDE_DIR)/Demo/RISC-V-ISP/freedom-e-sdk/env/free
 ISP_INCLUDES += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 
+ISP_CFLAGS      += --sysroot=$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf
+
 ISP_HEADERS      += $(wildcard $(ISP_RUNTIME)/*.h)
 ISP_C_SRCS       += $(wildcard $(ISP_RUNTIME)/*.c)
 ISP_ASM_SRCS     += $(wildcard $(ISP_RUNTIME)/*.S)
