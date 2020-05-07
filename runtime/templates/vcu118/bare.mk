@@ -48,7 +48,7 @@ LIBISP           := $(ISP_RUNTIME)/libisp.a
 
 ISP_LIBS         := $(LIBISP) $(LIBVCU118)
 
-ISP_LDFLAGS			 := -T $(BSP_BASE)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
+ISP_LDFLAGS			 := -T $(BSP_BASE)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=ld
 ISP_LDFLAGS			 += -Wl,--wrap=isatty
 ISP_LDFLAGS      += -Wl,--wrap=printf
 ISP_LDFLAGS      += -Wl,--wrap=puts
@@ -56,6 +56,7 @@ ISP_LDFLAGS      += -Wl,--wrap=read
 ISP_LDFLAGS      += -Wl,--wrap=write
 ISP_LDFLAGS      += -Wl,--wrap=malloc
 ISP_LDFLAGS      += -Wl,--wrap=free
+ISP_LDFLAGS      += -Wl,--wrap=exit
 ISP_LDFLAGS 		 += -Wl,--undefined=pvPortMalloc
 ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
 
