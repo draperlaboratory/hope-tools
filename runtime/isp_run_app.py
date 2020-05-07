@@ -247,7 +247,7 @@ def main():
                 sys.exit(1)
 
         if not os.path.isfile(pex_path):
-            if compileMissingPex(policy_dir, pex_path, args.simulator, args.arch, args.extra) is False:
+            if compileMissingPex(policy_dir, pex_path, args.simulator, arch, args.extra) is False:
                 logger.error("Failed to compile missing PEX binary")
                 sys.exit(1)
 
