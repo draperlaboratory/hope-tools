@@ -34,7 +34,7 @@ fpga = "gfe"
 
 def defaultPexPath(policy_name, arch, extra):
     extra_args = parseExtra(extra)
-    return os.path.join(isp_prefix, "pex_kernel", isp_pex_kernel.pexKernelName(policy_name, fpga,
+    return os.path.join(isp_prefix, "pex-kernel", isp_pex_kernel.pexKernelName(policy_name, fpga,
                         extra_args.processor))
 
 
