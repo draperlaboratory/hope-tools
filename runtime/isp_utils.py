@@ -127,6 +127,9 @@ def terminateMessage(runtime):
         return "Main task has completed with code:"
     if runtime == "sel4":
         return "seL4 root server abort()ed"
+    if runtime == "linux":
+        # TODO: Make sure this is correct!
+        return "Program exited with code:"
     elif runtime == "bare":
         return "Program exited with code:"
 

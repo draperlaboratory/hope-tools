@@ -151,12 +151,20 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
     if "sel4" in runtime:
         opts += ["-machine", "sifive_u"]
         opts += ["-serial", "tcp::4445,server,nodelay"]
+    if "linux" in runtime:
+        opts += ["-machine", "virt"]
+        opts += ["-drive", "file=/home/dev/hope-src/busybear/busybear.bin,format=raw,id=hd0"]
+        opts += ["-append", "\"root=/dev/vda\""]
+        opts += ["-device", "virtio-blk-device,drive=hd0"]
     else:
         opts += ["-machine", "sifive_e"]
 
     opts += ["-serial", "file:{}".format(os.path.join(run_dir, uart_log_file))]
     # Runtime specific options
     if "sel4" in runtime:
+        opts += ["-m", "size=2000M"]
+
+    if "linux" in runtime:
         opts += ["-m", "size=2000M"]
 
     if gdb_port is not 0:

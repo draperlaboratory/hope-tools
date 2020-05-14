@@ -37,6 +37,7 @@ MODULES := $(patsubst %,modules/%,$(MODULE_FILES))
 BARE_PREFIX := osv.bare.main.
 FRTOS_PREFIX := osv.frtos.main.
 SEL4_PREFIX := osv.sel4.main.
+LINUX_PREFIX := osv.linux.main.
 
 INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
 

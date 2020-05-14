@@ -106,7 +106,7 @@ def main():
     Module for simulating/running application. Must be installed to $ISP_PREFIX/runtime_modules
     ''')
     parser.add_argument("-r", "--runtime", type=str, default="bare", help='''
-    Currently supported: frtos, sel4, bare (bare metal) (default), stock_frtos, stock_sel4, stock_bare
+    Currently supported: frtos, sel4, linux, bare (bare metal) (default), stock_frtos, stock_sel4, stock_linux, stock_bare
     ''')
     parser.add_argument("-a", "--arch", type=str, help='''
     Architecture of executable. Currently supported: {}. Autodetect by default
@@ -178,8 +178,8 @@ def main():
     if args.output == "":
         output_dir = os.getcwd()
 
-    if args.runtime not in ["frtos", "sel4", "bare", "stock_frtos", "stock_sel4", "stock_bare"]:
-        logger.error("Invalid choice of runtime. Valid choices: frtos, sel4, bare, stock_frtos, stock_sel4, stock_bare")
+    if args.runtime not in ["frtos", "sel4", "linux", "bare", "stock_frtos", "stock_sel4", "stock_linux", "stock_bare"]:
+        logger.error("Invalid choice of runtime. Valid choices: frtos, sel4, linux, bare, stock_frtos, stock_sel4, stock_linux, stock_bare")
         return
 
     if not args.arch:
@@ -246,7 +246,7 @@ def main():
                 sys.exit(1)
 
         if not os.path.isfile(pex_path):
-            if compileMissingPex(policy_dir, pex_path, args.simulator, args.arch, args.extra) is False:
+            if compileMissingPex(policy_dir, pex_path, args.simulator, arch, args.extra) is False:
                 logger.error("Failed to compile missing PEX binary")
                 sys.exit(1)
 
