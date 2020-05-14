@@ -23,10 +23,10 @@ The ISP runtime consists of the following commands:
 ##### Building an application
 
 The `isp_install_runtime` script bootstraps an existing project directory with resources that allow applications to build with one of
-ISP's currently supported runtimes: FreeRTOS, seL4, Bare (bare metal). Use the script as follows:
+ISP's currently supported runtimes: FreeRTOS, seL4, linux, Bare (bare metal). Use the script as follows:
 
 ```
-isp_install_runtime <frtos/sel4/bare> -b <project directory (default .)>
+isp_install_runtime <frtos/sel4/linux/bare> -b <project directory (default .)>
 ```
 
 The `stock` variants build the runtime using a non-ISP toolchain. It looks for `clang`, `riscv32-unknown-elf-*`, `riscv64-unknown-elf-*`  binaries to be located in `ISP_PREFIX/stock-tools/bin`. When `hope-tools` is installed, the stock toolchain in `hope-src` is linked into this location by default, and if there is an installed copy of `clang`, it is linked as well.
@@ -38,7 +38,7 @@ This Makefile sets `CC` to the ISP or stock version of Clang and exposes the fol
 - `ISP_INCLUDES` - header files for the chosen runtime
 - `ISP_LDFLAGS` - command to use a custom linker script for the target application
 
-To build an application for ISP, include `isp-runtime-<frtos/sel4/bare>.mk` in an existing Makefile and add the above variables to your targets as needed.
+To build an application for ISP, include `isp-runtime-<frtos/sel4/linux/bare>.mk` in an existing Makefile and add the above variables to your targets as needed.
 
 NOTE: You must rename the `main()` function of your executable to `isp_main()` so that the runtime can locate it.
 
