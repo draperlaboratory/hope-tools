@@ -151,7 +151,6 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
     if "sel4" in runtime:
         opts += ["-machine", "sifive_u"]
         opts += ["-serial", "tcp::4445,server,nodelay"]
-        timeout_seconds = 36000
     else:
         opts += ["-machine", "sifive_e"]
 
@@ -255,7 +254,7 @@ def launchQEMU(run_dir, runtime, env, options):
                 # TODO: is this really what we want to do on this exception?
                 rc.terminate()
                 process_exit = True
-                return;
+                return
         if rc.returncode != 0:
             raise Exception("exited with return code " + str(rc.returncode))
         process_exit = True
