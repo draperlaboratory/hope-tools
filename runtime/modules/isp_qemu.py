@@ -143,8 +143,7 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
 
     # ISP validator specific flags
     if use_validator:
-        opts += ["-singlestep", #need to instrument every target instruction
-                 "--policy-validator-cfg",
+        opts += ["--policy-validator-cfg",
                  "yaml-cfg={}".format(os.path.join(run_dir, "validator_cfg.yml"))]
 
     # Machine selection
