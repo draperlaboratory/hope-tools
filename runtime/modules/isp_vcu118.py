@@ -89,6 +89,7 @@ def parseExtra(extra):
     parser.add_argument("--bitstream", type=str,
                         help="Re-program the FPGA with the specified bitstream")
     parser.add_argument("--processor", type=str, default="P1", help="GFE processor configuration (P1/P2/P3)")
+    parser.add_argument("--board", type=str, default="vcu118", help="Target board: vcu118 or vcu108")
 
     if not extra:
         return parser.parse_args([])
@@ -120,9 +121,9 @@ def detectTTY(symlink):
         return None
 
 
-def program_fpga(bit_file, ltx_file, log_file):
+def program_fpga(bit_file, ltx_file, board, log_file):
     tcl_script = os.path.join(isp_prefix, "vcu118", "tcl", "prog_bit.tcl")
-    args = ["vivado", "-mode", "batch", "-source", tcl_script, "-tclargs", bit_file, ltx_file, "vcu118"]
+    args = ["vivado", "-mode", "batch", "-source", tcl_script, "-tclargs", bit_file, ltx_file, board]
 
     if not isp_utils.checkDependency(tcl_script, logger, "hope-gfe"):
         return False
@@ -354,7 +355,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         bit_file = os.path.realpath(extra_args.bitstream)
         ltx_file = os.path.splitext(bit_file)[0] + ".ltx"
         logger.info("Re-programming FPGA with bitstream {}".format(bit_file))
-        if program_fpga(bit_file, ltx_file, vivado_log_file) is False:
+        if program_fpga(bit_file, ltx_file, extra_args.board, vivado_log_file) is False:
             return isp_utils.retVals.FAILURE
 
     ap_tty = detectTTY(ap_tty_symlink)
