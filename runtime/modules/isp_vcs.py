@@ -25,7 +25,7 @@ fpga = "gfe-sim"
 
 def defaultPexPath(policy_name, arch, extra):
     extra_args = parseExtra(extra)
-    return os.path.join(isp_prefix, "pex_kernel", isp_pex_kernel.pexKernelName(policy_name, fpga, extra_args.processor))
+    return os.path.join(isp_prefix, "pex-kernel", isp_pex_kernel.pexKernelName(policy_name, fpga, extra_args.processor))
 
 
 def installTagMemHexdump(policy_name, output_dir):

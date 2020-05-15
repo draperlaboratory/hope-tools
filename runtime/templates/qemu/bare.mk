@@ -8,6 +8,7 @@ ISP_HEADERS += $(wildcard $(ISP_RUNTIME)/*.h)
 C_SRCS += $(wildcard $(ISP_RUNTIME)/*.c)
 
 ISP_CFLAGS   += -O2 -fno-builtin-printf -mno-relax
+ISP_CFLAGS   += --sysroot=${ISP_PREFIX}/clang_sysroot/riscv64-unknown-elf
 ISP_INCLUDES += -I$(ISP_RUNTIME)
 ISP_INCLUDES += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 

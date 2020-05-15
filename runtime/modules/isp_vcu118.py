@@ -34,7 +34,7 @@ fpga = "gfe"
 
 def defaultPexPath(policy_name, arch, extra):
     extra_args = parseExtra(extra)
-    return os.path.join(isp_prefix, "pex_kernel", isp_pex_kernel.pexKernelName(policy_name, fpga,
+    return os.path.join(isp_prefix, "pex-kernel", isp_pex_kernel.pexKernelName(policy_name, fpga,
                         extra_args.processor))
 
 
@@ -192,12 +192,7 @@ def gdb_thread(exe_path, log_file=None, arch="rv32"):
 
 
 def ap_thread(ap_tty, ap_log, runtime, processor):
-    baud_rate = 0
-
-    if processor == "P1":
-        baud_rate = 57600
-    elif processor == "P2":
-        baud_rate = 115200
+    baud_rate = 115200
 
     ap_serial = serial.Serial(ap_tty, baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
                                parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
