@@ -85,11 +85,11 @@ def parseExtra(extra):
     parser.add_argument("--ap-address", type=str, default="0xf8040000", help='''
     Hex address (0x format) for the application processor load image in the flash init.
     ''')
-    parser.add_argument("--init-only", action="store_true", help="Generate the flash init without running on the FPGA")
     parser.add_argument("--bitstream", type=str,
                         help="Re-program the FPGA with the specified bitstream")
     parser.add_argument("--processor", type=str, default="P1", help="GFE processor configuration (P1/P2/P3)")
     parser.add_argument("--board", type=str, default="vcu118", help="Target board: vcu118 or vcu108")
+    parser.add_argument("--duplicate-mode", type=str, help="duplicate TMT entries. Valid modes: data, code, full")
 
     if not extra:
         return parser.parse_args([])
@@ -213,14 +213,14 @@ def pex_thread(pex_tty, pex_log):
 
 
 def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
-            flash_init_image_path, kernel_address, ap_address):
+            flash_init_image_path, kernel_address, ap_address, duplicate_mode):
     ap_load_image_path = os.path.join(run_dir, os.path.basename(exe_path) + ".load_image")
     pex_load_image_path = os.path.join(run_dir, "pex.load_image")
     tag_file_path = os.path.join(run_dir, "bininfo", os.path.basename(exe_path) + ".taginfo")
 
     logger.debug("Using PEX kernel at path: {}".format(pex_kernel_path))
 
-    if not isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=soc_cfg, arch=arch):
+    if not isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=soc_cfg, arch=arch, duplicate_mode=duplicate_mode):
         return False
     
     logger.debug("Using flash init file {}".format(flash_init_image_path))
@@ -316,7 +316,7 @@ def runStock(exe_path, ap, openocd_log_file, gdb_log_file,
 
 
 def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
-           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False):
+           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False, tag_only=False):
     extra_args = parseExtra(extra)
     ap_log_file = os.path.join(run_dir, "uart.log")
     pex_log_file = os.path.join(run_dir, "pex.log")
@@ -337,10 +337,10 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     if not extra_args.stock:
         if not tagInit(exe_path, run_dir, policy_dir, soc_cfg,
                        arch, pex_path, flash_init_image_path,
-                       extra_args.kernel_address, extra_args.ap_address):
+                       extra_args.kernel_address, extra_args.ap_address, extra_args.duplicate_mode):
             return isp_utils.retVals.TAG_FAIL
 
-    if extra_args.init_only:
+    if tag_only:
         return isp_utils.retVals.SUCCESS
 
     ap_log = open(ap_log_file, "w")

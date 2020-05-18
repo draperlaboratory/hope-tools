@@ -83,7 +83,7 @@ def setupLogger(level, colors=True):
     return logger
 
 
-def generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=None, arch=None):
+def generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=None, arch=None, duplicate_mode=None):
     policy = os.path.basename(policy_dir).split("-debug")[0]
     exe_name = os.path.basename(exe_path)
     doMkDir(os.path.join(run_dir, "bininfo"))
@@ -98,6 +98,8 @@ def generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=None, arch=None):
         args += ["-s", soc_cfg]
     if arch is not None:
         args += ["--arch", arch]
+    if duplicate_mode is not None:
+        args += ["--duplicate-mode", duplicate_mode]
 
     with open(os.path.join(run_dir, "inits.log"), "w+") as initlog:
         subprocess.Popen(args, stdout=initlog,
