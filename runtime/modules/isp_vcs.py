@@ -98,7 +98,6 @@ def parseExtra(extra):
     parser.add_argument("--debug", action="store_true", help="Enable debug tracing")
     parser.add_argument("--timeout", type=int, default=0, help="Simulator timeout (in seconds)")
     parser.add_argument("--max-cycles", type=int, default=300000000, help="Maxmimum number of cycles to simulate")
-    parser.add_argument("--init-only", action="store_true", help="Generate artifacts without running the simulator")
     parser.add_argument("--processor", type=str, default="P1", help="GFE processor configuration (P1/P2/P3)")
 
     if extra is not None:
@@ -204,7 +203,7 @@ def runVcsSim(exe_path, ap_hex_dump_path, pex_hex_dump_path, tag_mem_hexdump_pat
 
 
 def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
-           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False):
+           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False, tag_only=False):
     extra_args = parseExtra(extra)
     ap_log_file = os.path.join(run_dir, "uart.log")
     pex_log_file = os.path.join(run_dir, "pex.log")
@@ -229,7 +228,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     isp_load_image.generate_hex_dump(ap_load_image_path, ap_hex_dump_path, 64)
     isp_load_image.generate_hex_dump(pex_load_image_path, pex_hex_dump_path, 64)
 
-    if extra_args.init_only is True:
+    if tag_only is True:
         return isp_utils.retVals.SUCCESS
 
     # XXX: use default logfile names for now, update for parallel sim runs
