@@ -85,7 +85,6 @@ def parseExtra(extra):
     parser.add_argument("--ap-address", type=str, default="0xf8040000", help='''
     Hex address (0x format) for the application processor load image in the flash init.
     ''')
-    parser.add_argument("--init-only", action="store_true", help="Generate the flash init without running on the FPGA")
     parser.add_argument("--bitstream", type=str,
                         help="Re-program the FPGA with the specified bitstream")
     parser.add_argument("--processor", type=str, default="P1", help="GFE processor configuration (P1/P2/P3)")
@@ -316,7 +315,7 @@ def runStock(exe_path, ap, openocd_log_file, gdb_log_file,
 
 
 def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
-           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False):
+           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False, tag_only=False):
     extra_args = parseExtra(extra)
     ap_log_file = os.path.join(run_dir, "uart.log")
     pex_log_file = os.path.join(run_dir, "pex.log")
@@ -340,7 +339,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
                        extra_args.kernel_address, extra_args.ap_address):
             return isp_utils.retVals.TAG_FAIL
 
-    if extra_args.init_only:
+    if tag_only:
         return isp_utils.retVals.SUCCESS
 
     ap_log = open(ap_log_file, "w")
