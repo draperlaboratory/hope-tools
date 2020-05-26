@@ -152,9 +152,7 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
         opts += ["-serial", "tcp::4445,server,nodelay"]
     if "linux" in runtime:
         opts += ["-machine", "virt"]
-        opts += ["-drive", "file=/home/dev/hope-src/busybear/busybear.bin,format=raw,id=hd0"]
-        opts += ["-append", "\"root=/dev/vda\""]
-        opts += ["-device", "virtio-blk-device,drive=hd0"]
+        opts += ["-append", "\"root=/dev/ram console=ttyS0\""]
     else:
         opts += ["-machine", "sifive_e"]
 
@@ -285,7 +283,10 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     global status_log_file
 
     if soc_cfg is None:
-        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "hifive_e_cfg.yml")
+        if runtime == "linux":
+            soc_cfg = os.path.join(isp_prefix, "soc_cfg", "linux_virt_cfg.yml")
+        else:
+            soc_cfg = os.path.join(isp_prefix, "soc_cfg", "hifive_e_cfg.yml")
     else:
         soc_cfg = os.path.realpath(soc_cfg)
     logger.debug("Using SOC config {}".format(soc_cfg))
