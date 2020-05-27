@@ -182,7 +182,7 @@ def gdb_thread(exe_path, log_file=None, arch="rv32"):
     send_command("set confirm off")
     send_command("target remote :3333")
     send_command("load")
-    send_command("b terminate")
+    send_command("b do_exit")
     send_command("commands")
     send_command("quit")
     send_command("end")
