@@ -117,7 +117,7 @@ def main():
     Default is current working directory.
     ''')
     parser.add_argument("-u", "--uart", action="store_true", help='''
-    Forward UART output from the simulator to stdout
+    Print UART log file to stdout
     ''')
     parser.add_argument("-g", "--gdb", type=int, default=0, help='''
     Start the simulator in gdbserver mode on specified port
