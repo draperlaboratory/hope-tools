@@ -254,6 +254,10 @@ def main():
 
         doEntitiesFile(run_dir, exe_name)
 
+    if args.tag_only is True:
+        logger.debug("Tagging tools run only, exiting")
+        return
+
     logger.debug("Starting simulator...")
     result = sim_module.runSim(args.exe_path,
                                run_dir,
@@ -271,9 +275,6 @@ def main():
     if result != isp_utils.retVals.SUCCESS:
         logger.error(result)
         sys.exit(-1)
-
-    if args.tag_only is True:
-        return
 
     if args.uart is True:
         printUartOutput(run_dir)
