@@ -31,16 +31,13 @@ void isp_test_device_fail(void)
  */
 uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
 {
+  uint64_t cycle;
+  uint32_t cycle_lo, cycle_hi;
 #if __riscv_xlen == 64
-	uint64_t cycle;
-	asm volatile(
-		"%=:\n\t"
-		"csrr %0, mcycle\n\t"
-		: "=r"(cycle));
-
-  return cycle;
+	asm volatile("rdcycle %0" : "=r"(cycle));
+  cycle_hi = cycle >> 32;
+  cycle_lo = cycle & 0xFFFFFFFFU;
 #else
-	uint32_t cycle_lo, cycle_hi;
 	asm volatile(
 		"%=:\n\t"
 		"csrr %1, mcycleh\n\t"
@@ -50,16 +47,16 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
 		: "=r"(cycle_lo), "=r"(cycle_hi)
 		: // No inputs.
 		: "t1");
-
-   // XXX: pass back hi/lo to get around unreliable 64-bit intrinsics
-   if(result_hi != NULL) {
-     *result_hi = cycle_hi;
-   }
-   if(result_lo != NULL) {
-     *result_lo = cycle_lo;
-   }
-	 return (((uint64_t)cycle_hi) << 32) | (uint64_t)cycle_lo;
+  cycle = (((uint64_t)cycle_hi) << 32) | (uint64_t)cycle_lo;
 #endif
+  // XXX: pass back hi/lo to get around unreliable 64-bit intrinsics
+  if(result_hi != NULL) {
+    *result_hi = cycle_hi;
+  }
+  if(result_lo != NULL) {
+    *result_lo = cycle_lo;
+  }
+	return cycle;
 }
 
 /**
