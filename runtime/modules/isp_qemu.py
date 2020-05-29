@@ -277,7 +277,8 @@ def launchQEMUDebug(run_dir, env, options):
 
 
 def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
-           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=True):
+           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=True,
+           dry_run=False):
     global run_cmd
     global uart_log_file
     global status_log_file
@@ -308,6 +309,9 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         if tagfile is None:
             if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, arch=arch) is False:
                 return isp_utils.retVals.TAG_FAIL
+    if dry_run is True:
+        logger.debug("Simulation Dry run chosen. Simulation not run, exiting ..")
+        return isp_utils.retVals.SUCCESS
 
     options = qemuOptions(exe_path, run_dir, extra, runtime, use_validator, gdb_port)
 

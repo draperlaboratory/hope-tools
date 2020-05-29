@@ -315,7 +315,8 @@ def runStock(exe_path, ap, openocd_log_file, gdb_log_file,
 
 
 def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
-           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False):
+           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False,
+           dry_run=False):
     extra_args = parseExtra(extra)
     ap_log_file = os.path.join(run_dir, "uart.log")
     pex_log_file = os.path.join(run_dir, "pex.log")
@@ -339,7 +340,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
                        extra_args.kernel_address, extra_args.ap_address):
             return isp_utils.retVals.TAG_FAIL
 
-    if extra_args.init_only:
+    if extra_args.init_only or dry_run:
         return isp_utils.retVals.SUCCESS
 
     ap_log = open(ap_log_file, "w")

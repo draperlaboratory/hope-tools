@@ -204,7 +204,8 @@ def runVcsSim(exe_path, ap_hex_dump_path, pex_hex_dump_path, tag_mem_hexdump_pat
 
 
 def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
-           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False):
+           gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False,
+           dry_run=False):
     extra_args = parseExtra(extra)
     ap_log_file = os.path.join(run_dir, "uart.log")
     pex_log_file = os.path.join(run_dir, "pex.log")
@@ -229,7 +230,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     isp_load_image.generate_hex_dump(ap_load_image_path, ap_hex_dump_path, 64)
     isp_load_image.generate_hex_dump(pex_load_image_path, pex_hex_dump_path, 64)
 
-    if extra_args.init_only is True:
+    if extra_args.init_only is True or dry_run is True:
         return isp_utils.retVals.SUCCESS
 
     # XXX: use default logfile names for now, update for parallel sim runs

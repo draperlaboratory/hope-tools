@@ -109,7 +109,8 @@ def launchRenode(run_dir):
 
 
 def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
-           gdb_port, extra, soc_cfg, use_validator=True):
+           gdb_port, extra, soc_cfg, use_validator=True,
+           dry_run=False):
     global process_exit
     global connecting
 
@@ -118,6 +119,10 @@ def runSim(exe_path, run_dir, policy_dir, runtime, rule_cache,
     if use_validator == False:
         if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir) is False:
             return retVals.TAG_FAIL
+
+    if dry_run is True:
+        logger.debug("Simulation Dry run chosen. Simulation not run, exiting ..")
+        return isp_utils.retVals.SUCCESS
 
     try:
         logger.debug("Begin Renode test... (timeout: {})".format(timeout_seconds))

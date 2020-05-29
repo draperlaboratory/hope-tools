@@ -159,6 +159,10 @@ def main():
     parser.add_argument("--pex", type=str, help='''
     Path to a custom PEX implementation (validator lib, kernel, etc)
     ''')
+    parser.add_argument("--dry-run", action="store_true", help='''
+    Allow environment to be setup until exectuion of the simulation would
+    happen.
+    ''')
 
     args = parser.parse_args()
 
@@ -270,7 +274,8 @@ def main():
                                args.soc,
                                arch,
                                args.extra,
-                               use_validator)
+                               use_validator,
+                               args.dry_run)
 
     if result != isp_utils.retVals.SUCCESS:
         logger.error(result)
