@@ -1,29 +1,18 @@
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "isp_utils.h"
 
 #define CPU_CLOCK_HZ 50000000
 
-extern volatile uint64_t tohost;
-
-void write_tohost(uint64_t val)
-{
-  tohost = val;
-}
-
-void tohost_exit(uint64_t val)
-{
-  write_tohost(val << 1 | 1);
-}
-
 void isp_test_device_pass(void)
 {
-  tohost_exit(0);
+  exit(0);
 }
 
 void isp_test_device_fail(void)
 {
-  tohost_exit(0x10);
+  exit(0x10);
 }
 
 /**
