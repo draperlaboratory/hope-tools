@@ -156,7 +156,7 @@ def program_fpga(bit_file, ltx_file, board, log_file):
 
 def start_openocd(log_file=None, cfg_file="ssith_gfe.cfg"):
     openocd_path = os.path.join(isp_prefix, "bin", "openocd")
-    gfe_cfg_path = os.path.join(isp_prefix, "vcu118", "ssith_gfe.cfg")
+    gfe_cfg_path = os.path.join(isp_prefix, "vcu118", cfg_file)
 
     if not isp_utils.checkDependency(gfe_cfg_path, logger, "hope-gfe"):
         return None
