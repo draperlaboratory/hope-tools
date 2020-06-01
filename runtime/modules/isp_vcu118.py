@@ -94,6 +94,7 @@ def parseExtra(extra):
     parser.add_argument("--board", type=str, default="vcu118", help="Target board: vcu118 or vcu108")
     parser.add_argument("--ap-baud", type=int, choices=baud_rates, default=115200, help="Baud Rate for AP, default is 115200")
     parser.add_argument("--pex-baud", type=int, choices=baud_rates, default=115200, help="Baud Rate for Pex, default is 115200")
+    parser.add_argument("--openocd-cfg", type=str, default="ssith_gfe.cfg", help="Set OpenOCD config file for specific boards") # maybe this should be tied to --board?
 
     if not extra:
         return parser.parse_args([])
@@ -153,7 +154,7 @@ def program_fpga(bit_file, ltx_file, board, log_file):
     return True
 
 
-def start_openocd(log_file=None):
+def start_openocd(log_file=None, cfg_file="ssith_gfe.cfg"):
     openocd_path = os.path.join(isp_prefix, "bin", "openocd")
     gfe_cfg_path = os.path.join(isp_prefix, "vcu118", "ssith_gfe.cfg")
 
@@ -240,7 +241,7 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
 
 
 def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
-            gdb_log_file, flash_init_image_path, gdb_port, no_log, arch, pex_baud_rate):
+            gdb_log_file, flash_init_image_path, gdb_port, no_log, arch, pex_baud_rate, openocd_cfg_file):
     logger.debug("Connecting to {}".format(pex_tty))
     pex_serial = serial.Serial(pex_tty, 115200, timeout=3000000,
             bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
@@ -260,7 +261,7 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
         pex.start()
 
     logger.debug("Spawning openocd")
-    openocd_proc = start_openocd(openocd_log_file)
+    openocd_proc = start_openocd(openocd_log_file, openocd_cfg_file)
     if not openocd_proc:
         return isp_utils.retVals.FAILURE
 
@@ -289,9 +290,9 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
 
 
 def runStock(exe_path, ap, openocd_log_file, gdb_log_file,
-             gdb_port, no_log, arch):
+             gdb_port, no_log, arch, openocd_cfg_file):
     logger.debug("Spawning openocd")
-    openocd_proc = start_openocd(openocd_log_file)
+    openocd_proc = start_openocd(openocd_log_file, openocd_cfg_file)
     if not openocd_proc:
         return isp_utils.retVals.FAILURE
 
@@ -372,10 +373,10 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         ap.start()
 
     if extra_args.stock:
-        result = runStock(exe_path, ap, openocd_log_file, gdb_log_file, gdb_port, extra_args.no_log, arch)
+        result = runStock(exe_path, ap, openocd_log_file, gdb_log_file, gdb_port, extra_args.no_log, arch, extra_args.openocd_cfg)
     else:
         result = runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
-                         gdb_log_file, flash_init_image_path, gdb_port, extra_args.no_log, arch, extra_args.pex_baud)
+                         gdb_log_file, flash_init_image_path, gdb_port, extra_args.no_log, arch, extra_args.pex_baud, extra_args.openocd_cfg)
 
     pex_log.close()
     ap_log.close()
