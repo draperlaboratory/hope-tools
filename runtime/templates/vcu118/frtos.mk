@@ -18,7 +18,7 @@ ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 
 ifneq ($(ARCH), rv64)
-ISP_CFLAGS			 := -march=rv32im -mabi=ilp32 -mcmodel=medium --target=riscv32-unknown-elf
+ISP_CFLAGS			 := -march=rv32ima -mabi=ilp32 -mcmodel=medium --target=riscv32-unknown-elf
 else
 ISP_CFLAGS			 := -march=rv64imafd -mabi=lp64d -mcmodel=medany --target=riscv64-unknown-elf
 endif
@@ -29,6 +29,8 @@ ISP_CFLAGS 			 += -Dmalloc\(x\)=pvPortMalloc\(x\) -Dfree\(x\)=vPortFree\(x\)
 
 # flag to initialize hardware if running on FPGA
 ISP_CFLAGS 			 += -DFPGA=1
+
+ISP_ASMFLAGS     := $(ISP_CFLAGS)
 
 ISP_INCLUDES 		 := -I$(FREERTOS_INCLUDE_DIR)/Source/include
 ISP_INCLUDES 		 += -I$(FREERTOS_INCLUDE_DIR)/Source/portable/GCC/RISC-V

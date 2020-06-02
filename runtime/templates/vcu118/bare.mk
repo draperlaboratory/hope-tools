@@ -39,6 +39,8 @@ CC 							 := $(RISCV_CLANG)
 
 ISP_CFLAGS			 += -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI) --target=$(RISCV_TARGET)
 
+ISP_ASMFLAGS     := $(ISP_CFLAGS)
+
 BSP_BASE				 := $(ISP_RUNTIME)/bsp
 
 LIBVCU118				 := $(BSP_BASE)/libvcu118.a
