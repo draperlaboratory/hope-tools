@@ -225,28 +225,15 @@ def launchQEMU(run_dir, runtime, env, options):
         logger.debug("Running qemu cmd: {}\n".format(qemuCommand(run_cmd, env, options)))
         rc = subprocess.Popen([run_cmd] + options, env=env, stdout=status_log,
                               stderr=subprocess.STDOUT)
-        while rc.poll() is None:
+        while rc.poll() is None and not process_exit:
             time.sleep(1)
             try:
                 uart_log = open(os.path.join(run_dir, uart_log_file), 'r')
-                status_log = open(os.path.join(run_dir, status_log_file), 'r')
                 uart_output = uart_log.read()
-                status_output = status_log.read()
                 uart_log.close()
-                status_log.close()
-                if terminate_msg in uart_output or process_exit:
+                if terminate_msg in uart_output:
                     rc.terminate()
                     process_exit = True
-                    return
-                if "Policy Violation" in status_output or process_exit:
-                    rc.terminate()
-                    process_exit = True
-                    logger.warn("Process exited due to policy violation")
-                    return
-                if "TMT miss" in status_output or process_exit:
-                    rc.terminate()
-                    process_exit = True
-                    logger.warn("Process exited due to TMT miss")
                     return
             except IOError:
                 #keep trying if fail to open uart log
@@ -258,10 +245,19 @@ def launchQEMU(run_dir, runtime, env, options):
                 return;
         if rc.returncode != 0:
             raise Exception("exited with return code " + str(rc.returncode))
-        process_exit = True
     except Exception as e:
         logger.error("QEMU run failed for exception {}.\n".format(e))
-        raise
+    finally:
+        process_exit = True
+        rc.terminate()
+
+        # using grep because the pex log can get large when debug is on
+        grep_cmd = ["grep", "Policy Violation\\|TMT miss", os.path.join(run_dir, status_log_file)]
+        grep_results = subprocess.run(grep_cmd, env=env, stdout=subprocess.PIPE);
+        if "Policy Violation" in str(grep_results.stdout):
+            logger.warn("Process exited due to policy violation")
+        if "TMT miss" in str(grep_results.stdout):
+            logger.warn("Process exited due to TMT miss")
 
 
 def launchQEMUDebug(run_dir, env, options):
