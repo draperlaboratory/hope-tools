@@ -166,8 +166,7 @@ def start_openocd(log_file=None):
 
 
 def gdb_thread(exe_path, log_file=None, arch="rv32"):
-    xlen = 64 if arch == "rv64" else 32
-    child = pexpect.spawn("riscv{}-unknown-elf-gdb".format(xlen), [exe_path], encoding="utf-8", timeout=None)
+    child = pexpect.spawn("riscv64-unknown-elf-gdb", [exe_path], encoding="utf-8", timeout=None)
     if log_file is None:
         child.logfile = sys.stdout
     else:
