@@ -28,12 +28,13 @@ def defaultPexPath(policy_name, arch, extra):
     return os.path.join(isp_prefix, "pex-kernel", isp_pex_kernel.pexKernelName(policy_name, fpga, extra_args.processor))
 
 
-def installTagMemHexdump(policy_name, output_dir):
+def installTagMemHexdump(policy_name, output_dir, processor):
     logger.debug("Building tag_mem_hexdump utility for VCS")
 
     env = dict(os.environ)
 
     env["FPGA"] = "gfe-sim"
+    env["PROCESSOR"] = processor
 
     if policy_name.endswith("-debug"):
         policy_name = policy_name.replace("-debug", "")
@@ -77,7 +78,7 @@ def installPex(policy_dir, output_dir, arch, extra):
     if not isp_pex_kernel.buildPexKernel(policy_name, output_dir, fpga, extra_args.processor):
         return False
 
-    if not installTagMemHexdump(policy_name, output_dir):
+    if not installTagMemHexdump(policy_name, output_dir, extra_args.processor):
         return False
 
     if not isp_pex_kernel.movePexKernel(policy_name, output_dir, fpga, extra_args.processor):
