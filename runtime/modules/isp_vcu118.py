@@ -166,8 +166,7 @@ def start_openocd(log_file=None):
 
 
 def gdb_thread(exe_path, log_file=None, arch="rv32"):
-    xlen = 64 if arch == "rv64" else 32
-    child = pexpect.spawn("riscv{}-unknown-elf-gdb".format(xlen), [exe_path], encoding="utf-8", timeout=None)
+    child = pexpect.spawn("riscv64-unknown-elf-gdb", [exe_path], encoding="utf-8", timeout=None)
     if log_file is None:
         child.logfile = sys.stdout
     else:
@@ -248,7 +247,10 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
     pex_serial.write(open(flash_init_image_path, "rb").read())
     logger.debug("Done writing init file")
 
-    pex_expect.expect("Entering idle loop.")
+    found = pex_expect.expect(["Entering idle loop.", "Entering infinite loop.", pexpect.EOF])
+    if found > 0:
+        pex_expect.close()
+        return isp_utils.retVals.FAILURE
     pex_expect.close()
 
     pex = multiprocessing.Process(target=pex_thread, args=(pex_tty, pex_log))

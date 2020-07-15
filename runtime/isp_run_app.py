@@ -272,7 +272,7 @@ def main():
 
     if result != isp_utils.retVals.SUCCESS:
         logger.error(result)
-        sys.exit(-1)
+        os._exit(-1)
 
     if args.tag_only is True:
         return
