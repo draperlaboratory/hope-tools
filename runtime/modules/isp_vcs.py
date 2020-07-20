@@ -112,9 +112,9 @@ def parseExtra(extra):
         return parser.parse_args(extra_dashed)
     return parser.parse_args([])
 
-
+dbg_suffix = "-debug"
 def generateTagMemHexdump(tag_file_path, policy):
-    policy = policy.strip("-debug")
+    policy = policy if not policy.endswith(dbg_suffix) else policy[:-len(dbg_suffix)]
     output_path = tag_file_path + ".hex"
     subprocess.call(["tag_mem_hexdump-" + policy, tag_file_path, output_path])
     return output_path
