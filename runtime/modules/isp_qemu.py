@@ -139,7 +139,8 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
     # Base options for any runtime
     opts = [ "-nographic",
              "-kernel", exe_path,
-             "-d", "nochain"]
+             "-d", "nochain",
+             "-bios", "none"]
 
     # ISP validator specific flags
     if use_validator:
