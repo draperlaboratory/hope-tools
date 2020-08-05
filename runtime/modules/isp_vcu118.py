@@ -87,6 +87,8 @@ def parseExtra(extra):
     ''')
     parser.add_argument("--bitstream", type=str,
                         help="Re-program the FPGA with the specified bitstream")
+    parser.add_argument("--no-reset", action="store_true", help="Skip resetting the FPGA")
+    parser.add_argument("--reset-address", type=str, default="0x6fff0000", help="Soft reset address (default is 0x6fff0000)")
     parser.add_argument("--processor", type=str, default="P1", help="GFE processor configuration (P1/P2/P3)")
     parser.add_argument("--board", type=str, default="vcu118", help="Target board: vcu118 or vcu108")
 
@@ -165,33 +167,72 @@ def start_openocd(log_file=None):
     return openocd_proc
 
 
-def gdb_thread(exe_path, log_file=None, arch="rv32"):
-    xlen = 64 if arch == "rv64" else 32
-    child = pexpect.spawn("riscv{}-unknown-elf-gdb".format(xlen), [exe_path], encoding="utf-8", timeout=None)
-    if log_file is None:
+def soft_reset(exe_path, reset_address, openocd_log_file, gdb_log_file):
+    logger.info("Soft resetting FPGA")
+    openocd_proc = start_openocd(log_file=openocd_log_file)
+    gdb_reset(exe_path, reset_address, gdb_log_file)
+
+    if openocd_proc.poll():
+        logger.error("Openocd process terminated early with code {}".format(openocd_proc.returncode))
+        return False
+
+    openocd_proc.terminate()
+    return True
+
+
+def start_gdb(exe_path, gdb_log=None):
+    child = pexpect.spawn("riscv64-unknown-elf-gdb", [exe_path], encoding="utf-8", timeout=None)
+    if not gdb_log:
         child.logfile = sys.stdout
     else:
-        gdb_log = open(log_file, "w")
         child.logfile = gdb_log
 
-    def send_command(com):
-        child.expect_exact(["(gdb)", ">"])
-        child.sendline(com)
+    return child
 
-    send_command("set style enabled off")
-    send_command("set confirm off")
-    send_command("target remote :3333")
-    send_command("load")
-    send_command("b do_exit")
-    send_command("commands")
-    send_command("quit")
-    send_command("end")
-    send_command("continue")
+
+def send_gdb_command(child, com):
+    child.expect_exact(["(gdb)", ">"])
+    child.sendline(com)
+
+
+def gdb_reset(exe_path, reset_address, log_file=None):
+    if log_file:
+        gdb_log = open(log_file, "w")
+
+    child = start_gdb(exe_path, gdb_log)
+
+    send_gdb_command(child, "set style enabled off")
+    send_gdb_command(child, "set confirm off")
+    send_gdb_command(child, "target remote :3333")
+    send_gdb_command(child, "set {{int}}{} = 1".format(reset_address))
+    child.expect_exact(["(gdb)", ">"])
+
+    # Wait to make sure write goes through due to latency
+    time.sleep(1)
+
+    child.terminate(force=True)
+
+    if log_file:
+        gdb_log.close()
+
+
+def gdb_thread(exe_path, log_file=None, arch="rv32"):
+    if log_file:
+        gdb_log = open(log_file, "w")
+
+    child = start_gdb(exe_path, gdb_log)
+
+    send_gdb_command(child, "set style enabled off")
+    send_gdb_command(child, "set confirm off")
+    send_gdb_command(child, "target remote :3333")
+    send_gdb_command(child, "load")
+    send_gdb_command(child, "continue")
     logger.info("Process running in gdb")
     child.expect_exact("trap")
     send_command("quit")
     logger.info("Program successfully exited")
-    if log_file is not None:
+
+    if log_file:
         gdb_log.close()
 
 
@@ -253,7 +294,10 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
     pex_serial.write(open(flash_init_image_path, "rb").read())
     logger.debug("Done writing init file")
 
-    pex_expect.expect("Entering idle loop.")
+    found = pex_expect.expect(["Entering idle loop.", "Entering infinite loop.", pexpect.EOF])
+    if found > 0:
+        pex_expect.close()
+        return isp_utils.retVals.FAILURE
     pex_expect.close()
 
     pex = multiprocessing.Process(target=pex_thread, args=(pex_tty, pex_log))
@@ -355,6 +399,13 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         ltx_file = os.path.splitext(bit_file)[0] + ".ltx"
         logger.info("Re-programming FPGA with bitstream {}".format(bit_file))
         if program_fpga(bit_file, ltx_file, extra_args.board, vivado_log_file) is False:
+            return isp_utils.retVals.FAILURE
+    elif not extra_args.no_reset:
+        if not soft_reset(exe_path, extra_args.reset_address, openocd_log_file, gdb_log_file):
+            logger.error('''
+            Soft reset failed. Please re-program the FPGA by providing a +bitstream argument or with the command:
+            vivado -mode batch -source $ISP_PREFIX/vcu118/tcl/prog_bit.tcl -tclargs <bitstream> <ltx> vcu118
+            ''')
             return isp_utils.retVals.FAILURE
 
     ap_tty = detectTTY(ap_tty_symlink)

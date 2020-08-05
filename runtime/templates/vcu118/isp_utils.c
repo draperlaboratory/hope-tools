@@ -27,16 +27,28 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
   cycle_hi = cycle >> 32;
   cycle_lo = cycle & 0xFFFFFFFFU;
 #else
-	asm volatile(
-		"%=:\n\t"
-		"csrr %1, mcycleh\n\t"
-		"csrr %0, mcycle\n\t"
-		"csrr t1, mcycleh\n\t"
-		"bne  %1, t1, %=b"
-		: "=r"(cycle_lo), "=r"(cycle_hi)
-		: // No inputs.
-		: "t1");
-  cycle = (((uint64_t)cycle_hi) << 32) | (uint64_t)cycle_lo;
+	uint32_t cycle_lo, cycle_hi, temp_hi;
+        // Loop outside of the inline assembly to avoid issues with LLVM
+        // policies that don't tag inline assembly
+        do {
+            asm volatile(
+                    "csrr %1, mcycleh\n\t"
+                    "csrr %0, mcycle\n\t"
+                    "csrr %2, mcycleh\n\t"
+                    : "=r"(cycle_lo), "=r"(cycle_hi), "=r" (temp_hi)
+                    : // No inputs.
+                    : // No temps
+                    );
+        } while (temp_hi != cycle_hi);
+
+   // XXX: pass back hi/lo to get around unreliable 64-bit intrinsics
+   if(result_hi != NULL) {
+     *result_hi = cycle_hi;
+   }
+   if(result_lo != NULL) {
+     *result_lo = cycle_lo;
+   }
+	 return (((uint64_t)cycle_hi) << 32) | (uint64_t)cycle_lo;
 #endif
   // XXX: pass back hi/lo to get around unreliable 64-bit intrinsics
   if(result_hi != NULL) {
