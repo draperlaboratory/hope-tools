@@ -2,7 +2,7 @@ ISP_PREFIX       ?= $(HOME)/.local/isp/
 ARCH ?= rv32
 ARCH_XLEN = $(subst rv,,$(ARCH))
 
-ISP_RUNTIME      := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-bare\.mk"))
+ISP_RUNTIME      := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-vm\.mk"))
 
 ISP_HEADERS      += $(wildcard $(ISP_RUNTIME)/*.h)
 ISP_C_SRCS       += $(wildcard $(ISP_RUNTIME)/*.c)
@@ -56,6 +56,7 @@ ISP_LDFLAGS      += -Wl,--wrap=read
 ISP_LDFLAGS      += -Wl,--wrap=write
 ISP_LDFLAGS      += -Wl,--wrap=malloc
 ISP_LDFLAGS      += -Wl,--wrap=free
+ISP_LDFLAGS      += -Wl,--wrap=exit
 ISP_LDFLAGS 		 += -Wl,--undefined=pvPortMalloc
 ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
 
@@ -65,7 +66,7 @@ ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
 all:
 
 $(LIBVCU118):
-	ARCH=$(ARCH) make -C $(BSP_BASE)
+	ARCH=$(ARCH) USE_VM=1 make -C $(BSP_BASE)
 
 debug:
 	echo $(CC)

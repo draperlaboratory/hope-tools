@@ -1,29 +1,18 @@
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "isp_utils.h"
 
 #define CPU_CLOCK_HZ 50000000
 
-extern volatile uint64_t tohost;
-
-void write_tohost(uint64_t val)
-{
-  tohost = val;
-}
-
-void tohost_exit(uint64_t val)
-{
-  write_tohost(val << 1 | 1);
-}
-
 void isp_test_device_pass(void)
 {
-  tohost_exit(0);
+  exit(0);
 }
 
 void isp_test_device_fail(void)
 {
-  tohost_exit(0x10);
+  exit(0x10);
 }
 
 /**
@@ -35,7 +24,7 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
 	uint64_t cycle;
 	asm volatile(
 		"%=:\n\t"
-		"csrr %0, mcycle\n\t"
+		"csrr %0, cycle\n\t"
 		: "=r"(cycle));
 
   return cycle;
@@ -45,9 +34,9 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
         // policies that don't tag inline assembly
         do {
             asm volatile(
-                    "csrr %1, mcycleh\n\t"
-                    "csrr %0, mcycle\n\t"
-                    "csrr %2, mcycleh\n\t"
+                    "csrr %1, cycleh\n\t"
+                    "csrr %0, cycle\n\t"
+                    "csrr %2, cycleh\n\t"
                     : "=r"(cycle_lo), "=r"(cycle_hi), "=r" (temp_hi)
                     : // No inputs.
                     : // No temps
