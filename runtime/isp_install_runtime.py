@@ -85,7 +85,7 @@ def doInstall(build_dir, template_dir, runtime, sim, stock):
         shutil.copy(sim_utils_c, runtime_dir)
         shutil.copy(makefile, os.path.join(build_dir, ("isp-runtime-" + runtime + ".mk")))
 
-        if "bare" == runtime:
+        if runtime in ["bare", "vm"]:
             shutil.copytree(os.path.join(isp_utils.getIspPrefix(), bare_bsp[sim]),
                             os.path.join(runtime_dir, "bsp"))
 
