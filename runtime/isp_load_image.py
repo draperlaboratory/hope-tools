@@ -62,7 +62,7 @@ def generate_load_image(elf_binary, output_image, tag_info=None):
             open_segment = None
             elision = None
             elision_dict = {}
-            for s in ef.iter_sections():
+            for s in sorted(ef.iter_sections(), key=lambda s: s["sh_addr"]):
                 if include_section(s):
                     logger.debug("section {0} at 0x{1:x}, for 0x{2:x} bytes".format(s.name, s["sh_addr"], s["sh_size"]))
                     elision = SectionElision(s)
