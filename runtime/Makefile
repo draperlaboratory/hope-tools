@@ -29,6 +29,7 @@ ISP_BACKEND += isp_pex_kernel.py
 MODULE_FILES := isp_qemu.py
 MODULE_FILES += isp_vcu118.py
 MODULE_FILES += isp_vcs.py
+MODULE_FILES += isp_iveia.py
 
 MODULES := $(patsubst %,modules/%,$(MODULE_FILES))
 

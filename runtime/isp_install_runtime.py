@@ -32,7 +32,8 @@ class retVals:
 
 bare_bsp = {
     "qemu": "hifive_bsp",
-    "vcu118": "vcu118_bsp"
+    "vcu118": "vcu118_bsp",
+    "iveia": "iveia_bsp"
 }
 
 sim_aliases = {
