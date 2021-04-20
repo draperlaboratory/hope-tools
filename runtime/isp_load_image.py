@@ -62,7 +62,7 @@ def generate_load_image(elf_binary, output_image, tag_info=None):
             open_segment = None
             elision = None
             elision_dict = {}
-            for s in ef.iter_sections():
+            for s in sorted(ef.iter_sections(), key=lambda s: s["sh_addr"]):
                 if include_section(s):
                     logger.debug("section {0} at 0x{1:x}, for 0x{2:x} bytes".format(s.name, s["sh_addr"], s["sh_size"]))
                     elision = SectionElision(s)
@@ -78,14 +78,14 @@ def generate_load_image(elf_binary, output_image, tag_info=None):
                             open_segment.extend(s["sh_addr"], elision)
 
             segment_count = 0
-            for s in ef.iter_sections():
+            for s in sorted(ef.iter_sections(), key=lambda s: s["sh_addr"]):
                 if include_section(s):
                     elision = elision_dict[s["sh_name"]]
                     if elision.write_segment:
                         logger.debug("segment at 0x{0:x}, for 0x{1:x} bytes".format(s["sh_addr"], elision.segment_size))
                         out.write(load_segment_t.pack(s["sh_addr"], elision.segment_size))
                         segment_count = segment_count + 1
-            for s in ef.iter_sections():
+            for s in sorted(ef.iter_sections(), key=lambda s: s["sh_addr"]):
                 if include_section(s):
                     elision = elision_dict[s["sh_name"]]
                     size = s["sh_size"]
