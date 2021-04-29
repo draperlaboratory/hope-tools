@@ -169,7 +169,7 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
 
 
 def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_path, no_log, iveia_tmp):
-    logger.debug("Connecting to {}, baud rate {}".format(pex_tty, pex_baud_rate))
+    logger.debug("Connecting PEX uart to {}, baud rate {}".format(pex_tty, pex_baud_rate))
     pex_serial = serial.Serial(pex_tty, pex_baud_rate, timeout=3000000,
             bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
 
@@ -184,31 +184,31 @@ def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_p
                                    exe_path,
                                    "root@atlas-ii-z8-hp:" + iveia_tmp]
 
-    logger.info("Sending \t pex_kernel = {} \n\t ap tags = {} and \n\t  ap = {} files to iveia".format(pex_kernel_path, ap_tags_load_image, exec_path))
     result = subprocess.call(load_pex_and_tag_files_args, stdout=pex_log, stderr=subprocess.STDOUT, cwd=run_dir)
 
     if result != 0:
         logger.error("Failed to copy to iveia board the pex kernel and the ap_tag_info files ...")
+        logger.error("Used command : {} returned {}".format(load_pex_and_tag_files_args, result))
         return isp_utils.retVals.FAILURE
 
     isp_load_args = ["ssh",
                      "root@atlas-ii-z8-hp",
-                     "cd" + iveia_tmp + ";",
-                     "./isp-loader",
-                     os.path.basename(exe_path),
-                     os.path.basename(pex_kernel_path),
-                     os.path.basename(exe_path) +
+                     "isp-loader",
+                     iveia_tmp + "/" + os.path.basename(exe_path),
+                     iveia_tmp + "/" + os.path.basename(pex_kernel_path),
+                     iveia_tmp + "/" + os.path.basename(exe_path) +
                      ".load_image"]
 
     logger.info("Loading pex kernel and ap tags into the mem space of the PIPE and AP respectively and issuing reset")
-
     result = subprocess.call(isp_load_args, stdout=pex_log, stderr=subprocess.STDOUT, cwd=run_dir)
 
     if result != 0:
         logger.error("Failed to execute isp-load on the iveia board, command returned {}".format(result))
         return isp_utils.retVals.FAILURE
 
-    found = pex_expect.expect(["Entering idle loop.", "Entering infinite loop.", pexpect.EOF])
+    # when the data is already in the memory, the PEX is interrupted (to process rule cache misses)
+    # before it can print "Entering idle loop"
+    found = pex_expect.expect(["Releasing host core.", "Unrecoverable failure.", pexpect.EOF])
     if found > 0:
         pex_expect.close()
         return isp_utils.retVals.FAILURE
@@ -254,9 +254,6 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     if tag_only:
         return isp_utils.retVals.SUCCESS
 
-    # force the sim to exit successfully! 
-    return isp_utils.retVals.SUCCESS
-    
     ap_log = open(ap_log_file, "w")
     pex_log = open(pex_log_file, "w")
 
@@ -272,7 +269,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
 
     ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, extra_args.ap_br, ap_log, runtime, extra_args.processor))
     if not extra_args.no_log:
-        logger.debug("Connecting to {}, baud rate {}".format(ap_tty, extra_args.ap_br))
+        logger.debug("Connecting AP uart to {}, baud rate {}".format(ap_tty, extra_args.ap_br))
         ap.start()
 
     result = runPipe(exe_path, ap, pex_tty, extra_args.pex_br, pex_log, run_dir, pex_path, extra_args.no_log, extra_args.iveia_tmp)
