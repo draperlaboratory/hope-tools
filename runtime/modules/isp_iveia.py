@@ -134,8 +134,8 @@ def ap_thread(ap_tty, ap_baud_rate, ap_log, runtime, processor):
     ap_expect.expect(isp_utils.terminateMessage(runtime))
 
 
-def pex_thread(pex_tty, pex_log):
-    pex_serial = serial.Serial(pex_tty, 115200, timeout=3000000, bytesize=serial.EIGHTBITS,
+def pex_thread(pex_tty, pex_baud_rate, pex_log):
+    pex_serial = serial.Serial(pex_tty, pex_baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
                                 parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
     pex_expect = pexpect_serial.SerialSpawn(pex_serial, timeout=3000000, encoding='utf-8', codec_errors='ignore')
     pex_expect.logfile = pex_log
@@ -167,6 +167,18 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
 
     return True
 
+def runIveiaCmd(cmd, pex_log, run_dir):
+    local_cmd = ["ssh",
+                 "root@atlas-ii-z8-hp"] + cmd
+
+    result = subprocess.call(local_cmd, stdout=pex_log, stderr=subprocess.STDOUT, cwd=run_dir)
+
+    if result != 0:
+        logger.error("Failed to execute command remotely on the iveia board ...")
+        logger.error("Used command : {} returned {}".format(cmd, result))
+        return isp_utils.retVals.FAILURE
+
+    return isp_utils.retVals.SUCCESS
 
 def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_path, no_log, iveia_tmp):
     logger.debug("Connecting PEX uart to {}, baud rate {}".format(pex_tty, pex_baud_rate))
@@ -191,19 +203,16 @@ def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_p
         logger.error("Used command : {} returned {}".format(load_pex_and_tag_files_args, result))
         return isp_utils.retVals.FAILURE
 
-    isp_load_args = ["ssh",
-                     "root@atlas-ii-z8-hp",
-                     "isp-loader",
+    isp_load_args = ["isp-loader",
                      iveia_tmp + "/" + os.path.basename(exe_path),
                      iveia_tmp + "/" + os.path.basename(pex_kernel_path),
                      iveia_tmp + "/" + os.path.basename(exe_path) +
                      ".load_image"]
 
     logger.info("Loading pex kernel and ap tags into the mem space of the PIPE and AP respectively and issuing reset")
-    result = subprocess.call(isp_load_args, stdout=pex_log, stderr=subprocess.STDOUT, cwd=run_dir)
+    result = runIveiaCmd(isp_load_args, pex_log, run_dir)
 
-    if result != 0:
-        logger.error("Failed to execute isp-load on the iveia board, command returned {}".format(result))
+    if result != isp_utils.retVals.SUCCESS:
         return isp_utils.retVals.FAILURE
 
     # when the data is already in the memory, the PEX is interrupted (to process rule cache misses)
@@ -214,7 +223,7 @@ def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_p
         return isp_utils.retVals.FAILURE
     pex_expect.close()
 
-    pex = multiprocessing.Process(target=pex_thread, args=(pex_tty, pex_log))
+    pex = multiprocessing.Process(target=pex_thread, args=(pex_tty, pex_baud_rate, pex_log))
     if not no_log:
         pex.start()
 
@@ -224,6 +233,12 @@ def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_p
 
     ap.terminate()
     pex.terminate()
+
+    # removed the images that you copied over
+    isp_load_args[0] = "/bin/rm -f"
+    result = runIveiaCmd(isp_load_args, pex_log, run_dir)
+    if result != isp_utils.retVals.SUCCESS:
+        logger.warning("Failed to clean after yourself, check out the {} log for details!".format(pex_log))
 
     return isp_utils.retVals.SUCCESS
 
