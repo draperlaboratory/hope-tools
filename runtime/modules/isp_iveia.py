@@ -190,15 +190,6 @@ def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_p
 
     ap_tags_load_image = os.path.join(run_dir, os.path.basename(exe_path) + ".load_image")
 
-    # before you copy the images to the iveia_tmp, make sure you clear that dir (e.g. remove all the
-    # files in there possibly from other runs )
-#    cmd = ["/bin/rm -f",
-#           iveia_tmp + "/" + os.path.basename(exe_path),
-#           iveia_tmp + "/" + os.path.basename(pex_path),
-#           iveia_tmp + "/" + os.path.basename(exe_path) + ".load_image"]
-#    result1 = runIveiaCmd(cmd, pex_log, run_dir)
-
-
     load_pex_and_tag_files_args = ["scp",
                                    pex_kernel_path,
                                    ap_tags_load_image,
@@ -287,17 +278,14 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         logger.debug("Connecting AP uart to {}, baud rate {}".format(ap_tty, extra_args.ap_br))
         ap.start()
 
-    result = runPipe(exe_path, ap, pex_tty, extra_args.pex_br, pex_log, run_dir, pex_path, extra_args.no_log, extra_args.iveia_tmp)
+    # before we run anything, make sure that the extra_args.iveia_tmp dir on the iveia board is clean
+    # and it does not contain left-over stuff from previous runs (which might have exited due to a timeout)
+    cmd = ["/bin/rm",  "-f", extra_args.iveia_tmp + "/*"]
+    if runIveiaCmd(cmd, pex_log, run_dir) != isp_utils.retVals.SUCCESS:
+        logger.warning("Failed to clean the {} dir (on the iveia board) before running the current test!".format(extra_args.iveia_tmp))
+        return isp_utils.retVals.FAILURE
 
-    # clean after yourself - remove any files stored in the iveia_tmp
-    logger.info("Cleaning after yourself ...")
-    cmd = ["/bin/rm -f",
-           extra_args.iveia_tmp + "/" + os.path.basename(exe_path),
-           extra_args.iveia_tmp + "/" + os.path.basename(pex_path),
-           extra_args.iveia_tmp + "/" + os.path.basename(exe_path) + ".load_image"]
-    result1 = runIveiaCmd(cmd, pex_log, run_dir)
-    if result1 != isp_utils.retVals.SUCCESS:
-        logger.warning("Failed to clean after yourself, check out the {} log for details!".format(pex_log))
+    result = runPipe(exe_path, ap, pex_tty, extra_args.pex_br, pex_log, run_dir, pex_path, extra_args.no_log, extra_args.iveia_tmp)
 
     pex_log.close()
     ap_log.close()
