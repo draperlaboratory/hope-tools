@@ -190,6 +190,15 @@ def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_p
 
     ap_tags_load_image = os.path.join(run_dir, os.path.basename(exe_path) + ".load_image")
 
+    # before you copy the images to the iveia_tmp, make sure you clear that dir (e.g. remove all the
+    # files in there possibly from other runs )
+#    cmd = ["/bin/rm -f",
+#           iveia_tmp + "/" + os.path.basename(exe_path),
+#           iveia_tmp + "/" + os.path.basename(pex_path),
+#           iveia_tmp + "/" + os.path.basename(exe_path) + ".load_image"]
+#    result1 = runIveiaCmd(cmd, pex_log, run_dir)
+
+
     load_pex_and_tag_files_args = ["scp",
                                    pex_kernel_path,
                                    ap_tags_load_image,
@@ -234,12 +243,6 @@ def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_p
     ap.terminate()
     pex.terminate()
 
-    # removed the images that you copied over
-    isp_load_args[0] = "/bin/rm -f"
-    result = runIveiaCmd(isp_load_args, pex_log, run_dir)
-    if result != isp_utils.retVals.SUCCESS:
-        logger.warning("Failed to clean after yourself, check out the {} log for details!".format(pex_log))
-
     return isp_utils.retVals.SUCCESS
 
 def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
@@ -247,9 +250,6 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     extra_args = parseExtra(extra)
     ap_log_file = os.path.join(run_dir, "uart.log")
     pex_log_file = os.path.join(run_dir, "pex.log")
-    vivado_log_file = os.path.join(run_dir, "vivado.log")
-    openocd_log_file = os.path.join(run_dir, "openocd.log")
-    gdb_log_file = os.path.join(run_dir, "gdb.log")
 
     if not soc_cfg:
         soc_cfg = os.path.join(isp_prefix, "soc_cfg", "iveia.yml")
@@ -288,6 +288,16 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         ap.start()
 
     result = runPipe(exe_path, ap, pex_tty, extra_args.pex_br, pex_log, run_dir, pex_path, extra_args.no_log, extra_args.iveia_tmp)
+
+    # clean after yourself - remove any files stored in the iveia_tmp
+    logger.info("Cleaning after yourself ...")
+    cmd = ["/bin/rm -f",
+           extra_args.iveia_tmp + "/" + os.path.basename(exe_path),
+           extra_args.iveia_tmp + "/" + os.path.basename(pex_path),
+           extra_args.iveia_tmp + "/" + os.path.basename(exe_path) + ".load_image"]
+    result1 = runIveiaCmd(cmd, pex_log, run_dir)
+    if result1 != isp_utils.retVals.SUCCESS:
+        logger.warning("Failed to clean after yourself, check out the {} log for details!".format(pex_log))
 
     pex_log.close()
     ap_log.close()
