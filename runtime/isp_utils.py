@@ -167,27 +167,25 @@ def getScratchAddress(arch, name):
     # as the old format allows nested defines and arithmentic, and we need
     # a calculated (hex) address
     # searchString = "SOC_ADDR_DRAM_" + ("SCRATCH" if name == "kernel" else "AP_IMAGE")
-    return getField(arch, keyword)
+    # remove the UL suffix
+    return getField(arch, keyword)[:-2]
 
 def getBR(arch, name):
-    keyword = name.upper() + "MMIO_UART_BAUD_RATE"
+    keyword = name.upper() + "_MMIO_UART_BAUD_RATE"
     return getField(arch, keyword)
 
 def getField(arch, searchString):
     if arch != "rv32" and arch != "rv64":
-        logger.warn("Wrong arch {} - we support only rv32/rv64!".format(arch))
-	return None
+        return None
 
-    memoryMapName = getIspPrefix() + "include/memory_map_" + arch.upper() + ".h"
+    memoryMapName = getIspPrefix() + "/include/memory_map_" + arch.upper() + ".h"
     result = None
-    try:
-        p1 = subprocess.Popen(["awk", "/" + searchString + "/ {print $3}", memoryMapName ], stdin=subprocess.PIP, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        if p1.returncode is None:
-            outputStr= p1.stdout.read().decode()
-            result = outputStr[:-2]
-        else:
-            logger.warn("Could not find {} in the {} file!".format(searchString, memoryMapName)
-    except Exception as ex:
-        logger.warn("Encoutered exception {} while trying to extract {} from the {} file",format(ex, searchString, memoryMapName))
+
+    p1 = subprocess.Popen(["awk", "/" + searchString + "/ {print $3}", memoryMapName ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if p1.returncode is None:
+        outputStr= p1.stdout.read().decode()
+        if outputStr != '':
+            # remove the '\n'
+            result = outputStr[:-1]
 
     return result

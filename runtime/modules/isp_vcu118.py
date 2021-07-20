@@ -385,24 +385,30 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     # find the scratch location of the kernel and the tag info
     # from the memory map - that is where the PEX bootrom and
     # kernel, respectively, expect them
+    warnMsg = '''
+Could not extract the {} scratch address from the memory map!
+Inconsistencies between runtime and firmware/pex kernel might occur!
+'''
     kernel_address = isp_utils.getScratchAddress(arch, "kernel")
-    ap_address = isp_utils.getScratchAddress(arch, "tag")
-    if kernel_address is None or ap_address is None:
-        # alow the extra arguments with the understanding that this
-        # might actaully conflict with what was defined in the relevant Makefile
-        if extra_args.kernel_address is None and extra_args.ap_address is None:
-            logger.error("Could not extract the kernel and tag info scratch address!")
+    if kernel_address is None:
+        logger.warn(warnMsg.format('kernel'))
+        if extra_args.kernel_address is None:
+            logger.error("Could not extract the kernel info scratch address!")
             return isp_utils.retVals.FAILURE
         else:
-            warnMsg = '''
-Could not extract the scratch address for the pex and taginfo
-from the memory map! Inconsistencies between runtime and firmware/pex kernel might occur!
-'''
-            logger.warn(warnMsg)
             kernel_address = extra_args.kernel_address
+
+    ap_address = isp_utils.getScratchAddress(arch, "taginfo")
+    if ap_address is None:
+        logger.warn(warnMsg.format('taginfo'))
+        if extra_args.ap_address is None:
+            logger.error("Could not extract the taginfo scratch address!")
+            return isp_utils.retVals.FAILURE
+        else:
             ap_address = extra_args.ap_address
 
     if not extra_args.stock:
+        logger.debug("kernel_address={}, ap_address={}".format(kernel_address, ap_address))
         if not tagInit(exe_path, run_dir, policy_dir, soc_cfg,
                        arch, pex_path, flash_init_image_path,
                        kernel_address, ap_address):
@@ -413,20 +419,6 @@ from the memory map! Inconsistencies between runtime and firmware/pex kernel mig
 
     ap_log = open(ap_log_file, "w")
     pex_log = open(pex_log_file, "w")
-
-    if extra_args.bitstream:
-        bit_file = os.path.realpath(extra_args.bitstream)
-        ltx_file = os.path.splitext(bit_file)[0] + ".ltx"
-        logger.info("Re-programming FPGA with bitstream {}".format(bit_file))
-        if program_fpga(bit_file, ltx_file, extra_args.board, vivado_log_file) is False:
-            return isp_utils.retVals.FAILURE
-    elif not extra_args.no_reset:
-        if not soft_reset(exe_path, extra_args.reset_address, openocd_log_file, gdb_log_file):
-            logger.error('''
-            Soft reset failed. Please re-program the FPGA by providing a +bitstream argument or with the command:
-            vivado -mode batch -source $ISP_PREFIX/vcu118/tcl/prog_bit.tcl -tclargs <bitstream> <ltx> vcu118
-            ''')
-            return isp_utils.retVals.FAILURE
 
     ap_tty = detectTTY(ap_tty_symlink)
     if not ap_tty:
@@ -447,6 +439,20 @@ from the memory map! Inconsistencies between runtime and firmware/pex kernel mig
     if pex_br is None:
         logger.warn("Inconsistencies between the run-time and the PEX kernel firmware might occur!")
         pex_br = extra_args.pex_br
+
+    if extra_args.bitstream:
+        bit_file = os.path.realpath(extra_args.bitstream)
+        ltx_file = os.path.splitext(bit_file)[0] + ".ltx"
+        logger.info("Re-programming FPGA with bitstream {}".format(bit_file))
+        if program_fpga(bit_file, ltx_file, extra_args.board, vivado_log_file) is False:
+            return isp_utils.retVals.FAILURE
+    elif not extra_args.no_reset:
+        if not soft_reset(exe_path, extra_args.reset_address, openocd_log_file, gdb_log_file):
+            logger.error('''
+            Soft reset failed. Please re-program the FPGA by providing a +bitstream argument or with the command:
+            vivado -mode batch -source $ISP_PREFIX/vcu118/tcl/prog_bit.tcl -tclargs <bitstream> <ltx> vcu118
+            ''')
+            return isp_utils.retVals.FAILURE
 
     ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_br, ap_log, runtime, extra_args.processor))
     if not extra_args.no_log:
