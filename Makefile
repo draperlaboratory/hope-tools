@@ -73,7 +73,7 @@ $(CLEAN_PROJECTS):
 	$(MAKE) -f Makefile.isp -C ../$(@:clean-%=%) clean
 
 clean-riscv-isa-sim:
-	rm -r ../$(@:clean-%=%)/build
+	rm -rf ../$(@:clean-%=%)/build
 
 runtime: $(ISP_PREFIX) llvm-project/compiler-rt
 	$(MAKE) -C runtime install
