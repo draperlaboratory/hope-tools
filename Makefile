@@ -56,7 +56,7 @@ $(PROJECTS): $(ISP_PREFIX)
 	$(MAKE) -f Makefile.isp -C ../$@ install
 
 riscv-isa-sim: $(ISP_PREFIX)
-	mkdir ../$@/build
+	mkdir -p ../$@/build
 	cd ../$@/build && ../configure --prefix=$(ISP_PREFIX)
 	$(MAKE) -C ../$@/build
 	$(MAKE) -C ../$@/build install
