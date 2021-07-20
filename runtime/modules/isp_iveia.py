@@ -255,12 +255,12 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     # from the memory map - that is where the PEX bootrom and
     # the kernel, respectively, expect them
     kernel_address = isp_utils.getScratchAddress(arch, "kernel")
-    ap_address = isp_utils.getScratchAddress(arch, "tag")
+    ap_address = isp_utils.getScratchAddress(arch, "taginfo")
     if kernel_address is None or ap_address is None:
         # alow the extra arguments with the understanding that this
         # might actaully conflict with what was defined in the relevant Makefile
         if extra_args.kernel_address is None and extra_args.ap_address is None:
-            logger.error("Could not extract the kernel and tag info scratch address!")
+            logger.error("Could not determine the kernel and tag info scratch address!")
             return isp_utils.retVals.FAILURE
         else:
             warnMsg = '''
@@ -268,8 +268,10 @@ Could not extract the scratch address for the pex and taginfo
 from the memory map! Inconsistencies between runtime and firmware/pex kernel might occur!
 '''
             logger.warn(warnMsg)
-            kernel_address = extra_args.kernel_address
-            ap_address = extra_args.ap_address
+            if kernel_address is None:
+                kernel_address = extra_args.kernel_address
+            if ap_address is None:
+                ap_address = extra_args.ap_address
 
     if not tagInit(exe_path, run_dir, policy_dir, soc_cfg,
                    arch, pex_path, flash_init_image_path,
