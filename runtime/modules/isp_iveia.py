@@ -168,8 +168,7 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
     return True
 
 def runIveiaCmd(cmd, pex_log, run_dir):
-    local_cmd = ["ssh",
-                 "root@atlas-ii-z8-hp"] + cmd
+    local_cmd = ["ssh", "root@atlas-ii-z8-hp"] + cmd
 
     result = subprocess.call(local_cmd, stdout=pex_log, stderr=subprocess.STDOUT, cwd=run_dir)
 
@@ -252,9 +251,29 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     if extra_args.flash_init:
         flash_init_image_path = os.path.realpath(extra_args.flash_init)
 
+    # find the scratch location of the kernel and the tag info
+    # from the memory map - that is where the PEX bootrom and
+    # the kernel, respectively, expect them
+    kernel_address = isp_utils.getScratchAddress(arch, "kernel")
+    ap_address = isp_utils.getScratchAddress(arch, "tag")
+    if kernel_address is None or ap_address is None:
+        # alow the extra arguments with the understanding that this
+        # might actaully conflict with what was defined in the relevant Makefile
+        if extra_args.kernel_address is None and extra_args.ap_address is None:
+            logger.error("Could not extract the kernel and tag info scratch address!")
+            return isp_utils.retVals.FAILURE
+        else:
+            warnMsg = '''
+Could not extract the scratch address for the pex and taginfo
+from the memory map! Inconsistencies between runtime and firmware/pex kernel might occur!
+'''
+            logger.warn(warnMsg)
+            kernel_address = extra_args.kernel_address
+            ap_address = extra_args.ap_address
+
     if not tagInit(exe_path, run_dir, policy_dir, soc_cfg,
                    arch, pex_path, flash_init_image_path,
-                   extra_args.kernel_address, extra_args.ap_address):
+                   kernel_address, ap_address):
             return isp_utils.retVals.TAG_FAIL
 
     if tag_only:
@@ -273,19 +292,30 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         logger.error("Failed to autodetect PEX TTY file. If you know the symlink, re-run with the +pex_tty option")
         return isp_utils.retVals.FAILURE
 
-    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, extra_args.ap_br, ap_log, runtime, extra_args.processor))
+    ap_br = isp_utils.getBR(arch, "ap")
+    if ap_br is None:
+        logger.warn("Inconsistencies between the run-time and the AP firmware might occur!")
+        ap_br = extra_args.ap_br
+
+    pex_br = isp_utils.getBR(arch, "pex")
+    if pex_br is None:
+        logger.warn("Inconsistencies between the run-time and the PEX kernel firmware might occur!")
+        pex_br = extra_args.pex_br
+
+    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_br, ap_log, runtime, extra_args.processor))
     if not extra_args.no_log:
-        logger.debug("Connecting AP uart to {}, baud rate {}".format(ap_tty, extra_args.ap_br))
+        logger.debug("Connecting AP uart to {}, baud rate {}".format(ap_tty, ap_br))
         ap.start()
 
     # before we run anything, make sure that the extra_args.iveia_tmp dir on the iveia board is clean
     # and it does not contain left-over stuff from previous runs (which might have exited due to a timeout)
     cmd = ["/bin/rm",  "-f", extra_args.iveia_tmp + "/*"]
     if runIveiaCmd(cmd, pex_log, run_dir) != isp_utils.retVals.SUCCESS:
-        logger.warning("Failed to clean the {} dir (on the iveia board) before running the current test!".format(extra_args.iveia_tmp))
+        logger.warn("Failed to clean after yourself, check out the {} log for details!".format(pex_log))
         return isp_utils.retVals.FAILURE
 
-    result = runPipe(exe_path, ap, pex_tty, extra_args.pex_br, pex_log, run_dir, pex_path, extra_args.no_log, extra_args.iveia_tmp)
+    # now you are ready to run the test ....
+    result = runPipe(exe_path, ap, pex_tty, pex_br, pex_log, run_dir, pex_path, extra_args.no_log, extra_args.iveia_tmp)
 
     pex_log.close()
     ap_log.close()

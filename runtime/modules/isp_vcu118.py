@@ -91,6 +91,8 @@ def parseExtra(extra):
     parser.add_argument("--reset-address", type=str, default="0x6fff0000", help="Soft reset address (default is 0x6fff0000)")
     parser.add_argument("--processor", type=str, default="P1", help="GFE processor configuration (P1/P2/P3)")
     parser.add_argument("--board", type=str, default="vcu118", help="Target board: vcu118 or vcu108")
+    parser.add_argument("--pex-br", type=str, default="115200", help="pex uart baud rate")
+    parser.add_argument("--ap-br", type=str, default="115200", help="ap uart baud rate")
 
     if not extra:
         return parser.parse_args([])
@@ -235,10 +237,9 @@ def gdb_thread(exe_path, log_file=None, arch="rv32"):
         gdb_log.close()
 
 
-def ap_thread(ap_tty, ap_log, runtime, processor):
-    baud_rate = 115200
+def ap_thread(ap_tty, ap_baud_rate, ap_log, runtime, processor):
 
-    ap_serial = serial.Serial(ap_tty, baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
+    ap_serial = serial.Serial(ap_tty, ap_baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
                                parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
     ap_expect = pexpect_serial.SerialSpawn(ap_serial, timeout=3000000, encoding='utf-8', codec_errors='ignore')
     ap_expect.logfile = ap_log
@@ -246,8 +247,8 @@ def ap_thread(ap_tty, ap_log, runtime, processor):
     ap_expect.expect(isp_utils.terminateMessage(runtime))
 
 
-def pex_thread(pex_tty, pex_log):
-    pex_serial = serial.Serial(pex_tty, 115200, timeout=3000000, bytesize=serial.EIGHTBITS,
+def pex_thread(pex_tty, pex_baud_rate, pex_log):
+    pex_serial = serial.Serial(pex_tty, pex_baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
                                 parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
     pex_expect = pexpect_serial.SerialSpawn(pex_serial, timeout=3000000, encoding='utf-8', codec_errors='ignore')
     pex_expect.logfile = pex_log
@@ -280,10 +281,10 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
     return True
 
 
-def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
+def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, openocd_log_file,
             gdb_log_file, flash_init_image_path, gdb_port, no_log, arch):
     logger.debug("Connecting to {}".format(pex_tty))
-    pex_serial = serial.Serial(pex_tty, 115200, timeout=3000000,
+    pex_serial = serial.Serial(pex_tty, pex_baud_rate, timeout=3000000,
             bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
 
     pex_expect = pexpect_serial.SerialSpawn(pex_serial, timeout=3000000, encoding='utf-8', codec_errors='ignore')
@@ -299,7 +300,7 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
         return isp_utils.retVals.FAILURE
     pex_expect.close()
 
-    pex = multiprocessing.Process(target=pex_thread, args=(pex_tty, pex_log))
+    pex = multiprocessing.Process(target=pex_thread, args=(pex_tty, pex_baud_rate, pex_log))
     if not no_log:
         pex.start()
 
@@ -381,10 +382,30 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     if extra_args.flash_init:
         flash_init_image_path = os.path.realpath(extra_args.flash_init)
 
+    # find the scratch location of the kernel and the tag info
+    # from the memory map - that is where the PEX bootrom and
+    # kernel, respectively, expect them
+    kernel_address = isp_utils.getScratchAddress(arch, "kernel")
+    ap_address = isp_utils.getScratchAddress(arch, "tag")
+    if kernel_address is None or ap_address is None:
+        # alow the extra arguments with the understanding that this
+        # might actaully conflict with what was defined in the relevant Makefile
+        if extra_args.kernel_address is None and extra_args.ap_address is None:
+            logger.error("Could not extract the kernel and tag info scratch address!")
+            return isp_utils.retVals.FAILURE
+        else:
+            warnMsg = '''
+Could not extract the scratch address for the pex and taginfo
+from the memory map! Inconsistencies between runtime and firmware/pex kernel might occur!
+'''
+            logger.warn(warnMsg)
+            kernel_address = extra_args.kernel_address
+            ap_address = extra_args.ap_address
+
     if not extra_args.stock:
         if not tagInit(exe_path, run_dir, policy_dir, soc_cfg,
                        arch, pex_path, flash_init_image_path,
-                       extra_args.kernel_address, extra_args.ap_address):
+                       kernel_address, ap_address):
             return isp_utils.retVals.TAG_FAIL
 
     if tag_only:
@@ -417,7 +438,17 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         logger.error("Failed to autodetect PEX TTY file. If you know the symlink, re-run with the +pex_tty option")
         return isp_utils.retVals.FAILURE
 
-    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_log, runtime, extra_args.processor))
+    ap_br = isp_utils.getBR(arch, "ap")
+    if ap_br is None:
+        logger.warn("Inconsistencies between the run-time and the AP firmware might occur!")
+        ap_br = extra_args.ap_br
+
+    pex_br = isp_utils.getBR(arch, "pex")
+    if pex_br is None:
+        logger.warn("Inconsistencies between the run-time and the PEX kernel firmware might occur!")
+        pex_br = extra_args.pex_br
+
+    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_br, ap_log, runtime, extra_args.processor))
     if not extra_args.no_log:
         logger.debug("Connecting to {}".format(ap_tty))
         ap.start()
@@ -425,7 +456,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     if extra_args.stock:
         result = runStock(exe_path, ap, openocd_log_file, gdb_log_file, gdb_port, extra_args.no_log, arch)
     else:
-        result = runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
+        result = runPipe(exe_path, ap, pex_tty, pex_br, pex_log, openocd_log_file,
                          gdb_log_file, flash_init_image_path, gdb_port, extra_args.no_log, arch)
 
     pex_log.close()

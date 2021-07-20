@@ -159,3 +159,35 @@ def getArch(exe_path):
         return elf_archs[elf_arch]
 
     return None
+
+def getScratchAddress(arch, name):
+    # the new json format uses the following format
+    keyword = "PEX_MEMORY_0_" + name.upper() + "_SCRATCH_BEGIN"
+    # the old yaml format uses the following format, but it does not work for us
+    # as the old format allows nested defines and arithmentic, and we need
+    # a calculated (hex) address
+    # searchString = "SOC_ADDR_DRAM_" + ("SCRATCH" if name == "kernel" else "AP_IMAGE")
+    return getField(arch, keyword)
+
+def getBR(arch, name):
+    keyword = name.upper() + "MMIO_UART_BAUD_RATE"
+    return getField(arch, keyword)
+
+def getField(arch, searchString):
+    if arch != "rv32" and arch != "rv64":
+        logger.warn("Wrong arch {} - we support only rv32/rv64!".format(arch))
+	return None
+
+    memoryMapName = getIspPrefix() + "include/memory_map_" + arch.upper() + ".h"
+    result = None
+    try:
+        p1 = subprocess.Popen(["awk", "/" + searchString + "/ {print $3}", memoryMapName ], stdin=subprocess.PIP, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        if p1.returncode is None:
+            outputStr= p1.stdout.read().decode()
+            result = outputStr[:-2]
+        else:
+            logger.warn("Could not find {} in the {} file!".format(searchString, memoryMapName)
+    except Exception as ex:
+        logger.warn("Encoutered exception {} while trying to extract {} from the {} file",format(ex, searchString, memoryMapName))
+
+    return result
