@@ -304,6 +304,8 @@ from the memory map! Inconsistencies between runtime and firmware/pex kernel mig
         logger.warn("Inconsistencies between the run-time and the PEX kernel firmware might occur!")
         pex_br = extra_args.pex_br
 
+    logger.debug("ap_br = {}, pex_br = {}".format(ap_br, pex_br))
+
     ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_br, ap_log, runtime, extra_args.processor))
     if not extra_args.no_log:
         logger.debug("Connecting AP uart to {}, baud rate {}".format(ap_tty, ap_br))
