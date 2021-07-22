@@ -19,7 +19,6 @@ PROJECTS += freedom-e-sdk
 PROJECTS += riscv-newlib
 PROJECTS += llvm-project
 PROJECTS += qemu
-PROJECTS += riscv-fesvr
 PROJECTS += riscv-openocd
 PROJECTS += llvm-project/compiler-rt
 
@@ -34,11 +33,11 @@ STOCK_TOOLCHAIN += stock-qemu
 
 CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 
-.PHONY: $(PROJECTS)
-.PHONY: $(CLEAN_PROJECTS)
+.PHONY: $(PROJECTS) riscv-isa-sim
+.PHONY: $(CLEAN_PROJECTS) clean-riscv-isa-sim
 
 all: runtime
-	$(MAKE) $(PROJECTS)
+	$(MAKE) $(PROJECTS) riscv-isa-sim
 
 policy-engine: policy-tool
 qemu: policy-engine
@@ -56,6 +55,12 @@ $(PROJECTS): $(ISP_PREFIX)
 	$(MAKE) -f Makefile.isp -C ../$@
 	$(MAKE) -f Makefile.isp -C ../$@ install
 
+riscv-isa-sim: $(ISP_PREFIX)
+	mkdir -p ../$@/build
+	cd ../$@/build && ../configure --prefix=$(ISP_PREFIX)
+	$(MAKE) -C ../$@/build
+	$(MAKE) -C ../$@/build install
+
 $(STOCK_TOOLCHAIN): $(ISP_PREFIX)
 	$(MAKE) -f Makefile.isp -C ../$@
 	$(MAKE) -f Makefile.isp -C ../$@ install
@@ -66,6 +71,9 @@ $(ISP_PREFIX):
 
 $(CLEAN_PROJECTS):
 	$(MAKE) -f Makefile.isp -C ../$(@:clean-%=%) clean
+
+clean-riscv-isa-sim:
+	rm -rf ../$(@:clean-%=%)/build
 
 runtime: $(ISP_PREFIX) llvm-project/compiler-rt
 	$(MAKE) -C runtime install
@@ -91,7 +99,7 @@ clean-runtime:
 clean-test:
 	$(MAKE) -C ../policies/policy_tests clean
 
-clean: $(CLEAN_PROJECTS) clean-test clean-runtime
+clean: $(CLEAN_PROJECTS) clean-riscv-isa-sim clean-test clean-runtime
 
 distclean: clean
 	-rm -rf $(ISP_PREFIX)
