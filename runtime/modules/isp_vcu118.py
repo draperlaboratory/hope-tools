@@ -244,7 +244,7 @@ def ap_thread(ap_tty, ap_baud_rate, ap_log, runtime, processor):
     ap_expect = pexpect_serial.SerialSpawn(ap_serial, timeout=3000000, encoding='utf-8', codec_errors='ignore')
     ap_expect.logfile = ap_log
 
-    ap_expect.expect(isp_utils.terminateMessage(runtime))
+    ap_expect.expect([isp_utils.terminateMessage(runtime), " BAD TRAP:"])
 
 
 def pex_thread(pex_tty, pex_baud_rate, pex_log):
