@@ -254,8 +254,15 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     # find the scratch location of the kernel and the tag info
     # from the memory map - that is where the PEX bootrom and
     # the kernel, respectively, expect them
-    kernel_address = isp_utils.getScratchAddress(arch, "kernel")
-    ap_address = isp_utils.getScratchAddress(arch, "taginfo")
+
+    # HAck, hack ... disable the next two lines and enable the isp_util calls.
+    # the names of the constants are different than what isp_utils.getScratchAddress
+    # assumes ... the isp_utils.getScratchAddress is to be used on the refactored
+    # and new master branch....
+    kernel_address = None
+    ap_address = None
+    # kernel_address = isp_utils.getScratchAddress(arch, "kernel")
+    # ap_address = isp_utils.getScratchAddress(arch, "taginfo")
     if kernel_address is None or ap_address is None:
         # alow the extra arguments with the understanding that this
         # might actaully conflict with what was defined in the relevant Makefile
