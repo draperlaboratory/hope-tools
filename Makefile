@@ -33,11 +33,11 @@ STOCK_TOOLCHAIN += stock-qemu
 
 CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 
-.PHONY: $(PROJECTS) riscv-isa-sim
-.PHONY: $(CLEAN_PROJECTS) clean-riscv-isa-sim
+.PHONY: $(PROJECTS) riscv-isa-sim freedom-elf2hex
+.PHONY: $(CLEAN_PROJECTS) clean-riscv-isa-sim clean-freedom-elf2hex
 
 all: runtime
-	$(MAKE) $(PROJECTS) riscv-isa-sim
+	$(MAKE) $(PROJECTS) riscv-isa-sim freedom-elf2hex
 
 policy-engine: policy-tool
 qemu: policy-engine
@@ -61,6 +61,10 @@ riscv-isa-sim: $(ISP_PREFIX)
 	$(MAKE) -C ../$@/build
 	$(MAKE) -C ../$@/build install
 
+freedom-elf2hex: $(ISP_PREFIX)
+	$(MAKE) -C ../$@
+	INSTALL_PATH=$(ISP_PREFIX) $(MAKE) -C ../$@ install
+
 $(STOCK_TOOLCHAIN): $(ISP_PREFIX)
 	$(MAKE) -f Makefile.isp -C ../$@
 	$(MAKE) -f Makefile.isp -C ../$@ install
@@ -74,6 +78,9 @@ $(CLEAN_PROJECTS):
 
 clean-riscv-isa-sim:
 	rm -rf ../$(@:clean-%=%)/build
+
+clean-freedom-elf2hex:
+	$(MAKE) -C ../$(@:clean-%=%) clean
 
 runtime: $(ISP_PREFIX) llvm-project/compiler-rt
 	$(MAKE) -C runtime install
