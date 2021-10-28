@@ -11,6 +11,7 @@ import subprocess
 isp_prefix = isp_utils.getIspPrefix()
 sys.path.append(os.path.join(isp_prefix, "runtime", "modules"))
 sim_module = None
+import isp_pex_kernel
 
 logger = logging.getLogger()
 
@@ -236,7 +237,7 @@ def main():
 
     pex_path = args.pex
     if not pex_path:
-        pex_path = os.path.join(run_dir, "pex-kernel")
+        pex_path = os.path.join(run_dir, os.path.basename(sim_module.defaultPexPath(policy_name, arch, args.extra)))
     else:
         pex_path = os.path.realpath(args.pex)
 
