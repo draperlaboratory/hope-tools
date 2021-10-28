@@ -66,10 +66,10 @@ def compileMissingPex(policy_dir, pex_path, sim, arch, extra):
     return True
 
 
-def compileMissingPolicy(policies, global_policies, debug):
+def compileMissingPolicy(policies, global_policies, output_dir, debug):
     logger.info("Attempting to compile missing policy")
     args = ["isp_install_policy",
-            "-O", os.path.join(isp_prefix, "policies"),
+            "-O", output_dir,
             "-p"] + policies
 
     if global_policies:
@@ -242,7 +242,7 @@ def main():
 
     if "stock_" not in args.runtime and use_validator == True:
         if not os.path.isdir(policy_dir):
-            if compileMissingPolicy(policies, args.global_policies, args.policy_debug) is False:
+            if compileMissingPolicy(policies, args.global_policies, run_dir, args.policy_debug) is False:
                 logger.error("Failed to compile missing policy")
                 sys.exit(1)
 
