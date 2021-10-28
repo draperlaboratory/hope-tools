@@ -209,12 +209,6 @@ def main():
         logger.info("Using a stock simulator or runtime, setting policy to 'none'")
         policies = ["none"]
 
-    pex_path = args.pex
-    if not pex_path:
-        pex_path = sim_module.defaultPexPath(policy_name, arch, args.extra)
-    else:
-        pex_path = os.path.realpath(args.pex)
-
     args.exe_path = os.path.realpath(args.exe_path)
     exe_name = os.path.basename(args.exe_path)
     run_dir = os.path.join(output_dir,
@@ -239,6 +233,12 @@ def main():
     else:
         policy_name = isp_utils.getPolicyFullName(policies, args.global_policies, args.policy_debug)
         policy_dir = os.path.join(run_dir, policy_name)
+
+    pex_path = args.pex
+    if not pex_path:
+        pex_path = os.path.join(run_dir, "pex-kernel")
+    else:
+        pex_path = os.path.realpath(args.pex)
 
     if "stock_" not in args.runtime and use_validator == True:
         if not os.path.isdir(policy_dir):
