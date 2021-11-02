@@ -1,6 +1,5 @@
 include ../venv.mk
 
-HOPE_SRC_SYMLINK = $(ISP_PREFIX)/sources
 POLICY_DIR = $(ISP_PREFIX)/policies/
 BIN_DIR = $(ISP_PREFIX)/bin/
 GDB_DIR = $(ISP_PREFIX)/gdb-scripts/
@@ -42,10 +41,10 @@ INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
 PYTHON_SCRIPTS := $(patsubst %,%.py,$(ISP_SCRIPTS))
 PYTHON_SCRIPTS += $(ISP_BACKEND)
 
-.PHONY: all install clean uninstall symlink install-isp-scripts install-gdb-scripts install-runtime
+.PHONY: all install clean uninstall install-isp-scripts install-gdb-scripts install-runtime
 all: $(ISP_SCRIPTS)
 
-install: install-runtime install-isp-scripts install-gdb-scripts install-modules $(VENV_DONE) $(HOPE_SRC_SYMLINK)
+install: install-runtime install-isp-scripts install-gdb-scripts install-modules $(VENV_DONE)
 
 install-runtime:
 	mkdir -p $(POLICY_DIR)
@@ -85,18 +84,12 @@ install-stock-tools:
             fi
         endif
 
-symlink: $(HOPE_SRC_SYMLINK)
-
 $(ISP_SCRIPTS): %: %.py
 	printf '#!/bin/sh\n$(VENV) python $(RUNTIME_DIR)/$< "$$@"' > $@
 	chmod +x $@
-
-$(HOPE_SRC_SYMLINK):
-	ln -s $(HOPE_SRC) $@
 
 clean:
 	rm -rf $(ISP_SCRIPTS) *.pyc *.spec build/
 
 uninstall:
 	rm -rf $(INSTALLED_ISP_SCRIPTS) $(GDB_DIR) $(POLICY_DIR) $(RUNTIME_DIR) $(MODULE_DIR) $(VENV_DIR)
-	rm -f $(HOPE_SRC_SYMLINK)
