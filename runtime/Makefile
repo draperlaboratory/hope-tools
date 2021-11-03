@@ -32,6 +32,9 @@ MODULE_FILES += isp_iveia.py
 
 MODULES := $(patsubst %,modules/%,$(MODULE_FILES))
 
+SOURCES := pex-kernel
+SOURCES += policies
+
 BARE_PREFIX := osv.bare.main.
 FRTOS_PREFIX := osv.frtos.main.
 SEL4_PREFIX := osv.sel4.main.
@@ -41,10 +44,10 @@ INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
 PYTHON_SCRIPTS := $(patsubst %,%.py,$(ISP_SCRIPTS))
 PYTHON_SCRIPTS += $(ISP_BACKEND)
 
-.PHONY: all install clean uninstall install-isp-scripts install-gdb-scripts install-runtime
+.PHONY: all install clean uninstall install-isp-scripts install-gdb-scripts install-runtime install-sources
 all: $(ISP_SCRIPTS)
 
-install: install-runtime install-isp-scripts install-gdb-scripts install-modules $(VENV_DONE)
+install: install-runtime install-isp-scripts install-gdb-scripts install-modules install-sources $(VENV_DONE)
 
 install-runtime:
 	mkdir -p $(POLICY_DIR)
@@ -62,6 +65,12 @@ install-gdb-scripts: $(GDB_SCRIPTS)
 install-modules: $(MODULES)
 	mkdir -p $(MODULE_DIR)
 	install $(MODULES) $(MODULE_DIR)
+
+$(SOURCES:%=$(ISP_PREFIX)/sources/%): $(ISP_PREFIX)/sources/%: $(HOPE_SRC)/%
+	mkdir -p $(ISP_PREFIX)/sources
+	rsync -av --exclude=".*" $^ $(ISP_PREFIX)/sources
+
+install-sources: $(ISP_PREFIX) $(SOURCES:%=$(ISP_PREFIX)/sources/%)
 
 install-sel4-template:
 	if [ ! -d $(ISP_PREFIX)/hope-seL4-app-template ]; then \
