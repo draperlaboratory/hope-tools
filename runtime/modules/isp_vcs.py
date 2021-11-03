@@ -4,6 +4,7 @@ import argparse
 import logging
 import multiprocessing
 import pexpect
+import shutil
 import subprocess
 import sys
 import time
@@ -45,8 +46,10 @@ def installTagMemHexdump(policy_name, output_dir, processor):
     build_log_path = os.path.join(output_dir, "build.log")
     build_log = open(build_log_path, "w+")
     pex_kernel_output_dir = os.path.join(output_dir, "pex-kernel")
-    result = subprocess.call(["make", "install-tag_mem_hexdump"], stdout=build_log, stderr=subprocess.STDOUT,
+    result = subprocess.call(["make", "tag_mem_hexdump"], stdout=build_log, stderr=subprocess.STDOUT,
                              cwd=pex_kernel_output_dir, env=env)
+    shutil.copy(os.path.join(pex_kernel_output_dir, "tag_mem_hexdump", "tag_mem_hexdump-{}".format(policy_name)),
+                os.path.dirname(output_dir))
 
     if result != 0:
         logger.error("Failed to install tag_mem_hexdump")
@@ -64,9 +67,6 @@ def installPex(policy_dir, output_dir, arch, extra):
     extra_args = parseExtra(extra)
 
     if not isp_utils.checkDependency(pex_kernel_source_dir, logger):
-        return False
-
-    if not isp_utils.checkDependency(pex_firmware_source_dir, logger):
         return False
 
     if not isp_pex_kernel.copyPexKernelSources(pex_kernel_source_dir, output_dir):
@@ -113,10 +113,10 @@ def parseExtra(extra):
     return parser.parse_args([])
 
 debug_suffix = "-debug"
-def generateTagMemHexdump(tag_file_path, policy):
+def generateTagMemHexdump(run_dir, tag_file_path, policy):
     policy = policy if not policy.endswith(debug_suffix) else policy[:-len(debug_suffix)]
     output_path = tag_file_path + ".hex"
-    subprocess.call(["tag_mem_hexdump-" + policy, tag_file_path, output_path])
+    subprocess.call([os.path.join(run_dir, "tag_mem_hexdump-{}".format(policy)), tag_file_path, output_path])
     return output_path
 
 # sanity check the file name lengths; currently, the verilog code
@@ -221,8 +221,9 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=soc_cfg, arch=arch) is False:
         return isp_utils.retVals.TAG_FAIL
 
+    
     logger.info("Generating hex files")
-    tag_mem_hexdump_path = generateTagMemHexdump(tag_file_path, policy_name)
+    tag_mem_hexdump_path = generateTagMemHexdump(run_dir, tag_file_path, policy_name)
 
     isp_load_image.generate_load_image(exe_path, ap_load_image_path, tag_file_path)
     isp_load_image.generate_load_image(pex_path, pex_load_image_path)
