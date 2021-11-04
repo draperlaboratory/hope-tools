@@ -210,8 +210,9 @@ def main():
         logger.info("Using a stock simulator or runtime, setting policy to 'none'")
         policies = ["none"]
 
-    # use exiting policy directory if -p arg refers to path
+    # use existing policy directory if -p arg refers to path
     if (len(policies) == 1 and  "/" in args.policies[0] and os.path.isdir(policies[0])):
+        policy_dir = os.path.abspath(policies[0])
         policy_name = os.path.basename(policy_dir)
     else:
         policy_name = isp_utils.getPolicyFullName(policies, args.global_policies, args.policy_debug)
@@ -219,21 +220,17 @@ def main():
     args.exe_path = os.path.realpath(args.exe_path)
     exe_name = os.path.basename(args.exe_path)
     run_dir = os.path.join(output_dir, "isp-run-{}-{}".format(exe_name, policy_name))
-
     if args.rule_cache_name != "":
         run_dir = run_dir + "-{}-{}".format(args.rule_cache_name, args.rule_cache_size)
-
     if args.suffix:
         run_dir = run_dir + "-" + args.suffix
+    
+    # set policy_dir based on run_dir if it's not an existing directory
+    if (not (len(policies) == 1 and  "/" in args.policies[0] and os.path.isdir(policies[0]))):
+        policy_dir = os.path.join(run_dir, policy_name)
 
     isp_utils.removeIfExists(run_dir)
     isp_utils.doMkDir(run_dir)
-
-    # use exiting policy directory if -p arg refers to path
-    if (len(policies) == 1 and  "/" in args.policies[0] and os.path.isdir(policies[0])):
-        policy_dir = os.path.abspath(policies[0])
-    else:
-        policy_dir = os.path.join(run_dir, policy_name)
 
     pex_path = args.pex
     if not pex_path:
