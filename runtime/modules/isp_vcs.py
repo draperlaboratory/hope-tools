@@ -49,7 +49,7 @@ def installTagMemHexdump(policy_name, output_dir, processor):
     result = subprocess.call(["make", "tag_mem_hexdump"], stdout=build_log, stderr=subprocess.STDOUT,
                              cwd=pex_kernel_output_dir, env=env)
     shutil.copy(os.path.join(pex_kernel_output_dir, "tag_mem_hexdump", "tag_mem_hexdump-{}".format(policy_name)),
-                os.path.dirname(output_dir))
+                output_dir)
 
     if result != 0:
         logger.error("Failed to install tag_mem_hexdump")
@@ -76,9 +76,6 @@ def installPex(policy_dir, output_dir, arch, extra):
         return False
 
     if not isp_pex_kernel.buildPexKernel(policy_name, output_dir, fpga, extra_args.processor):
-        return False
-
-    if not installTagMemHexdump(policy_name, output_dir, extra_args.processor):
         return False
 
     if not isp_pex_kernel.movePexKernel(policy_name, output_dir, fpga, extra_args.processor):
@@ -222,6 +219,12 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         return isp_utils.retVals.TAG_FAIL
 
     
+    if not os.path.isdir(os.path.join(run_dir, "pex-kernel")):
+        logger.info("Generating tag_mem_hexdump-{}".format(policy_name))
+        if not isp_pex_kernel.copyPexKernelSources(os.path.join(isp_prefix, "sources", "pex-kernel"), run_dir):
+            return False
+        if not installTagMemHexdump(policy_name, run_dir, extra_args.processor):
+            return False
     logger.info("Generating hex files")
     tag_mem_hexdump_path = generateTagMemHexdump(run_dir, tag_file_path, policy_name)
 
