@@ -274,6 +274,22 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
         isp_load_image.generate_tag_load_image(ap_load_image_path, tag_file_path)
         isp_load_image.generate_load_image(pex_kernel_path, pex_load_image_path)
 
+        # make sure that the kernel size is smaller than the size of the PEX_MEMORY_0_KERNEL_SCRATCH_SIZE
+        # or else, the lower section of the kernel will be overwritten by the taginfo file
+        kernel_size = os.path.getsize(pex_kernel_path)
+        kernel_scratch_size = isp_utils.getScratchSize(arch, "kernel")
+        if kernel_size > int(kernel_scratch_size,16):
+            logger.error("The kernel {} is {} bytes, but the size of the kernel_scratch in the json file is {}\n".format(pex_kernel_path, kernel_size, kernel_scratch_size))
+            return False
+
+        # make sure that the taginfo size is smaller than the size of the PEX_MEMORY_0_TAGINFO_SCRATCH_SIZE
+        # or else the lower section of the taginfo will not be loaded to the correct address
+        taginfo_size = os.path.getsize(ap_load_image_path)
+        taginfo_scratch_size = isp_utils.getScratchSize(arch,  "taginfo")
+        if taginfo_size > int(taginfo_scratch_size, 16):
+            logger.error("The taginfo {} is {} bytes, but the size of the taginfo_scratch in the json file is {}\n".format(ap_load_image_path, taginfo_size, taginfo_scratch_size))
+            return False
+
         flash_init_map = {kernel_address:pex_load_image_path,
                           ap_address:ap_load_image_path}
         isp_load_image.generate_flash_init(flash_init_image_path, flash_init_map)

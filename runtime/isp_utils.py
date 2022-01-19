@@ -160,6 +160,12 @@ def getArch(exe_path):
 
     return None
 
+def getScratchSize(arch, name):
+    # the new json format uses the following format
+    keyword = "PEX_MEMORY_0_" + name.upper() + "_SCRATCH_SIZE"
+    # remove the UL suffix
+    return getField(arch, keyword)[:-2]
+
 def getScratchAddress(arch, name):
     # the new json format uses the following format
     keyword = "PEX_MEMORY_0_" + name.upper() + "_SCRATCH_BEGIN"
