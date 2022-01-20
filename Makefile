@@ -52,7 +52,7 @@ path_check:
 	(grep -q $(ISP_PREFIX)bin <<< $(PATH)) || (echo "Need to add $(ISP_PREFIX)/bin to your PATH" && false)
 
 $(PROJECTS): $(ISP_PREFIX)
-	$(MAKE) -f Makefile.isp -C ../$@
+	$(MAKE) -f Makefile.isp -C ../$@  > >(tee make_stdout.log) 2> >(tee make_stderr.log >&2)
 	$(MAKE) -f Makefile.isp -C ../$@ install
 
 riscv-isa-sim: $(ISP_PREFIX)
