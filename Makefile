@@ -58,7 +58,7 @@ $(PROJECTS): $(ISP_PREFIX)
 riscv-isa-sim: $(ISP_PREFIX)
 	mkdir -p ../$@/build
 	cd ../$@/build && ../configure --prefix=$(ISP_PREFIX)
-	$(MAKE) -C ../$@/build
+	$(MAKE) -C ../$@/build > >(tee ../$@/build/make_stdout.log) 2> >(tee ../$@/build/make_stderr.log >&2)
 	$(MAKE) -C ../$@/build install
 
 freedom-elf2hex: $(ISP_PREFIX)
