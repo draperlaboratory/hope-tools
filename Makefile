@@ -1,4 +1,7 @@
+include ./venv.mk
+
 .PHONY: all
+.PHONY: setup
 .PHONY: path_check
 .PHONY: runtime
 .PHONY: documentation
@@ -36,8 +39,12 @@ CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 .PHONY: $(PROJECTS) riscv-isa-sim freedom-elf2hex
 .PHONY: $(CLEAN_PROJECTS) clean-riscv-isa-sim clean-freedom-elf2hex
 
-all: runtime
+all: setup runtime
 	$(MAKE) freedom-elf2hex $(PROJECTS) riscv-isa-sim
+
+
+setup: $(VENV_DONE)
+	$(VENV) true
 
 policy-engine: policy-tool
 qemu: policy-engine
