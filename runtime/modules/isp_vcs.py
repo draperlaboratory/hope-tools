@@ -227,7 +227,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     policy = policy_name.replace(debug_suffix, "") if policy_name.endswith(debug_suffix) else policy_name
     if not shutil.which(f"tag_mem_hexdump-{policy}") and \
        not installTagMemHexdump(policy_name, run_dir, extra_args.processor):
-        return False
+        return isp_utils.retVals.NO_BIN
     logger.info("Generating hex files")
     tag_mem_hexdump_path = generateTagMemHexdump(run_dir, tag_file_path, policy_name)
 
