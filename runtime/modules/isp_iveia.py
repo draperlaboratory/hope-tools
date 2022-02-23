@@ -49,9 +49,6 @@ def installPex(policy_dir, output_dir, arch, extra):
     if not isp_utils.checkDependency(pex_kernel_source_dir, logger):
         return False
 
-    if not isp_utils.checkDependency(pex_firmware_source_dir, logger):
-        return False
-
     if not isp_pex_kernel.copyPexKernelSources(pex_kernel_source_dir, output_dir):
         return False
 
