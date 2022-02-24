@@ -37,7 +37,7 @@ CLEAN_PROJECTS := $(patsubst %,clean-%,$(PROJECTS))
 .PHONY: $(CLEAN_PROJECTS) clean-riscv-isa-sim clean-freedom-elf2hex
 
 all: runtime
-	$(MAKE) $(PROJECTS) riscv-isa-sim freedom-elf2hex
+	$(MAKE) freedom-elf2hex $(PROJECTS) riscv-isa-sim
 
 policy-engine: policy-tool
 qemu: policy-engine
@@ -45,13 +45,13 @@ riscv-newlib: llvm-project
 llvm-project/compiler-rt: llvm-project riscv-newlib
 FreeRTOS: llvm-project/compiler-rt runtime
 pex-firmware: riscv-gnu-toolchain
-pex-kernel: pex-firmware
+pex-kernel: pex-firmware freedom-elf2hex
 stock-riscv-newlib: stock-llvm-project
 
 path_check:
 	(grep -q $(ISP_PREFIX)bin <<< $(PATH)) || (echo "Need to add $(ISP_PREFIX)/bin to your PATH" && false)
 
-$(PROJECTS): $(ISP_PREFIX)
+$(PROJECTS): freedom-elf2hex $(ISP_PREFIX)
 	$(MAKE) -f Makefile.isp -C ../$@
 	$(MAKE) -f Makefile.isp -C ../$@ install
 
