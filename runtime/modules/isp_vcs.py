@@ -4,6 +4,7 @@ import argparse
 import logging
 import multiprocessing
 import pexpect
+import shutil
 import subprocess
 import sys
 import time
@@ -17,6 +18,7 @@ logger = logging.getLogger()
 isp_prefix = isp_utils.getIspPrefix()
 
 fpga = "gfe-sim"
+debug_suffix = "-debug"
 
 #################################
 # Build/Install PEX kernel
@@ -31,13 +33,17 @@ def defaultPexPath(policy_name, arch, extra):
 def installTagMemHexdump(policy_name, output_dir, processor):
     logger.debug("Building tag_mem_hexdump utility for VCS")
 
+    if not os.path.isdir(os.path.join(output_dir, "pex-kernel")) and \
+       not isp_pex_kernel.copyPexKernelSources(os.path.join(isp_prefix, "sources", "pex-kernel"), output_dir):
+        return False
+
     env = dict(os.environ)
 
     env["FPGA"] = "gfe-sim"
     env["PROCESSOR"] = processor
 
-    if policy_name.endswith("-debug"):
-        policy_name = policy_name.replace("-debug", "")
+    if policy_name.endswith(debug_suffix):
+        policy_name = policy_name.replace(debug_suffix, "")
         env["DEBUG"] = "1"
 
     env["POLICY_NAME"] = policy_name
@@ -45,8 +51,11 @@ def installTagMemHexdump(policy_name, output_dir, processor):
     build_log_path = os.path.join(output_dir, "build.log")
     build_log = open(build_log_path, "w+")
     pex_kernel_output_dir = os.path.join(output_dir, "pex-kernel")
-    result = subprocess.call(["make", "install-tag_mem_hexdump"], stdout=build_log, stderr=subprocess.STDOUT,
+    result = subprocess.call(["make", "tag_mem_hexdump"], stdout=build_log, stderr=subprocess.STDOUT,
                              cwd=pex_kernel_output_dir, env=env)
+    shutil.copy(os.path.join(pex_kernel_output_dir, "tag_mem_hexdump", "tag_mem_hexdump-{}".format(policy_name)),
+                output_dir)
+    shutil.rmtree(pex_kernel_output_dir)
 
     if result != 0:
         logger.error("Failed to install tag_mem_hexdump")
@@ -66,9 +75,6 @@ def installPex(policy_dir, output_dir, arch, extra):
     if not isp_utils.checkDependency(pex_kernel_source_dir, logger):
         return False
 
-    if not isp_utils.checkDependency(pex_firmware_source_dir, logger):
-        return False
-
     if not isp_pex_kernel.copyPexKernelSources(pex_kernel_source_dir, output_dir):
         return False
 
@@ -76,9 +82,6 @@ def installPex(policy_dir, output_dir, arch, extra):
         return False
 
     if not isp_pex_kernel.buildPexKernel(policy_name, output_dir, fpga, extra_args.processor):
-        return False
-
-    if not installTagMemHexdump(policy_name, output_dir, extra_args.processor):
         return False
 
     if not isp_pex_kernel.movePexKernel(policy_name, output_dir, fpga, extra_args.processor):
@@ -112,18 +115,18 @@ def parseExtra(extra):
         return parser.parse_args(extra_dashed)
     return parser.parse_args([])
 
-debug_suffix = "-debug"
-def generateTagMemHexdump(tag_file_path, policy):
+def generateTagMemHexdump(run_dir, tag_file_path, policy):
     policy = policy if not policy.endswith(debug_suffix) else policy[:-len(debug_suffix)]
     output_path = tag_file_path + ".hex"
-    subprocess.call(["tag_mem_hexdump-" + policy, tag_file_path, output_path])
+    hexdump = f"tag_mem_hexdump-{policy}" if (shutil.which(f"tag_mem_hexdump-{policy}")) else os.path.join(run_dir, f"tag_mem_hexdump-{policy}")
+    subprocess.call([hexdump, tag_file_path, output_path])
     return output_path
 
 # sanity check the file name lengths; currently, the verilog code
 # assumes file name lengths <= 256 characters
 def validateFileName (fileName):
     if len(fileName) > 256:
-        logger.debug("Filename path ({}) needs to be less then 256 characters.".format(fileName))
+        logger.debug(f"Filename path ({fileName}) needs to be less then 256 characters.")
         return False
     else:
         return True
@@ -137,7 +140,7 @@ def waitForError(run_dir, pex_uart_log):
 
 def runVcsSim(exe_path, ap_hex_dump_path, pex_hex_dump_path, tag_mem_hexdump_path, config, debug, timeout, max_cycles,
               ap_uart_log, pex_uart_log):
-    sim_path = os.path.join(isp_prefix, "vcs", "simv-galois.system-{}".format(config))
+    sim_path = os.path.join(isp_prefix, "vcs", f"simv-galois.system-{config}")
     if debug is True:
         sim_path += "-debug"
 
@@ -221,8 +224,12 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=soc_cfg, arch=arch) is False:
         return isp_utils.retVals.TAG_FAIL
 
+    policy = policy_name.replace(debug_suffix, "") if policy_name.endswith(debug_suffix) else policy_name
+    if not shutil.which(f"tag_mem_hexdump-{policy}") and \
+       not installTagMemHexdump(policy_name, run_dir, extra_args.processor):
+        return isp_utils.retVals.NO_BIN
     logger.info("Generating hex files")
-    tag_mem_hexdump_path = generateTagMemHexdump(tag_file_path, policy_name)
+    tag_mem_hexdump_path = generateTagMemHexdump(run_dir, tag_file_path, policy_name)
 
     isp_load_image.generate_load_image(exe_path, ap_load_image_path, tag_file_path)
     isp_load_image.generate_load_image(pex_path, pex_load_image_path)

@@ -11,6 +11,7 @@ import subprocess
 isp_prefix = isp_utils.getIspPrefix()
 sys.path.append(os.path.join(isp_prefix, "runtime", "modules"))
 sim_module = None
+import isp_pex_kernel
 
 logger = logging.getLogger()
 
@@ -66,10 +67,10 @@ def compileMissingPex(policy_dir, pex_path, sim, arch, extra):
     return True
 
 
-def compileMissingPolicy(policies, global_policies, debug):
+def compileMissingPolicy(policies, global_policies, output_dir, debug):
     logger.info("Attempting to compile missing policy")
     args = ["isp_install_policy",
-            "-O", os.path.join(isp_prefix, "policies"),
+            "-O", output_dir,
             "-p"] + policies
 
     if global_policies:
@@ -209,40 +210,37 @@ def main():
         logger.info("Using a stock simulator or runtime, setting policy to 'none'")
         policies = ["none"]
 
-    # use exiting policy directory if -p arg refers to path
-    if (len(policies) == 1 and 
-        "/" in args.policies[0] and
-        os.path.isdir(policies[0])):
+    # use existing policy directory if -p arg refers to path
+    if (len(policies) == 1 and  "/" in args.policies[0] and os.path.isdir(policies[0])):
         policy_dir = os.path.abspath(policies[0])
         policy_name = os.path.basename(policy_dir)
     else:
         policy_name = isp_utils.getPolicyFullName(policies, args.global_policies, args.policy_debug)
-        policy_dir = os.path.join(isp_prefix, "policies", policy_name)
-
-    pex_path = args.pex
-    if not pex_path:
-        pex_path = sim_module.defaultPexPath(policy_name, arch, args.extra)
-    else:
-        pex_path = os.path.realpath(args.pex)
 
     args.exe_path = os.path.realpath(args.exe_path)
     exe_name = os.path.basename(args.exe_path)
-    run_dir = os.path.join(output_dir,
-                           "isp-run-{}-{}".format(exe_name, policy_name))
-
+    run_dir = os.path.join(output_dir, "isp-run-{}-{}".format(exe_name, policy_name))
     if args.rule_cache_name != "":
-        run_dir = run_dir + "-{}-{}".format(args.rule_cache_name,
-                                            args.rule_cache_size)
-
+        run_dir = run_dir + "-{}-{}".format(args.rule_cache_name, args.rule_cache_size)
     if args.suffix:
         run_dir = run_dir + "-" + args.suffix
+    
+    # set policy_dir based on run_dir if it's not an existing directory
+    if (not (len(policies) == 1 and  "/" in args.policies[0] and os.path.isdir(policies[0]))):
+        policy_dir = os.path.join(run_dir, policy_name)
 
     isp_utils.removeIfExists(run_dir)
     isp_utils.doMkDir(run_dir)
 
+    pex_path = args.pex
+    if not pex_path:
+        pex_path = os.path.join(run_dir, os.path.basename(sim_module.defaultPexPath(policy_name, arch, args.extra)))
+    else:
+        pex_path = os.path.realpath(args.pex)
+
     if "stock_" not in args.runtime and use_validator == True:
         if not os.path.isdir(policy_dir):
-            if compileMissingPolicy(policies, args.global_policies, args.policy_debug) is False:
+            if compileMissingPolicy(policies, args.global_policies, run_dir, args.policy_debug) is False:
                 logger.error("Failed to compile missing policy")
                 sys.exit(1)
 
