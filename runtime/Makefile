@@ -34,6 +34,7 @@ MODULES := $(patsubst %,modules/%,$(MODULE_FILES))
 
 SOURCES := pex-kernel
 SOURCES += policies
+SOURCES += tools/runtime/templates
 
 BARE_PREFIX := osv.bare.main.
 FRTOS_PREFIX := osv.frtos.main.
@@ -67,8 +68,8 @@ install-modules: $(MODULES)
 	install $(MODULES) $(MODULE_DIR)
 
 $(SOURCES:%=$(ISP_PREFIX)/sources/%): $(ISP_PREFIX)/sources/%: $(HOPE_SRC)/%
-	mkdir -p $(ISP_PREFIX)/sources
-	rsync -av --exclude=".*" $^ $(ISP_PREFIX)/sources
+	mkdir -p $(@D)
+	rsync -av --exclude=".*" $^ $(@D)
 
 install-sources: $(ISP_PREFIX) $(SOURCES:%=$(ISP_PREFIX)/sources/%)
 
