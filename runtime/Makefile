@@ -34,6 +34,7 @@ MODULES := $(patsubst %,modules/%,$(MODULE_FILES))
 
 SOURCES := pex-kernel
 SOURCES += policies
+SOURCES += policy-engine/validator
 SOURCES += tools/runtime/templates
 
 BARE_PREFIX := osv.bare.main.
