@@ -34,7 +34,7 @@ MODULES := $(patsubst %,modules/%,$(MODULE_FILES))
 
 SOURCES := pex-kernel
 SOURCES += policies
-SOURCES += policy-engine/validator
+SOURCES += policy-engine
 SOURCES += tools/runtime/templates
 
 BARE_PREFIX := osv.bare.main.
@@ -69,6 +69,7 @@ install-modules: $(MODULES)
 	install $(MODULES) $(MODULE_DIR)
 
 $(SOURCES:%=$(ISP_PREFIX)/sources/%): $(ISP_PREFIX)/sources/%: $(HOPE_SRC)/%
+	if [ -f "$^/Makefile.isp" ]; then $(MAKE) -C $^ -f Makefile.isp clean; fi
 	mkdir -p $(@D)
 	rsync -av --exclude=".*" $^ $(@D)
 
