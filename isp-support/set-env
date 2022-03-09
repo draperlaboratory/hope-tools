@@ -5,3 +5,5 @@
 export ISP_PREFIX=$ISP/
 [[ ":$PATH:" != *":${ISP_PREFIX}bin:"* ]] && \
   export PATH="${PATH}:${ISP_PREFIX}/bin"
+
+source $ISP_PREFIX/venv/bin/activate
