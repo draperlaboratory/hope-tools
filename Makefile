@@ -15,6 +15,7 @@ ISP_PREFIX ?= $(HOME)/.local/isp/
 SDK_VERSION:=0.0.0
 
 PROJECTS := riscv-gnu-toolchain
+PROJECTS += libns550
 PROJECTS += policy-tool
 PROJECTS += policy-engine
 PROJECTS += FreeRTOS
@@ -51,8 +52,9 @@ qemu: policy-engine
 riscv-newlib: llvm-project
 llvm-project/compiler-rt: llvm-project riscv-newlib
 FreeRTOS: llvm-project/compiler-rt runtime
+libns550: riscv-gnu-toolchain
 pex-firmware: riscv-gnu-toolchain
-pex-kernel: pex-firmware freedom-elf2hex
+pex-kernel: pex-firmware freedom-elf2hex libns550
 stock-riscv-newlib: stock-llvm-project
 
 path_check:
