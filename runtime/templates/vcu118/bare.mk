@@ -14,6 +14,7 @@ ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 ISP_CFLAGS			 += -Wall -Wextra -O0 -g3 -std=gnu11 -mno-relax
 ISP_CFLAGS			 += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
+ISP_INCLUDES     += -I$(ISP_PREFIX)/local/include
 ISP_INCLUDES     += -I$(ISP_RUNTIME)
 
 RISCV_PATH			 ?= $(ISP_PREFIX)
@@ -61,6 +62,7 @@ ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
 
 ISP_LDFLAGS      += -lvcu118 -L$(BSP_BASE)
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
+ISP_LDFLAGS      += -lxuartns550 -L$(ISP_PREFIX)/local/lib/$(RISCV_ARCH)/$(RISCV_ABI)
 
 all:
 
