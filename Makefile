@@ -26,7 +26,8 @@ PROJECTS += qemu
 PROJECTS += riscv-openocd
 PROJECTS += llvm-project/compiler-rt
 
-PRIVATE_PROJECTS := pex-firmware
+PRIVATE_PROJECTS := pex-bootrom
+PRIVATE_PROJECTS += pex-firmware
 PRIVATE_PROJECTS += pex-kernel
 
 PROJECTS += $(foreach project, $(PRIVATE_PROJECTS), $(if $(wildcard ../$(project)/Makefile.isp),$(project)))
@@ -53,6 +54,7 @@ riscv-newlib: llvm-project
 llvm-project/compiler-rt: llvm-project riscv-newlib
 FreeRTOS: llvm-project/compiler-rt runtime
 libns550: riscv-gnu-toolchain
+pex-bootrom: riscv-gnu-toolchain libns550 pex-firmware freedom-elf2hex
 pex-firmware: riscv-gnu-toolchain
 pex-kernel: pex-firmware freedom-elf2hex libns550
 stock-riscv-newlib: stock-llvm-project
