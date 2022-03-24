@@ -8,12 +8,12 @@ sudo apt-get install -y autoconf automake autogen autotools-dev curl \
     python3-distutils python3-pytest \
     python3-pytest-xdist python3-pytest-timeout python3-pyelftools \
     git automake autoconf libtool g++ \
-    cmake libboost-dev libboost-program-options-dev \
+    cmake libboost-dev libboost-program-options-dev libboost-regex-dev libboost-all-dev \
     libyaml-cpp-dev libgflags-dev \
     python3-psutil xterm verilator virtualenv python3-pip \
     libftdi1-2 libusb-1.0-0-dev libtinfo5 \
     libglib2.0-dev libpixman-1-dev pkg-config device-tree-compiler rsync \
-    gcc-multilib
+    gcc-multilib 
 
 # gcc-multilib is needed as the pex-kernel/tag_mem_gexdump/Makefile uses the -m32 gcc flag
 # and by default support for 32-bits is not included in gcc that comes with a 64-bit Ubuntu 2004.
