@@ -228,7 +228,7 @@ def main():
 
     pex_path = args.pex
     if not pex_path:
-        pex_path = os.path.join(run_dir, os.path.basename(sim_module.defaultPexPath(policy_name, arch, args.extra)))
+        pex_path = os.path.join(run_dir, os.path.basename(sim_module.defaultPexPath(policy_name, "rv", args.extra)))
     else:
         pex_path = os.path.realpath(args.pex)
 
