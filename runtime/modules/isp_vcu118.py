@@ -70,6 +70,8 @@ def installPex(policy_dir, output_dir, arch, extra):
 #################################
 
 def parseExtra(extra):
+    baud_rates = [57600, 115200, 230400] # what we've used so far, non-exhaustive
+
     parser = argparse.ArgumentParser(prog="isp_run_app ... -s vcu118 -e")
     parser.add_argument("--pex-tty", help="TTY for PEX UART (autodetect by default)")
     parser.add_argument("--ap-tty", help="TTY for AP UART (autodetect by default)")
@@ -88,6 +90,9 @@ def parseExtra(extra):
     parser.add_argument("--reset-address", type=str, default="0x6fff0000", help="Soft reset address (default is 0x6fff0000)")
     parser.add_argument("--processor", type=str, default="P1", help="GFE processor configuration (P1/P2/P3)")
     parser.add_argument("--board", type=str, default="vcu118", help="Target board: vcu118 or vcu108")
+    parser.add_argument("--ap-baud", type=int, choices=baud_rates, default=115200, help="Baud Rate for AP, default is 115200")
+    parser.add_argument("--pex-baud", type=int, choices=baud_rates, default=115200, help="Baud Rate for Pex, default is 115200")
+    parser.add_argument("--openocd-cfg", type=str, default="ssith_gfe.cfg", help="Set OpenOCD config file for specific boards") # maybe this should be tied to --board?
 
     if not extra:
         return parser.parse_args([])
@@ -147,9 +152,9 @@ def program_fpga(bit_file, ltx_file, board, log_file):
     return True
 
 
-def start_openocd(log_file=None):
+def start_openocd(log_file=None, cfg_file="ssith_gfe.cfg"):
     openocd_path = os.path.join(isp_prefix, "bin", "openocd")
-    gfe_cfg_path = os.path.join(isp_prefix, "vcu118", "ssith_gfe.cfg")
+    gfe_cfg_path = os.path.join(isp_prefix, "vcu118", cfg_file)
 
     if not isp_utils.checkDependency(gfe_cfg_path, logger, "hope-gfe"):
         return None
@@ -232,8 +237,7 @@ def gdb_thread(exe_path, log_file=None, arch="rv32"):
         gdb_log.close()
 
 
-def ap_thread(ap_tty, ap_log, runtime, processor):
-    baud_rate = 115200
+def ap_thread(ap_tty, ap_log, runtime, processor, baud_rate = 115200):
 
     ap_serial = serial.Serial(ap_tty, baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
                                parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
@@ -243,8 +247,8 @@ def ap_thread(ap_tty, ap_log, runtime, processor):
     ap_expect.expect(isp_utils.terminateMessage(runtime))
 
 
-def pex_thread(pex_tty, pex_log):
-    pex_serial = serial.Serial(pex_tty, 115200, timeout=3000000, bytesize=serial.EIGHTBITS,
+def pex_thread(pex_tty, pex_log, baud_rate = 115200):
+    pex_serial = serial.Serial(pex_tty, baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
                                 parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
     pex_expect = pexpect_serial.SerialSpawn(pex_serial, timeout=3000000, encoding='utf-8', codec_errors='ignore')
     pex_expect.logfile = pex_log
@@ -278,7 +282,7 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
 
 
 def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
-            gdb_log_file, flash_init_image_path, gdb_port, no_log, arch):
+            gdb_log_file, flash_init_image_path, gdb_port, no_log, arch, pex_baud_rate, openocd_cfg_file):
     logger.debug("Connecting to {}".format(pex_tty))
     pex_serial = serial.Serial(pex_tty, 115200, timeout=3000000,
             bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
@@ -296,12 +300,12 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
         return isp_utils.retVals.FAILURE
     pex_expect.close()
 
-    pex = multiprocessing.Process(target=pex_thread, args=(pex_tty, pex_log))
+    pex = multiprocessing.Process(target=pex_thread, args=(pex_tty, pex_log, pex_baud_rate))
     if not no_log:
         pex.start()
 
     logger.debug("Spawning openocd")
-    openocd_proc = start_openocd(openocd_log_file)
+    openocd_proc = start_openocd(openocd_log_file, openocd_cfg_file)
     if not openocd_proc:
         return isp_utils.retVals.FAILURE
 
@@ -330,9 +334,9 @@ def runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
 
 
 def runStock(exe_path, ap, openocd_log_file, gdb_log_file,
-             gdb_port, no_log, arch):
+             gdb_port, no_log, arch, openocd_cfg_file):
     logger.debug("Spawning openocd")
-    openocd_proc = start_openocd(openocd_log_file)
+    openocd_proc = start_openocd(openocd_log_file, openocd_cfg_file)
     if not openocd_proc:
         return isp_utils.retVals.FAILURE
 
@@ -414,16 +418,16 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         logger.error("Failed to autodetect PEX TTY file. If you know the symlink, re-run with the +pex_tty option")
         return isp_utils.retVals.FAILURE
 
-    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_log, runtime, extra_args.processor))
+    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_log, runtime, extra_args.processor, extra_args.ap_baud))
     if not extra_args.no_log:
         logger.debug("Connecting to {}".format(ap_tty))
         ap.start()
 
     if extra_args.stock:
-        result = runStock(exe_path, ap, openocd_log_file, gdb_log_file, gdb_port, extra_args.no_log, arch)
+        result = runStock(exe_path, ap, openocd_log_file, gdb_log_file, gdb_port, extra_args.no_log, arch, extra_args.openocd_cfg)
     else:
         result = runPipe(exe_path, ap, pex_tty, pex_log, openocd_log_file,
-                         gdb_log_file, flash_init_image_path, gdb_port, extra_args.no_log, arch)
+                         gdb_log_file, flash_init_image_path, gdb_port, extra_args.no_log, arch, extra_args.pex_baud, extra_args.openocd_cfg)
 
     pex_log.close()
     ap_log.close()
