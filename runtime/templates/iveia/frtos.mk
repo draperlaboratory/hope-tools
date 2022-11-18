@@ -23,7 +23,7 @@ else
 ISP_CFLAGS			 := -march=rv64imafd -mabi=lp64d -mcmodel=medany --target=riscv64-unknown-elf
 endif
 
-ISP_CFLAGS			 += -Wall -Wextra -O0 -g3 -std=gnu11 -mno-relax
+ISP_CFLAGS			 += -Wall -Wextra -O0 -g3 -std=gnu11 -mno-relax -Wno-error=int-conversion
 ISP_CFLAGS			 += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_CFLAGS 			 += -Dmalloc\(x\)=pvPortMalloc\(x\) -Dfree\(x\)=vPortFree\(x\)
 
