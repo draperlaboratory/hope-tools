@@ -29,6 +29,7 @@ MODULE_FILES := isp_qemu.py
 MODULE_FILES += isp_vcu118.py
 MODULE_FILES += isp_vcs.py
 MODULE_FILES += isp_iveia.py
+MODULE_FILES += isp_omaha.py
 
 MODULES := $(patsubst %,modules/%,$(MODULE_FILES))
 
