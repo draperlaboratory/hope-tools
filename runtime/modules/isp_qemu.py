@@ -82,7 +82,7 @@ def buildValidator(policy_name, output_dir):
 
 def moveValidator(policy_name, output_dir, arch):
     engine_output_dir = os.path.join(output_dir, "engine")
-    validator_path = os.path.join(engine_output_dir, "build", "lib{}-sim-validator.so".format(arch))
+    validator_path = os.path.join(engine_output_dir, "build", "librv-sim-validator.so")
 
     try:
         validator_out_name = validatorName(policy_name, arch)
@@ -97,7 +97,7 @@ def moveValidator(policy_name, output_dir, arch):
 
 
 def validatorName(policy_name, arch):
-    return "-".join([arch, policy_name, "validator"]) + ".so"
+    return "-".join(["rv", policy_name, "validator"]) + ".so"
 
 
 def defaultPexPath(policy_name, arch, extra):
@@ -209,7 +209,7 @@ def watchdog():
 
 
 def qemuSetupValidatorEnvironment(pex_path, run_dir, arch):
-    os.symlink(pex_path, os.path.join(run_dir, "lib{}-sim-validator.so".format(arch)))
+    os.symlink(pex_path, os.path.join(run_dir, "librv-sim-validator.so"))
     env = dict(os.environ)
     env["LD_LIBRARY_PATH"] = run_dir
 
