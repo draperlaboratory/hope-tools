@@ -219,7 +219,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     policy_name = os.path.basename(policy_dir)
 
     if not soc_cfg:
-        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "gfe-vcu118.yml")
+        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "soc_omaha.yml")
 
     if isp_utils.generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=soc_cfg, arch=arch) is False:
         return isp_utils.retVals.TAG_FAIL
