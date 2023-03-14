@@ -88,16 +88,14 @@ def generateTagInfo(exe_path, run_dir, policy_dir, soc_cfg=None, arch=None):
     exe_name = os.path.basename(exe_path)
     doMkDir(os.path.join(run_dir, "bininfo"))
     args = ["gen_tag_info",
-            "-d", policy_dir,
-            "-t", os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
-            "-b", exe_path,
-            "-e", os.path.join(policy_dir, "policy_entities.yml"),
+            "--policy_dir", policy_dir,
+            "--tag_file", os.path.join(run_dir, "bininfo", exe_name + ".taginfo"),
+            "--bin", exe_path,
+            "--entities", os.path.join(policy_dir, "policy_entities.yml"),
             os.path.join(policy_dir, "composite_entities.yml"),
             os.path.join(run_dir, exe_name + ".entities.yml")]
     if soc_cfg is not None:
-        args += ["-s", soc_cfg]
-    if arch is not None:
-        args += ["--arch", arch]
+        args += ["--soc_file", soc_cfg]
 
     with open(os.path.join(run_dir, "inits.log"), "w+") as initlog:
         subprocess.Popen(args, stdout=initlog,
