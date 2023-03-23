@@ -47,8 +47,11 @@ def auto_int(x):
     return int(x, 0)
 
 
+def unique_section_name(s):
+    return f"{s['sh_name']}{s['sh_addr']}"
+
 def include_section(s):
-    return ((s['sh_flags'] & SH_FLAGS.SHF_ALLOC) != 0) and (s['sh_type'] != 'SHT_NOBITS')
+    return ((s['sh_flags'] & SH_FLAGS.SHF_ALLOC) != 0) and (s['sh_type'] != 'SHT_NOBITS') and (s['sh_size'] != 0)
 
 
 def generate_load_image(elf_binary, output_image, tag_info=None):
@@ -66,7 +69,7 @@ def generate_load_image(elf_binary, output_image, tag_info=None):
                 if include_section(s):
                     logger.debug("section {0} at 0x{1:x}, for 0x{2:x} bytes".format(s.name, s["sh_addr"], s["sh_size"]))
                     elision = SectionElision(s)
-                    elision_dict[s["sh_name"]] = elision
+                    elision_dict[unique_section_name(s)] = elision
                     if open_segment is None:
                         open_segment = elision
                         open_segment.write_segment = True
@@ -80,14 +83,14 @@ def generate_load_image(elf_binary, output_image, tag_info=None):
             segment_count = 0
             for s in sorted(ef.iter_sections(), key=lambda s: s["sh_addr"]):
                 if include_section(s):
-                    elision = elision_dict[s["sh_name"]]
+                    elision = elision_dict[unique_section_name(s)]
                     if elision.write_segment:
                         logger.debug("segment at 0x{0:x}, for 0x{1:x} bytes".format(s["sh_addr"], elision.segment_size))
                         out.write(load_segment_t.pack(s["sh_addr"], elision.segment_size))
                         segment_count = segment_count + 1
             for s in sorted(ef.iter_sections(), key=lambda s: s["sh_addr"]):
                 if include_section(s):
-                    elision = elision_dict[s["sh_name"]]
+                    elision = elision_dict[unique_section_name(s)]
                     size = s["sh_size"]
                     if elision.front_pad > 0:
                         pad = bytearray(elision.front_pad)
