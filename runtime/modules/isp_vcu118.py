@@ -369,7 +369,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     gdb_log_file = os.path.join(run_dir, "gdb.log")
 
     if not soc_cfg:
-        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "gfe-vcu118.yml")
+        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "soc_vcu118.yml")
     else:
         soc_cfg = os.path.realpath(soc_cfg)
     logger.debug("Using SOC config {}".format(soc_cfg))
