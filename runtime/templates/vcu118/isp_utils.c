@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include "bsp.h"
 #include "isp_utils.h"
-
-#define CPU_CLOCK_HZ 50000000
 
 extern volatile uint64_t tohost;
 

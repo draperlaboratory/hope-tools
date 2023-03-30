@@ -249,7 +249,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     pex_log_file = os.path.join(run_dir, "pex.log")
 
     if not soc_cfg:
-        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "iveia.yml")
+        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "soc_iveia.yml")
     else:
         soc_cfg = os.path.realpath(soc_cfg)
     logger.debug("Using SOC config {}".format(soc_cfg))
