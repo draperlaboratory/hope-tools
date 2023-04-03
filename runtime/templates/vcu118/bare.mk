@@ -14,7 +14,9 @@ ISP_OBJECTS      += $(patsubst %.S,%.o,$(ISP_ASM_SRCS))
 ISP_CFLAGS			 += -Wall -Wextra -O0 -g3 -std=gnu11 -mno-relax
 ISP_CFLAGS			 += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
+ISP_INCLUDES     += -I$(ISP_PREFIX)/include
 ISP_INCLUDES     += -I$(ISP_PREFIX)/local/include
+ISP_INCLUDES     += -I$(ISP_PREFIX)/vcu118_bsp
 ISP_INCLUDES     += -I$(ISP_RUNTIME)
 
 RISCV_PATH			 ?= $(ISP_PREFIX)
@@ -28,12 +30,13 @@ ifneq ($(ARCH), rv64)
 RISCV_ARCH 			 ?= rv32ima
 RISCV_ABI        ?= ilp32
 RISCV_TARGET	?= riscv32-unknown-elf
+ISP_CFLAGS += -DRV32
 else
 RISCV_ARCH ?= rv64imafd
 RISCV_ABI ?= lp64d
 RISCV_TARGET ?= riscv64-unknown-elf
 
-ISP_CFLAGS += -mcmodel=medany
+ISP_CFLAGS += -DRV64 -mcmodel=medany
 ISP_LDFLAGS += -mcmodel=medany
 endif
 CC 							 := $(RISCV_CLANG)
