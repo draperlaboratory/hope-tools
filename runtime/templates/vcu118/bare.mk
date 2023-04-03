@@ -30,13 +30,13 @@ ifneq ($(ARCH), rv64)
 RISCV_ARCH 			 ?= rv32ima
 RISCV_ABI        ?= ilp32
 RISCV_TARGET	?= riscv32-unknown-elf
-ISP_CFLAGS += -DRV64
+ISP_CFLAGS += -DRV32
 else
 RISCV_ARCH ?= rv64imafd
 RISCV_ABI ?= lp64d
 RISCV_TARGET ?= riscv64-unknown-elf
 
-ISP_CFLAGS += -DRV32 -mcmodel=medany
+ISP_CFLAGS += -DRV64 -mcmodel=medany
 ISP_LDFLAGS += -mcmodel=medany
 endif
 CC 							 := $(RISCV_CLANG)
