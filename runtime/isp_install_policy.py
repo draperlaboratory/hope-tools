@@ -111,7 +111,6 @@ def main():
     logger = isp_utils.setupLogger(log_level, (not args.disable_colors))
 
     policies_dir = os.path.join(isp_prefix, "sources", "policies")
-    soc_cfg_path = os.path.join(isp_prefix, "soc_cfg")
     entities_dir = os.path.join(policies_dir, "entities")
 
     policy_name = ""
