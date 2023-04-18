@@ -31,9 +31,9 @@ class retVals:
 #  main() renamed to isp_main()
 
 bare_bsp = {
-    "qemu": "hifive_bsp",
-    "vcu118": "vcu118_bsp",
-    "iveia": "iveia_bsp"
+    "qemu": "hifive",
+    "vcu118": "vcu118",
+    "iveia": "iveia"
 }
 
 sim_aliases = {
@@ -87,8 +87,7 @@ def doInstall(build_dir, template_dir, runtime, sim, stock):
         shutil.copy(makefile, os.path.join(build_dir, ("isp-runtime-" + runtime + ".mk")))
 
         if "bare" == runtime:
-            shutil.copytree(os.path.join(isp_utils.getIspPrefix(), bare_bsp[sim]),
-                            os.path.join(runtime_dir, "bsp"))
+            shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "bsp", bare_bsp[sim], "ap"), os.path.join(runtime_dir, "bsp"))
 
         if "sel4" == runtime:
             sel4_setup_source(build_dir, template_dir)

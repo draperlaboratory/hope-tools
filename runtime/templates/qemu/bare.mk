@@ -36,7 +36,7 @@ LINK_TARGET ?= flash
 
 BSP_BASE = $(ISP_RUNTIME)/bsp
 
-ISP_LIBS := $(BSP_BASE)/libwrap/libwrap.a
+ISP_LIBS := $(BSP_BASE)/src/libwrap/libwrap.a
 
 all:
 

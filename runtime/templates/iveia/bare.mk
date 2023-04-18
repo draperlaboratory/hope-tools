@@ -41,14 +41,15 @@ ISP_CFLAGS			 += -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI) --target=$(RISCV_TARGET
 
 ISP_ASMFLAGS     := $(ISP_CFLAGS)
 
-BSP_BASE				 := $(ISP_RUNTIME)/bsp
+BSP_BASE         := $(ISP_RUNTIME)/bsp
+BSP_SRC          := $(BSP_BASE)/src
 
 LIBIVEIA				 := $(BSP_BASE)/libiveia.a
 LIBISP           := $(ISP_RUNTIME)/libisp.a
 
 ISP_LIBS         := $(LIBISP) $(LIBIVEIA)
 
-ISP_LDFLAGS			 := -T $(BSP_BASE)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
+ISP_LDFLAGS      := -T $(BSP_SRC)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
 ISP_LDFLAGS			 += -Wl,--wrap=isatty
 ISP_LDFLAGS      += -Wl,--wrap=printf
 ISP_LDFLAGS      += -Wl,--wrap=puts
@@ -59,13 +60,13 @@ ISP_LDFLAGS      += -Wl,--wrap=free
 ISP_LDFLAGS 		 += -Wl,--undefined=pvPortMalloc
 ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
 
-ISP_LDFLAGS      += -liveia -L$(BSP_BASE)
+ISP_LDFLAGS      += -liveia -L$(BSP_SRC)
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
 
 all:
 
 $(LIBIVEIA):
-	ARCH=$(ARCH) make -C $(BSP_BASE)
+	ARCH=$(ARCH) make -C $(BSP_SRC)
 
 debug:
 	echo $(CC)
@@ -80,6 +81,6 @@ clean: isp-clean
 
 .PHONY: isp-clean isp-runtime-common
 isp-clean:
-	make -C $(BSP_BASE) clean
+	make -C $(BSP_SRC) clean
 
 isp-runtime-common: $(ISP_LIBS) $(ISP_OBJECTS)
