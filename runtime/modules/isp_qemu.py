@@ -166,6 +166,9 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
     if extra is not None:
         opts += isp_utils.processExtraArgs(extra)
 
+    # PropFuzz
+    opts += ["-voltron_freertos"]
+
     return opts
 
 

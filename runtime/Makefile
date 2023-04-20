@@ -32,8 +32,8 @@ MODULE_FILES += isp_iveia.py
 
 MODULES := $(patsubst %,modules/%,$(MODULE_FILES))
 
-SOURCES := pex-kernel
-SOURCES += policies
+#SOURCES := pex-kernel
+SOURCES := policies
 SOURCES += policy-engine
 SOURCES += tools/runtime/templates
 
