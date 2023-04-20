@@ -51,11 +51,8 @@ def installTagMemHexdump(policy_name, output_dir, processor):
     build_log_path = os.path.join(output_dir, "build.log")
     build_log = open(build_log_path, "w+")
     pex_kernel_output_dir = os.path.join(output_dir, "pex-kernel")
-    result = subprocess.call(["make", "tag_mem_hexdump"], stdout=build_log, stderr=subprocess.STDOUT,
-                             cwd=pex_kernel_output_dir, env=env)
-    shutil.copy(os.path.join(pex_kernel_output_dir, "tag_mem_hexdump", "tag_mem_hexdump-{}".format(policy_name)),
-                output_dir)
-    shutil.rmtree(pex_kernel_output_dir)
+    result = subprocess.call(["make", "tag_mem_hexdump"], stdout=build_log, stderr=subprocess.STDOUT, cwd=pex_kernel_output_dir, env=env)
+    shutil.copy(os.path.join(pex_kernel_output_dir, "tag_mem_hexdump", "tag_mem_hexdump-{}".format(policy_name)), output_dir)
 
     if result != 0:
         logger.error("Failed to install tag_mem_hexdump")

@@ -88,7 +88,6 @@ def moveValidator(policy_name, output_dir, arch):
         validator_out_name = validatorName(policy_name, arch)
         validator_out_path = os.path.join(os.path.dirname(output_dir), validator_out_name) 
         shutil.move(validator_path, validator_out_path)
-        shutil.rmtree(output_dir)
     except Exception as e:
         logger.error("Moving validator to output dir failed with error: {}".format(e))
         return False
@@ -275,7 +274,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     global status_log_file
 
     if soc_cfg is None:
-        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "hifive_e_cfg.yml")
+        soc_cfg = os.path.join(isp_prefix, "bsp", "hifive", "config", "hifive_e_cfg.yml")
     else:
         soc_cfg = os.path.realpath(soc_cfg)
     logger.debug("Using SOC config {}".format(soc_cfg))
