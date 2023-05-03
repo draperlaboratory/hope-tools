@@ -248,11 +248,6 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     ap_log_file = os.path.join(run_dir, "uart.log")
     pex_log_file = os.path.join(run_dir, "pex.log")
 
-#    if not soc_cfg:
-#        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "soc_iveia.yml")
-#    else:
-#        soc_cfg = os.path.realpath(soc_cfg)
-
     flash_init_image_path = os.path.join(run_dir, "full.init")
     if extra_args.flash_init:
         flash_init_image_path = os.path.realpath(extra_args.flash_init)

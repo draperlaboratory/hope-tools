@@ -273,11 +273,6 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     global uart_log_file
     global status_log_file
 
-#    if soc_cfg is None:
-#        soc_cfg = os.path.join(isp_prefix, "bsp", "hifive", "config", "hifive_e_cfg.yml")
-#    else:
-#        soc_cfg = os.path.realpath(soc_cfg)
-
     qemu_cmd = qemu_base_cmd + '32'
     if arch == 'rv64':
         qemu_cmd = qemu_base_cmd + '64'
