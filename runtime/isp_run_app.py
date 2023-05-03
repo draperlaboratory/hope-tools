@@ -95,6 +95,9 @@ def main():
     parser.add_argument("exe_path", type=str, help='''
     Path of the executable to run
     ''')
+    parser.add_argument("soc", type=str, help='''
+    SOC configuration YAML file
+    ''')
     parser.add_argument("-p", "--policies", nargs='+', default=["none"], help='''
     List of policies to apply to run, or path to a policy directory
     Default is none
@@ -143,9 +146,6 @@ def main():
     ''')
     parser.add_argument("-S", "--suffix", type=str, help='''
     Extra suffix to add to the test directory name
-    ''')
-    parser.add_argument("--soc", type=str, help='''
-    SOC configuration YAML file
     ''')
     parser.add_argument("-N", "--no_validator", action="store_true", help='''
     Do not use the validator and run the stock version of the simulator (which
@@ -248,6 +248,8 @@ def main():
         doEntitiesFile(run_dir, exe_name)
 
     logger.debug("Starting simulator...")
+    soc_cfg = args.soc if args.soc.lower().endswith(".yml") else os.path.join(isp_prefix, "bsp", args.soc, "config", f"soc_{args.soc}.yml")
+    logger.debug("Using SOC config {}".format(soc_cfg))
     result = sim_module.runSim(args.exe_path,
                                run_dir,
                                policy_dir,
@@ -256,7 +258,7 @@ def main():
                                (args.rule_cache_name, args.rule_cache_size),
                                args.gdb,
                                args.tagfile,
-                               args.soc,
+                               soc_cfg,
                                arch,
                                args.extra,
                                use_validator,
