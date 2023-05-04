@@ -40,7 +40,7 @@ def copyPolicySources(policy_dir, output_dir, fpga, processor):
     return True
 
 
-def buildPexKernel(policy_name, output_dir, fpga, processor):
+def buildPexKernel(design, policy_name, output_dir, fpga, processor):
     logger.debug("Building PEX kernel")
     env = dict(os.environ)
 
@@ -52,6 +52,7 @@ def buildPexKernel(policy_name, output_dir, fpga, processor):
         env["DEBUG"] = "1"
 
     env["POLICY_NAME"] = policy_name
+    env["DESIGN"] = design
 
     num_cores = str(multiprocessing.cpu_count())
     build_log_path = os.path.join(output_dir, "build.log")

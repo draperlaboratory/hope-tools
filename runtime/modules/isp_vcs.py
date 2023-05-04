@@ -61,7 +61,7 @@ def installTagMemHexdump(policy_name, output_dir, processor):
     return True
 
 
-def installPex(policy_dir, output_dir, arch, extra):
+def installPex(design, policy_dir, output_dir, arch, extra):
     logger.info("Installing pex kernel for VCS")
     pex_kernel_source_dir = os.path.join(isp_prefix, "sources", "pex-kernel")
     pex_firmware_source_dir = os.path.join(isp_prefix, "sources", "pex-firmware")
@@ -78,7 +78,7 @@ def installPex(policy_dir, output_dir, arch, extra):
     if not isp_pex_kernel.copyPolicySources(policy_dir, output_dir, fpga, extra_args.processor):
         return False
 
-    if not isp_pex_kernel.buildPexKernel(policy_name, output_dir, fpga, extra_args.processor):
+    if not isp_pex_kernel.buildPexKernel(design, policy_name, output_dir, fpga, extra_args.processor):
         return False
 
     if not isp_pex_kernel.movePexKernel(policy_name, output_dir, fpga, extra_args.processor):
