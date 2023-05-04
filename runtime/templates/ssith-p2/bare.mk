@@ -16,7 +16,7 @@ ISP_CFLAGS       += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 ISP_INCLUDES     += -I$(ISP_PREFIX)/include
 ISP_INCLUDES     += -I$(ISP_PREFIX)/local/include
-ISP_INCLUDES     += -I$(ISP_PREFIX)/bsp/vcu118/ap/include
+ISP_INCLUDES     += -I$(ISP_PREFIX)/bsp/ssith-p2/ap/include
 ISP_INCLUDES     += -I$(ISP_RUNTIME)
 
 RISCV_PATH       ?= $(ISP_PREFIX)
@@ -46,14 +46,13 @@ ISP_CFLAGS       += -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI) --target=$(RISCV_TAR
 ISP_ASMFLAGS     := $(ISP_CFLAGS)
 
 BSP_BASE         := $(ISP_RUNTIME)/bsp
-BSP_SRC          := $(BSP_BASE)/src
 
-LIBVCU118        := $(BSP_SRC)/libvcu118.a
+LIBVCU118        := $(BSP_BASE)/libvcu118.a
 LIBISP           := $(ISP_RUNTIME)/libisp.a
 
 ISP_LIBS         := $(LIBISP) $(LIBVCU118)
 
-ISP_LDFLAGS      := -T $(BSP_SRC)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
+ISP_LDFLAGS      := -T $(BSP_BASE)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
 ISP_LDFLAGS      += -Wl,--wrap=isatty
 ISP_LDFLAGS      += -Wl,--wrap=printf
 ISP_LDFLAGS      += -Wl,--wrap=puts
@@ -64,14 +63,14 @@ ISP_LDFLAGS      += -Wl,--wrap=free
 ISP_LDFLAGS      += -Wl,--undefined=pvPortMalloc
 ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
 
-ISP_LDFLAGS      += -lvcu118 -L$(BSP_SRC)
+ISP_LDFLAGS      += -lvcu118 -L$(BSP_BASE)
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
 ISP_LDFLAGS      += -lxuartns550 -L$(ISP_PREFIX)/local/lib/$(RISCV_ARCH)/$(RISCV_ABI)
 
 all:
 
 $(LIBVCU118):
-	ARCH=$(ARCH) $(MAKE) -C $(BSP_SRC)
+	ARCH=$(ARCH) $(MAKE) -C $(BSP_BASE)
 
 debug:
 	echo $(CC)
@@ -86,6 +85,6 @@ clean: isp-clean
 
 .PHONY: isp-clean isp-runtime-common
 isp-clean:
-	make -C $(BSP_SRC) clean
+	make -C $(BSP_BASE) clean
 
 isp-runtime-common: $(ISP_LIBS) $(ISP_OBJECTS)
