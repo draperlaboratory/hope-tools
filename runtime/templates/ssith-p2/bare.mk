@@ -1,5 +1,5 @@
 ISP_PREFIX       ?= $(HOME)/.local/isp/
-ARCH             ?= rv32
+ARCH             ?= rv64
 ARCH_XLEN         = $(subst rv,,$(ARCH))
 
 ISP_RUNTIME      := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-bare\.mk"))
@@ -26,19 +26,13 @@ RISCV_OBJDUMP    ?= $(abspath  $(RISCV_PATH)/bin/llvm-objdump)
 RISCV_GDB        ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-gdb)
 RISCV_AR         ?= $(abspath  $(RISCV_PATH)/bin/llvm-ar)
 
-ifneq ($(ARCH), rv64)
-RISCV_ARCH       ?= rv32ima
-RISCV_ABI        ?= ilp32
-RISCV_TARGET     ?= riscv32-unknown-elf
-ISP_CFLAGS       += -DRV32
-else
 RISCV_ARCH       ?= rv64imafd
 RISCV_ABI        ?= lp64d
 RISCV_TARGET     ?= riscv64-unknown-elf
 
 ISP_CFLAGS       += -DRV64 -mcmodel=medany
 ISP_LDFLAGS      += -mcmodel=medany
-endif
+
 CC               := $(RISCV_CLANG)
 
 ISP_CFLAGS       += -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI) --target=$(RISCV_TARGET)
