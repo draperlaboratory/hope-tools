@@ -25,12 +25,11 @@ debug_suffix = "-debug"
 # Invoked by isp_install_policy
 #################################
 
-def defaultPexPath(policy_name, arch, extra):
-    extra_args = parseExtra(extra)
-    return os.path.join(isp_prefix, "pex-kernel", isp_pex_kernel.pexKernelName(policy_name, fpga, extra_args.processor))
+def defaultPexPath(policy_name, soc):
+    return os.path.join(isp_prefix, "pex-kernel", isp_pex_kernel.pexKernelName(policy_name, soc))
 
 
-def installTagMemHexdump(policy_name, output_dir, processor):
+def installTagMemHexdump(policy_name, output_dir):
     logger.debug("Building tag_mem_hexdump utility for VCS")
 
     if not os.path.isdir(os.path.join(output_dir, "pex-kernel")) and \
@@ -40,7 +39,6 @@ def installTagMemHexdump(policy_name, output_dir, processor):
     env = dict(os.environ)
 
     env["FPGA"] = "gfe-sim"
-    env["PROCESSOR"] = processor
 
     if policy_name.endswith(debug_suffix):
         policy_name = policy_name.replace(debug_suffix, "")
@@ -52,7 +50,7 @@ def installTagMemHexdump(policy_name, output_dir, processor):
     build_log = open(build_log_path, "w+")
     pex_kernel_output_dir = os.path.join(output_dir, "pex-kernel")
     result = subprocess.call(["make", "tag_mem_hexdump"], stdout=build_log, stderr=subprocess.STDOUT, cwd=pex_kernel_output_dir, env=env)
-    shutil.copy(os.path.join(pex_kernel_output_dir, "tag_mem_hexdump", "tag_mem_hexdump-{}".format(policy_name)), output_dir)
+    shutil.copy(os.path.join(pex_kernel_output_dir, "tag_mem_hexdump", f"tag_mem_hexdump-{policy_name}"), output_dir)
 
     if result != 0:
         logger.error("Failed to install tag_mem_hexdump")
@@ -61,13 +59,11 @@ def installTagMemHexdump(policy_name, output_dir, processor):
     return True
 
 
-def installPex(design, policy_dir, output_dir, arch, extra):
+def installPex(soc, policy_dir, output_dir):
     logger.info("Installing pex kernel for VCS")
     pex_kernel_source_dir = os.path.join(isp_prefix, "sources", "pex-kernel")
     pex_firmware_source_dir = os.path.join(isp_prefix, "sources", "pex-firmware")
     policy_name = os.path.basename(policy_dir)
-
-    extra_args = parseExtra(extra)
 
     if not isp_utils.checkDependency(pex_kernel_source_dir, logger):
         return False
@@ -75,13 +71,13 @@ def installPex(design, policy_dir, output_dir, arch, extra):
     if not isp_pex_kernel.copyPexKernelSources(pex_kernel_source_dir, output_dir):
         return False
 
-    if not isp_pex_kernel.copyPolicySources(policy_dir, output_dir, fpga, extra_args.processor):
+    if not isp_pex_kernel.copyPolicySources(policy_dir, output_dir, soc):
         return False
 
-    if not isp_pex_kernel.buildPexKernel(design, policy_name, output_dir, fpga, extra_args.processor):
+    if not isp_pex_kernel.buildPexKernel(soc, policy_name, output_dir, "gfe-sim"):
         return False
 
-    if not isp_pex_kernel.movePexKernel(policy_name, output_dir, fpga, extra_args.processor):
+    if not isp_pex_kernel.movePexKernel(policy_name, output_dir, soc):
         return False
 
     return True
@@ -99,7 +95,6 @@ def parseExtra(extra):
     parser.add_argument("--debug", action="store_true", help="Enable debug tracing")
     parser.add_argument("--timeout", type=int, default=0, help="Simulator timeout (in seconds)")
     parser.add_argument("--max-cycles", type=int, default=300000000, help="Maxmimum number of cycles to simulate")
-    parser.add_argument("--processor", type=str, default="P1", help="GFE processor configuration (P1/P2/P3)")
 
     if extra is not None:
         extra_dashed = []
@@ -203,7 +198,7 @@ def runVcsSim(exe_path, ap_hex_dump_path, pex_hex_dump_path, tag_mem_hexdump_pat
     return True
 
 
-def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
+def runSim(exe_path, soc, run_dir, policy_dir, pex_path, runtime, rule_cache,
            gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False, tag_only=False):
     extra_args = parseExtra(extra)
     ap_log_file = os.path.join(run_dir, "uart.log")
@@ -219,8 +214,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         return isp_utils.retVals.TAG_FAIL
 
     policy = policy_name.replace(debug_suffix, "") if policy_name.endswith(debug_suffix) else policy_name
-    if not shutil.which(f"tag_mem_hexdump-{policy}") and \
-       not installTagMemHexdump(policy_name, run_dir, extra_args.processor):
+    if not shutil.which(f"tag_mem_hexdump-{policy}") and not installTagMemHexdump(policy_name, run_dir, soc):
         return isp_utils.retVals.NO_BIN
     logger.info("Generating hex files")
     tag_mem_hexdump_path = generateTagMemHexdump(run_dir, tag_file_path, policy_name)

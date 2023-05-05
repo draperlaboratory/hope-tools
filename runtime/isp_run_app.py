@@ -229,7 +229,7 @@ def main():
 
     pex_path = args.pex
     if not pex_path:
-        pex_path = os.path.join(run_dir, os.path.basename(sim_module.defaultPexPath(policy_name, "rv", args.extra)))
+        pex_path = os.path.join(run_dir, os.path.basename(sim_module.defaultPexPath(policy_name, args.soc)))
     else:
         pex_path = os.path.realpath(args.pex)
 
@@ -252,6 +252,7 @@ def main():
     soc_cfg = os.path.join(isp_prefix, "bsp", args.soc, "config", f"soc_{args.soc}.yml")
     logger.debug(f"Using SOC config {soc_cfg}")
     result = sim_module.runSim(args.exe_path,
+                               args.soc,
                                run_dir,
                                policy_dir,
                                pex_path,

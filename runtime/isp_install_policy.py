@@ -156,7 +156,7 @@ def main():
         isp_utils.doMkDir(output_dir)
         sim_module = __import__("isp_" + args.sim)
         logger.debug("SIM module is {}".format(sim_module))
-        if not sim_module.installPex(args.soc, policy_out_dir, output_dir, args.arch, args.extra):
+        if not sim_module.installPex(args.soc, policy_out_dir, output_dir):
             sys.exit(1)
 
 
