@@ -76,9 +76,6 @@ def doInstall(build_dir, template_dir, runtime, soc, stock):
         shutil.copy(sim_utils_c, runtime_dir)
         shutil.copy(makefile, os.path.join(build_dir, ("isp-runtime-" + runtime + ".mk")))
 
-        if "bare" == runtime:
-            shutil.copytree(os.path.join(isp_utils.getIspPrefix(), "bsp", soc, "ap", "src"), os.path.join(runtime_dir, "bsp"))
-
         if "sel4" == runtime:
             sel4_setup_source(build_dir, template_dir)
             sel4_dir = os.path.join(runtime_dir, "sel4")
