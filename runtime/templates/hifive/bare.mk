@@ -2,14 +2,22 @@ ISP_PREFIX ?= $(HOME)/.local/isp/
 ARCH ?= rv32
 ARCH_XLEN = $(subst rv,,$(ARCH))
 
+BOARD ?= freedom-e300-hifive1
+LINK_TARGET ?= flash
+
+BSP_BASE    := $(ISP_PREFIX)/bsp
+
 ISP_RUNTIME := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-bare\.mk"))
 
 ISP_HEADERS += $(wildcard $(ISP_RUNTIME)/*.h)
-C_SRCS += $(wildcard $(ISP_RUNTIME)/*.c)
+ISP_C_SRCS  += $(wildcard $(ISP_RUNTIME)/*.c)
+
+ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 
 ISP_CFLAGS   += -O2 -fno-builtin-printf -mno-relax
 ISP_CFLAGS   += --sysroot=${ISP_PREFIX}/clang_sysroot/riscv64-unknown-elf
 ISP_INCLUDES += -I$(ISP_RUNTIME)
+ISP_INCLUDES += -I$(ISP_PREFIX)/bsp/hifive/ap/include
 ISP_INCLUDES += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 
 RISCV_PATH    ?= $(ISP_PREFIX)
@@ -20,6 +28,9 @@ RISCV_AR      ?= $(abspath $(RISCV_PATH)/bin/llvm-ar)
 
 CC = $(RISCV_CLANG)
 
+LIBISP   := $(ISP_RUNTIME)/libisp.a
+ISP_LIBS := $(LIBISP)
+
 ifneq ($(ARCH), rv64)
    RISCV_ARCH ?= rv32ima
    RISCV_ABI ?= ilp32
@@ -29,18 +40,27 @@ else
    RISCV_ABI ?= lp64d
    ISP_CFLAGS += --target=riscv64-unknown-elf -mcmodel=medany
 endif
+ISP_CFLAGS += -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI)
+
+ISP_LDFLAGS := -T$(ISP_PREFIX)/bsp/hifive/ap/$(LINK_TARGET).lds -nostartfiles
+ISP_LDFLAGS += -Wl,--wrap=isatty
+ISP_LDFLAGS += -Wl,--wrap=printf
+ISP_LDFLAGS += -Wl,--wrap=puts
+ISP_LDFLAGS += -Wl,--wrap=read
+ISP_LDFLAGS += -Wl,--wrap=write
+ISP_LDFLAGS += -Wl,--wrap=malloc
+ISP_LDFLAGS += -Wl,--wrap=free
+ISP_LDFLAGS += -Wl,--undefined=pvPortMalloc
+ISP_LDFLAGS += -Wl,--undefined=pvPortFree
 ISP_LDFLAGS += -fuse-ld=lld
+ISP_LDFLAGS += -lbsp -L$(BSP_BASE)/hifive/ap/lib
+ISP_LDFLAGS += -lisp -L$(ISP_RUNTIME)
 
-BOARD ?= freedom-e300-hifive1
-LINK_TARGET ?= flash
+$(LIBISP): $(ISP_OBJECTS)
+	$(RISCV_AR) rcs $@ $(ISP_OBJECTS)
 
-BSP_BASE = $(ISP_RUNTIME)/bsp
-
-ISP_LIBS = $(BSP_BASE)/libwrap/libwrap.a
-
-all:
+$(ISP_RUNTIME)/%.o: $(ISP_RUNTIME)/%.c
+	$(CC) $(ISP_CFLAGS) $(ISP_INCLUDES) -c $< -o $@
 
 .PHONY: isp-runtime-common
-isp-runtime-common: $(ISP_LIBS) $(ISP_OBJECTS)
-
-include $(BSP_BASE)/env/common.mk
+isp-runtime-common: $(LIBISP)

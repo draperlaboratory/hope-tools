@@ -42,8 +42,7 @@ ISP_ASMFLAGS     := $(ISP_CFLAGS)
 BSP_BASE         := $(ISP_RUNTIME)/bsp
 
 LIBISP           := $(ISP_RUNTIME)/libisp.a
-
-ISP_LIBS         := $(LIBISP) $(LIBVCU118)
+ISP_LIBS         := $(LIBISP)
 
 ISP_LDFLAGS      := -T$(ISP_PREFIX)/bsp/ssith-p2/ap/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
 ISP_LDFLAGS      += -Wl,--wrap=isatty
@@ -59,8 +58,6 @@ ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
 ISP_LDFLAGS      += -lbsp -L$(ISP_PREFIX)/bsp/ssith-p2/ap/lib
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
 ISP_LDFLAGS      += -lxuartns550 -L$(ISP_PREFIX)/local/lib/$(RISCV_ARCH)/$(RISCV_ABI)
-
-all:
 
 debug:
 	echo $(CC)
