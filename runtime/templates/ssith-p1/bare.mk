@@ -56,7 +56,6 @@ ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
 
 ISP_LDFLAGS      += -lbsp -L$(ISP_PREFIX)/bsp/ssith-p1/ap/lib
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
-ISP_LDFLAGS      += -lxuartns550 -L$(ISP_PREFIX)/local/lib/$(RISCV_ARCH)/$(RISCV_ABI)
 
 debug:
 	echo $(CC)
