@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "uart.h"
+#include "bsp.h"
 
 extern int main(void);
 
@@ -22,7 +22,7 @@ void _init(void)
 {
   int result;
 
-  uart0_init();
+  uart_init(UART_BAUD_RATE);
 
   // set up a bad trap handler
   write_csr(mtvec, ((uintptr_t)&bad_trap));

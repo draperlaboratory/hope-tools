@@ -67,6 +67,9 @@ $(LIBISP): $(ISP_OBJECTS)
 $(ISP_RUNTIME)/%.o: $(ISP_RUNTIME)/%.c
 	$(CC) $(ISP_CFLAGS) $(ISP_INCLUDES) -c $< -o $@
 
+$(ISP_RUNTIME)/%.o: $(ISP_RUNTIME)/%.S
+	$(CC) $(ISP_ASMFLAGS) -c $< -o $@
+
 clean: isp-clean
 
 .PHONY: isp-clean isp-runtime-common
