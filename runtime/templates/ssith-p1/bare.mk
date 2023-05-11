@@ -16,7 +16,7 @@ ISP_CFLAGS       += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 ISP_INCLUDES     += -I$(ISP_PREFIX)/include
 ISP_INCLUDES     += -I$(ISP_PREFIX)/local/include
-ISP_INCLUDES     += -I$(ISP_PREFIX)/bsp/ssith-p2/ap/include
+ISP_INCLUDES     += -I$(ISP_PREFIX)/bsp/ssith-p1/ap/include
 ISP_INCLUDES     += -I$(ISP_RUNTIME)
 
 RISCV_PATH       ?= $(ISP_PREFIX)
