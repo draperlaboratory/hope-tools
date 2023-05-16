@@ -22,9 +22,9 @@ ISP_INCLUDES     += -I$(ISP_RUNTIME)
 RISCV_PATH       ?= $(ISP_PREFIX)
 RISCV_CLANG      ?= $(abspath $(RISCV_PATH)/bin/clang)
 RISCV_GXX        ?= $(RISCV_CLANG)
-RISCV_OBJDUMP    ?= $(abspath  $(RISCV_PATH)/bin/llvm-objdump)
+RISCV_OBJDUMP    ?= $(abspath $(RISCV_PATH)/bin/llvm-objdump)
 RISCV_GDB        ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-gdb)
-RISCV_AR         ?= $(abspath  $(RISCV_PATH)/bin/llvm-ar)
+RISCV_AR         ?= $(abspath $(RISCV_PATH)/bin/llvm-ar)
 
 RISCV_ARCH       ?= rv32ima
 RISCV_ABI        ?= ilp32
@@ -43,7 +43,7 @@ LIBISP           := $(ISP_RUNTIME)/libisp.a
 
 ISP_LIBS         := $(LIBISP)
 
-ISP_LDFLAGS      := -T$(ISP_PREFIX)/bsp/ssith-p1/ap/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
+ISP_LDFLAGS      := -T$(ISP_RUNTIME)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
 ISP_LDFLAGS      += -Wl,--wrap=isatty
 ISP_LDFLAGS      += -Wl,--wrap=printf
 ISP_LDFLAGS      += -Wl,--wrap=puts
