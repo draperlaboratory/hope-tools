@@ -51,7 +51,7 @@ def buildPexKernel(soc, policy_name, output_dir, fpga="gfe"):
         env["DEBUG"] = "1"
 
     env["POLICY_NAME"] = policy_name
-    env["TARGET"] = soc
+    env["SOC"] = soc
 
     num_cores = str(multiprocessing.cpu_count())
     build_log_path = os.path.join(output_dir, "build.log")
