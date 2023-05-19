@@ -77,9 +77,12 @@ def doInstall(build_dir, template_dir, runtime, soc, stock):
     try:
         shutil.copy(runtime_main_c, runtime_dir)
         shutil.copy(sim_utils_c, runtime_dir)
-        shutil.copy(sim_init_c, runtime_dir)
-        shutil.copy(sim_boot_S, runtime_dir)
-        shutil.copy(sim_link_ld, runtime_dir)
+        if os.path.exists(sim_init_c):
+            shutil.copy(sim_init_c, runtime_dir)
+        if os.path.exists(sim_boot_S):
+            shutil.copy(sim_boot_S, runtime_dir)
+        if os.path.exists(sim_link_ld):
+            shutil.copy(sim_link_ld, runtime_dir)
         shutil.copy(makefile, os.path.join(build_dir, ("isp-runtime-" + runtime + ".mk")))
 
         if "sel4" == runtime:
