@@ -17,7 +17,7 @@ ISP_OBJECTS      := $(patsubst %.c,%.o,$(ISP_C_SRCS))
 ISP_CFLAGS   += -O2 -fno-builtin-printf -mno-relax
 ISP_CFLAGS   += --sysroot=${ISP_PREFIX}/clang_sysroot/riscv64-unknown-elf
 ISP_INCLUDES += -I$(ISP_RUNTIME)
-ISP_INCLUDES += -I$(ISP_PREFIX)/bsp/hifive/ap/include
+ISP_INCLUDES += -I$(ISP_PREFIX)/bsp/hifive32/ap/include
 ISP_INCLUDES += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 
 RISCV_PATH    ?= $(ISP_PREFIX)
@@ -42,7 +42,7 @@ else
 endif
 ISP_CFLAGS += -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI)
 
-ISP_LDFLAGS := -T$(ISP_PREFIX)/bsp/hifive/ap/$(LINK_TARGET).lds -nostartfiles
+ISP_LDFLAGS := -T$(ISP_PREFIX)/bsp/hifive32/ap/$(LINK_TARGET).lds -nostartfiles
 ISP_LDFLAGS += -Wl,--wrap=isatty
 ISP_LDFLAGS += -Wl,--wrap=printf
 ISP_LDFLAGS += -Wl,--wrap=puts
@@ -53,7 +53,7 @@ ISP_LDFLAGS += -Wl,--wrap=free
 ISP_LDFLAGS += -Wl,--undefined=pvPortMalloc
 ISP_LDFLAGS += -Wl,--undefined=pvPortFree
 ISP_LDFLAGS += -fuse-ld=lld
-ISP_LDFLAGS += -lbsp -L$(BSP_BASE)/hifive/ap/lib
+ISP_LDFLAGS += -lbsp -L$(BSP_BASE)/hifive32/ap/lib
 ISP_LDFLAGS += -lisp -L$(ISP_RUNTIME)
 
 $(LIBISP): $(ISP_OBJECTS)
