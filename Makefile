@@ -15,18 +15,17 @@ ISP_PREFIX ?= $(HOME)/.local/isp/
 SDK_VERSION:=0.0.0
 
 PROJECTS := riscv-gnu-toolchain
-PROJECTS += libns550
 PROJECTS += policy-tool
 PROJECTS += policy-engine
 PROJECTS += FreeRTOS
-PROJECTS += freedom-e-sdk
 PROJECTS += riscv-newlib
 PROJECTS += llvm-project
 PROJECTS += qemu
 PROJECTS += riscv-openocd
 PROJECTS += llvm-project/compiler-rt
 
-PRIVATE_PROJECTS := pex-bootrom
+PRIVATE_PROJECTS := bsp
+PRIVATE_PROJECTS += pex-bootrom
 PRIVATE_PROJECTS += pex-firmware
 PRIVATE_PROJECTS += pex-kernel
 
@@ -53,10 +52,9 @@ qemu: policy-engine
 riscv-newlib: llvm-project
 llvm-project/compiler-rt: llvm-project riscv-newlib
 FreeRTOS: llvm-project/compiler-rt runtime
-libns550: riscv-gnu-toolchain
-pex-bootrom: riscv-gnu-toolchain libns550 pex-firmware freedom-elf2hex
-pex-firmware: riscv-gnu-toolchain
-pex-kernel: pex-firmware freedom-elf2hex libns550
+pex-bootrom: bsp riscv-gnu-toolchain pex-firmware freedom-elf2hex
+pex-firmware: bsp riscv-gnu-toolchain
+pex-kernel: pex-firmware freedom-elf2hex
 stock-riscv-newlib: stock-llvm-project
 
 path_check:
