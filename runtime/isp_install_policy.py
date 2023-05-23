@@ -19,8 +19,8 @@ logger = logging.getLogger()
 isp_prefix = isp_utils.getIspPrefix()
 sys.path.append(os.path.join(isp_prefix, "runtime", "modules"))
 
-def runPolicyTool(policies, policies_dir, entities_dir, output_dir, debug):
-    policy_names = list(isp_utils.getPolicyModuleName(policy) for policy in policies)
+def runPolicyTool(module, policies, policies_dir, entities_dir, output_dir, debug):
+    policy_names = list(isp_utils.getPolicyModuleName(module, policy) for policy in policies)
     logger.info("Running policy tool")
 
     policy_tool_cmd = "policy-tool"
@@ -40,11 +40,11 @@ def runPolicyTool(policies, policies_dir, entities_dir, output_dir, debug):
     return True
 
 
-def generateCompositeEntities(policies, entities_dir, output):
+def generateCompositeEntities(policies, entities_dir, output, module):
     entity_sources = []
 
     for policy in policies:
-        entities_file = ".".join(["osv", policy, "entities", "yml"])
+        entities_file = ".".join([module, policy, "entities", "yml"])
         entities_path = os.path.join(entities_dir, entities_file)
 
         if os.path.isfile(entities_path):
@@ -104,6 +104,9 @@ def main():
     parser.add_argument("-e", "--extra", nargs="+", help='''
     Extra command line arguments for the simulator
     ''')
+    parser.add_argument("-m", "--module", type=str, default="osv", help='''
+    Module name. Default "osv".
+    ''')
 
     args = parser.parse_args()
 
@@ -132,7 +135,7 @@ def main():
         if args.global_policies:
             policies += args.global_policies
 
-        if runPolicyTool(policies, policies_dir, entities_dir,
+        if runPolicyTool(args.module, policies, policies_dir, entities_dir,
                          policy_out_dir, args.policy_debug) is False:
             logger.error('''
                          Policy tool failed to run to completion.
@@ -143,7 +146,7 @@ def main():
         entity_output_path = os.path.join(policy_out_dir,
                                           ".".join(["composite_entities", "yml"]))
         logger.info("Generating composite policy entity file at {}".format(entity_output_path))
-        generateCompositeEntities(policies, entities_dir, entity_output_path)
+        generateCompositeEntities(policies, entities_dir, entity_output_path, args.module)
 
     logger.debug("Policy directory is {}".format(policy_out_dir))
 
