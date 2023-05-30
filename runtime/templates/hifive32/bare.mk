@@ -50,6 +50,7 @@ ISP_LDFLAGS += -Wl,--wrap=read
 ISP_LDFLAGS += -Wl,--wrap=write
 ISP_LDFLAGS += -Wl,--wrap=malloc
 ISP_LDFLAGS += -Wl,--wrap=free
+ISP_LDFLAGS += -Wl,--wrap=_sbrk
 ISP_LDFLAGS += -Wl,--undefined=pvPortMalloc
 ISP_LDFLAGS += -Wl,--undefined=pvPortFree
 ISP_LDFLAGS += -fuse-ld=lld
