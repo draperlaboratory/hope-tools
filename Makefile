@@ -25,7 +25,6 @@ PROJECTS += riscv-openocd
 PROJECTS += llvm-project/compiler-rt
 
 PRIVATE_PROJECTS := bsp
-PRIVATE_PROJECTS += pex-bootrom
 PRIVATE_PROJECTS += pex-firmware
 PRIVATE_PROJECTS += pex-kernel
 
@@ -53,7 +52,6 @@ riscv-newlib: llvm-project
 llvm-project/compiler-rt: llvm-project riscv-newlib
 FreeRTOS: llvm-project/compiler-rt runtime
 bsp: riscv-gnu-toolchain setup
-pex-bootrom: riscv-gnu-toolchain bsp pex-firmware freedom-elf2hex
 pex-firmware: riscv-gnu-toolchain bsp
 pex-kernel: pex-firmware freedom-elf2hex
 stock-riscv-newlib: stock-llvm-project
