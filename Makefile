@@ -51,9 +51,9 @@ qemu: policy-engine
 riscv-newlib: llvm-project
 llvm-project/compiler-rt: llvm-project riscv-newlib
 FreeRTOS: llvm-project/compiler-rt runtime
-bsp: riscv-gnu-toolchain setup
+bsp: riscv-gnu-toolchain llvm-project setup
 pex-firmware: riscv-gnu-toolchain bsp
-pex-kernel: pex-firmware freedom-elf2hex
+pex-kernel: bsp pex-firmware freedom-elf2hex
 stock-riscv-newlib: stock-llvm-project
 
 path_check:
