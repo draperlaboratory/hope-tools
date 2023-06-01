@@ -75,14 +75,7 @@ OUTPUT_ARCH( "riscv" )
 _STACK_SIZE = 0x4000;
 _HEAP_SIZE  = 0x8000;
 
-/*****************************************************************************
- * Define memory layout
- ****************************************************************************/
-MEMORY {
-   cmem : ORIGIN = 0x80000000, LENGTH = 0x00800000
-	imem : ORIGIN = 0xc0000000, LENGTH = 0x00080000
-	dmem : ORIGIN = 0xc0080000, LENGTH = 0x00800000
-}
+INCLUDE bsp.ld
 
 /* Specify the default entry point to the program */
 
@@ -92,11 +85,6 @@ ENTRY(boot)
  * Define the sections, and where they are mapped in memory 
  ****************************************************************************/
 SECTIONS {
-   .uncached : {
-      . = ALIGN(64);
-      *(.uncached);
-		*(.uncached.*);
-   } > cmem
 	.text : {
       . = ALIGN(8);
 	    *boot.o(.text);

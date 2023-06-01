@@ -44,7 +44,7 @@ BSP_BASE         := $(ISP_RUNTIME)/bsp
 LIBISP           := $(ISP_RUNTIME)/libisp.a
 ISP_LIBS         := $(LIBISP)
 
-ISP_LDFLAGS      := -T$(ISP_RUNTIME)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
+ISP_LDFLAGS      := -L$(ISP_PREFIX)/bsp/ssith-p2/ap -T$(ISP_RUNTIME)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
 ISP_LDFLAGS      += -Wl,--wrap=isatty
 ISP_LDFLAGS      += -Wl,--wrap=printf
 ISP_LDFLAGS      += -Wl,--wrap=puts

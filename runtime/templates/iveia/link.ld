@@ -75,14 +75,7 @@ OUTPUT_ARCH( "riscv" )
 _STACK_SIZE = 0x4000;
 _HEAP_SIZE  = 0x8000;
 
-/*****************************************************************************
- * Define memory layout
- ****************************************************************************/
-MEMORY {
-	imem : ORIGIN = 0x10000000, LENGTH = 0x00080000
-	dmem : ORIGIN = 0x10080000, LENGTH = 0x00800000
-	cmem : ORIGIN = 0x20000000, LENGTH = 0x00800000
-}
+INCLUDE bsp.ld
 
 /* Specify the default entry point to the program */
 ENTRY(boot)
