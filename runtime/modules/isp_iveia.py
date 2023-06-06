@@ -128,7 +128,7 @@ def ap_thread(ap_tty, ap_baud_rate, ap_log, runtime, processor):
     ap_expect = pexpect_serial.SerialSpawn(ap_serial, timeout=3000000, encoding='utf-8', codec_errors='ignore')
     ap_expect.logfile = ap_log
 
-    ap_expect.expect(isp_utils.terminateMessage(runtime))
+    ap_expect.expect([isp_utils.terminateMessage(runtime), " BAD TRAP:"])
 
 
 def pex_thread(pex_tty, pex_baud_rate, pex_log):
@@ -158,6 +158,22 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
         isp_load_image.generate_tag_load_image(ap_load_image_path, tag_file_path)
         isp_load_image.generate_load_image(pex_kernel_path, pex_load_image_path)
 
+        # make sure that the kernel size is smaller than the size of the PEX_MEMORY_0_KERNEL_SCRATCH_SIZE
+        # or else, the lower section of the kernel will be overwritten by the taginfo file
+        kernel_size = os.path.getsize(pex_kernel_path)
+        kernel_scratch_size = isp_utils.getScratchSize(arch, "kernel")
+        if kernel_size > int(kernel_scratch_size,16):
+            logger.error("The kernel {} is {} bytes, but the size of the kernel_scratch in the json file is {}\n".format(pex_kernel_path, kernel_size, kernel_scratch_size))
+            return False
+
+        # make sure that the taginfo size is smaller than the size of the PEX_MEMORY_0_TAGINFO_SCRATCH_SIZE
+        # or else the lower section of the taginfo will not be loaded to the correct address
+        taginfo_size = os.path.getsize(ap_load_image_path)
+        taginfo_scratch_size = isp_utils.getScratchSize(arch,  "taginfo")
+        if taginfo_size > int(taginfo_scratch_size, 16):
+            logger.error("The taginfo {} is {} bytes, but the size of the taginfo_scratch in the json file is {}\n".format(ap_load_image_path, taginfo_size, taginfo_scratch_size))
+            return False
+
         flash_init_map = {kernel_address:pex_load_image_path,
                           ap_address:ap_load_image_path}
         isp_load_image.generate_flash_init(flash_init_image_path, flash_init_map)
@@ -165,8 +181,7 @@ def tagInit(exe_path, run_dir, policy_dir, soc_cfg, arch, pex_kernel_path,
     return True
 
 def runIveiaCmd(cmd, pex_log, run_dir):
-    local_cmd = ["ssh",
-                 "root@atlas-ii-z8-hp"] + cmd
+    local_cmd = ["ssh", "root@atlas-ii-z8-hp"] + cmd
 
     result = subprocess.call(local_cmd, stdout=pex_log, stderr=subprocess.STDOUT, cwd=run_dir)
 
@@ -258,9 +273,31 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
     if extra_args.flash_init:
         flash_init_image_path = os.path.realpath(extra_args.flash_init)
 
+    # find the scratch location of the kernel and the tag info
+    # from the memory map - that is where the PEX bootrom and
+    # the kernel, respectively, expect them
+    kernel_address = isp_utils.getScratchAddress(arch, "kernel")
+    ap_address = isp_utils.getScratchAddress(arch, "taginfo")
+    if kernel_address is None or ap_address is None:
+        # alow the extra arguments with the understanding that this
+        # might actaully conflict with what was defined in the relevant Makefile
+        if extra_args.kernel_address is None and extra_args.ap_address is None:
+            logger.error("Could not determine the kernel and tag info scratch address!")
+            return isp_utils.retVals.FAILURE
+        else:
+            warnMsg = '''
+Could not extract the scratch address for the pex and taginfo
+from the memory map! Inconsistencies between runtime and firmware/pex kernel might occur!
+'''
+            logger.warn(warnMsg)
+            if kernel_address is None:
+                kernel_address = extra_args.kernel_address
+            if ap_address is None:
+                ap_address = extra_args.ap_address
+
     if not tagInit(exe_path, run_dir, policy_dir, soc_cfg,
                    arch, pex_path, flash_init_image_path,
-                   extra_args.kernel_address, extra_args.ap_address):
+                   kernel_address, ap_address):
             return isp_utils.retVals.TAG_FAIL
 
     if tag_only:
@@ -279,12 +316,32 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         logger.error("Failed to autodetect PEX TTY file. If you know the symlink, re-run with the +pex_tty option")
         return isp_utils.retVals.FAILURE
 
-    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, extra_args.ap_br, ap_log, runtime, extra_args.processor))
+    ap_br = isp_utils.getBR(arch, "ap")
+    if ap_br is None:
+        logger.warn("Inconsistencies between the run-time and the AP firmware might occur!")
+        ap_br = extra_args.ap_br
+
+    pex_br = isp_utils.getBR(arch, "pex")
+    if pex_br is None:
+        logger.warn("Inconsistencies between the run-time and the PEX kernel firmware might occur!")
+        pex_br = extra_args.pex_br
+
+    logger.debug("ap_br = {}, pex_br = {}".format(ap_br, pex_br))
+
+    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, ap_br, ap_log, runtime, extra_args.processor))
     if not extra_args.no_log:
-        logger.debug("Connecting AP uart to {}, baud rate {}".format(ap_tty, extra_args.ap_br))
+        logger.debug("Connecting AP uart to {}, baud rate {}".format(ap_tty, ap_br))
         ap.start()
 
-    result = runPipe(exe_path, ap, pex_tty, extra_args.pex_br, pex_log, run_dir, pex_path, extra_args.no_log, extra_args.iveia_tmp)
+    # before we run anything, make sure that the extra_args.iveia_tmp dir on the iveia board is clean
+    # and it does not contain left-over stuff from previous runs (which might have exited due to a timeout)
+    cmd = ["/bin/rm",  "-f", extra_args.iveia_tmp + "/*"]
+    if runIveiaCmd(cmd, pex_log, run_dir) != isp_utils.retVals.SUCCESS:
+        logger.warn("Failed to clean after yourself, check out the {} log for details!".format(pex_log))
+        return isp_utils.retVals.FAILURE
+
+    # now you are ready to run the test ....
+    result = runPipe(exe_path, ap, pex_tty, pex_br, pex_log, run_dir, pex_path, extra_args.no_log, extra_args.iveia_tmp)
 
     # clean after yourself - remove any files stored in the iveia_tmp
     logger.info("Cleaning after yourself ...")

@@ -157,3 +157,39 @@ def getArch(exe_path):
         return elf_archs[elf_arch]
 
     return None
+
+def getScratchSize(arch, name):
+    # the new json format uses the following format
+    keyword = "PEX_MEMORY_0_" + name.upper() + "_SCRATCH_SIZE"
+    # remove the UL suffix
+    return getField(arch, keyword)[:-2]
+
+def getScratchAddress(arch, name):
+    # the new json format uses the following format
+    keyword = "PEX_MEMORY_0_" + name.upper() + "_SCRATCH_BEGIN"
+    # the old yaml format uses the following format, but it does not work for us
+    # as the old format allows nested defines and arithmentic, and we need
+    # a calculated (hex) address
+    # searchString = "SOC_ADDR_DRAM_" + ("SCRATCH" if name == "kernel" else "AP_IMAGE")
+    # remove the UL suffix
+    return getField(arch, keyword)[:-2]
+
+def getBR(arch, name):
+    keyword = name.upper() + "_MMIO_UART_BAUD_RATE"
+    return getField(arch, keyword)
+
+def getField(arch, searchString):
+    if arch != "rv32" and arch != "rv64":
+        return None
+
+    memoryMapName = getIspPrefix() + "/include/memory_map_" + arch.upper() + ".h"
+    result = None
+
+    p1 = subprocess.Popen(["awk", "/" + searchString + "/ {print $3}", memoryMapName ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if p1.returncode is None:
+        outputStr= p1.stdout.read().decode()
+        if outputStr != '':
+            # remove the '\n'
+            result = outputStr[:-1]
+
+    return result
