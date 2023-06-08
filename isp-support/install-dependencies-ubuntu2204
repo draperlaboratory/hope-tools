@@ -1,0 +1,21 @@
+#!/bin/bash
+
+sudo apt-get install -y autoconf automake autogen autotools-dev curl \
+    libmpc-dev libmpfr-dev libgmp-dev gawk build-essential \
+    bison flex texinfo gperf iverilog libelf-dev socat \
+    expat libexpat1-dev git python3 python3-setuptools \
+    cmake ninja-build clang haskell-platform haskell-stack binutils-dev \
+    python3-distutils python3-pytest python-is-python3 \
+    python3-pytest-xdist python3-pytest-timeout python3-pyelftools \
+    git automake autoconf libtool g++ \
+    cmake libboost-dev libboost-program-options-dev libboost-regex-dev libboost-all-dev \
+    libyaml-cpp-dev libgflags-dev \
+    python3-psutil xterm verilator virtualenv python3-pip \
+    libftdi1-2 libusb-1.0-0-dev libtinfo5 \
+    libglib2.0-dev libpixman-1-dev pkg-config device-tree-compiler rsync \
+    gcc-multilib libstdc++-12-dev
+
+# gcc-multilib is needed as the pex-kernel/tag_mem_gexdump/Makefile uses the -m32 gcc flag
+# and by default support for 32-bits is not included in gcc that comes with a 64-bit Ubuntu 2004.
+
+sudo stack upgrade --binary-only --allow-different-user --local-bin-path /usr/bin
