@@ -278,6 +278,8 @@ def main():
     if result is not isp_utils.retVals.SUCCESS:
         logger.error("Failed to run application: {}".format(result))
 
+    sys.exit(process_exit_code)
+
 
 if __name__ == "__main__":
     main()
