@@ -53,7 +53,7 @@ ISP_LIBS         := $(LIBISP)
 ISP_LDFLAGS       = -T $(LINKER_SCRIPT) -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
 ISP_LDFLAGS      += -Wl,--gc-sections
 
-ISP_LDFLAGS      += -lfreertos-vcu11832 -lbsp -L$(FREERTOS_LIB_DIR) -L$(ISP_PREFIX)/bsp/ssith-p1/ap/lib -fuse-ld=lld
+ISP_LDFLAGS      += -lfreertos-vcu11832 -lbsp -L$(FREERTOS_LIB_DIR) -L$(ISP_PREFIX)/bsp/ssith-p1/ap/lib
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
 ISP_LDFLAGS      += -Wl,--wrap=puts
 ISP_LDFLAGS      += -Wl,--wrap=printf
