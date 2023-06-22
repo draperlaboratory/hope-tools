@@ -97,16 +97,16 @@ documentation:
 	$(MAKE) -C documentation
 
 test-bare:
-	$(MAKE) -C ../policies/policy_tests bare-qemu
+	$(MAKE) -C ../policies/policy_tests bare-hifive32
 
 test-frtos:
-	$(MAKE) -C ../policies/policy_tests frtos-qemu
+	$(MAKE) -C ../policies/policy_tests frtos-hifive32
 
 test-bare64:
-	$(MAKE) -C ../policies/policy_tests bare64-qemu
+	$(MAKE) -C ../policies/policy_tests bare-hifive64
 
 test-frtos64:
-	$(MAKE) -C ../policies/policy_tests frtos64-qemu
+	$(MAKE) -C ../policies/policy_tests frtos-hifive64
 
 clean-runtime:
 	$(MAKE) -C runtime clean
