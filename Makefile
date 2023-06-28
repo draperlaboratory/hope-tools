@@ -23,6 +23,7 @@ PROJECTS += llvm-project
 PROJECTS += qemu
 PROJECTS += riscv-openocd
 PROJECTS += llvm-project/compiler-rt
+PROJECTS += freedom-e-sdk
 
 PRIVATE_PROJECTS := bsp
 PRIVATE_PROJECTS += pex-firmware
@@ -52,6 +53,7 @@ riscv-newlib: llvm-project
 llvm-project/compiler-rt: llvm-project riscv-newlib
 FreeRTOS: llvm-project/compiler-rt runtime
 bsp: riscv-gnu-toolchain llvm-project setup
+freedom-e-sdk: riscv-gnu-toolchain llvm-project
 pex-firmware: riscv-gnu-toolchain bsp
 pex-kernel: bsp pex-firmware freedom-elf2hex
 stock-riscv-newlib: stock-llvm-project
