@@ -98,18 +98,6 @@ runtime: $(ISP_PREFIX) llvm-project/compiler-rt
 documentation:
 	$(MAKE) -C documentation
 
-test-bare:
-	$(MAKE) -C ../policies/policy_tests bare-hifive32
-
-test-frtos:
-	$(MAKE) -C ../policies/policy_tests frtos-hifive32
-
-test-bare64:
-	$(MAKE) -C ../policies/policy_tests bare-hifive64
-
-test-frtos64:
-	$(MAKE) -C ../policies/policy_tests frtos-hifive64
-
 clean-runtime:
 	$(MAKE) -C runtime clean
 
