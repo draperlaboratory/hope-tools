@@ -138,6 +138,10 @@ def program_fpga(bit_file, ltx_file, board, log_file):
         result = subprocess.call(args, cwd=bitstream_dir,
                                 stdout=vivado_log, stderr=subprocess.STDOUT)
 
+    # These processes will fail if vivado actually did its cleanup. That's fine.
+    cleanup_tmp_files = ["rm", "-f", "/tmp/digilent-adept2-*"]
+    subprocess.call(cleanup_tmp_files, stdout=vivado_log, stderr=subprocess.STDOUT)
+
     vivado_log.close()
 
     if result != 0:
