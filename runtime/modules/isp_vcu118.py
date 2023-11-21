@@ -133,6 +133,16 @@ def program_fpga(bit_file, ltx_file, board, log_file):
         result = subprocess.call(args, cwd=bitstream_dir,
                                 stdout=vivado_log, stderr=subprocess.STDOUT)
 
+    # These processes will fail if vivado actually did its cleanup. That's fine.
+    logger.info("Running vivado cleanup. These commands failing likely means vivado did its own cleanup")
+
+    proc_res = subprocess.Popen("rm -f /tmp/digilent-adept2-*", shell=True, stderr=subprocess.STDOUT)
+    proc_res.wait()
+    logger.info(f"{(proc_res.args)} returned {proc_res.returncode}, with output:\n{proc_res.stdout}")
+
+    proc_res = subprocess.run(["killall", "hw_server", "cs_server"], stderr=subprocess.STDOUT)
+    logger.info(f"{(proc_res.args)} returned {proc_res.returncode}, with output:\n{proc_res.stdout}")
+
     vivado_log.close()
 
     if result != 0:

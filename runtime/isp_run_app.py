@@ -226,6 +226,8 @@ def main():
 
     isp_utils.removeIfExists(run_dir)
     isp_utils.doMkDir(run_dir)
+    logger.addHandler( logging.FileHandler("{0}/{1}.log".format(run_dir, "isp_run_app")))
+    logger.info("isp_run_app called with 'isp_run_app {}'".format(' '.join([arg for arg in sys.argv[1:]])))
 
     pex_path = args.pex
     if not pex_path:
