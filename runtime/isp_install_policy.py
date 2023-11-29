@@ -77,6 +77,9 @@ def main():
     Currently supported: qemu
     If omitted, only the policy tool will run
     ''')
+    parser.add_argument("--soc", type=str, help='''
+    SOC design to build the kernel for
+    ''')
     parser.add_argument("-o", "--output", type=str, default=os.getcwd(), help='''
     Output directory for compiled kernel/validator
     Default is current working directory
@@ -111,7 +114,6 @@ def main():
     logger = isp_utils.setupLogger(log_level, (not args.disable_colors))
 
     policies_dir = os.path.join(isp_prefix, "sources", "policies")
-    soc_cfg_path = os.path.join(isp_prefix, "soc_cfg")
     entities_dir = os.path.join(policies_dir, "entities")
 
     policy_name = ""
@@ -154,7 +156,7 @@ def main():
         isp_utils.doMkDir(output_dir)
         sim_module = __import__("isp_" + args.sim)
         logger.debug("SIM module is {}".format(sim_module))
-        if not sim_module.installPex(policy_out_dir, output_dir, args.arch, args.extra):
+        if not sim_module.installPex(args.soc, policy_out_dir, output_dir):
             sys.exit(1)
 
 

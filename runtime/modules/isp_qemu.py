@@ -51,7 +51,7 @@ def copyEngineSources(engine_dir, output_dir):
     return True
 
 
-def copyPolicySources(policy_dir, output_dir):
+def copyPolicySources(policy_dir, output_dir, soc):
     engine_output_dir = os.path.join(output_dir, "engine", "policy")
     try:
         shutil.copytree(policy_dir, engine_output_dir)
@@ -80,15 +80,14 @@ def buildValidator(policy_name, output_dir):
     return True
 
 
-def moveValidator(policy_name, output_dir, arch):
+def moveValidator(policy_name, output_dir):
     engine_output_dir = os.path.join(output_dir, "engine")
     validator_path = os.path.join(engine_output_dir, "build", "librv-sim-validator.so")
 
     try:
-        validator_out_name = validatorName(policy_name, arch)
+        validator_out_name = validatorName(policy_name)
         validator_out_path = os.path.join(os.path.dirname(output_dir), validator_out_name) 
         shutil.move(validator_path, validator_out_path)
-        shutil.rmtree(output_dir)
     except Exception as e:
         logger.error("Moving validator to output dir failed with error: {}".format(e))
         return False
@@ -96,15 +95,15 @@ def moveValidator(policy_name, output_dir, arch):
     return True
 
 
-def validatorName(policy_name, arch):
+def validatorName(policy_name):
     return "-".join(["rv", policy_name, "validator"]) + ".so"
 
 
-def defaultPexPath(policy_name, arch, extra):
-    return os.path.join(isp_prefix, "validator", validatorName(policy_name, arch))
+def defaultPexPath(policy_name, soc):
+    return os.path.join(isp_prefix, "validator", validatorName(policy_name))
 
 
-def installPex(policy_dir, output_dir, arch, extra):
+def installPex(soc, policy_dir, output_dir):
     logger.info("Installing policy validator for QEMU")
     engine_dir = os.path.join(isp_prefix, "sources", "policy-engine")
     policy_name = os.path.basename(policy_dir)
@@ -113,14 +112,14 @@ def installPex(policy_dir, output_dir, arch, extra):
         logger.error("Failed to copy policy engine sources")
         return False
 
-    if not copyPolicySources(policy_dir, output_dir):
+    if not copyPolicySources(policy_dir, output_dir, soc):
         logger.error("Failed to copy policy engine sources")
 
     if not buildValidator(policy_name, output_dir):
         logger.error("Failed to build validator")
         return False
 
-    if not moveValidator(policy_name, output_dir, arch):
+    if not moveValidator(policy_name, output_dir):
         logger.error("Failed to move validator")
         return False
 
@@ -268,17 +267,11 @@ def launchQEMUDebug(run_dir, env, options):
     rc.wait()
 
 
-def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
+def runSim(exe_path, soc, run_dir, policy_dir, pex_path, runtime, rule_cache,
            gdb_port, tagfile, soc_cfg, arch, extra, use_validator=True, tag_only=False):
     global run_cmd
     global uart_log_file
     global status_log_file
-
-    if soc_cfg is None:
-        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "hifive_e_cfg.yml")
-    else:
-        soc_cfg = os.path.realpath(soc_cfg)
-    logger.debug("Using SOC config {}".format(soc_cfg))
 
     qemu_cmd = qemu_base_cmd + '32'
     if arch == 'rv64':

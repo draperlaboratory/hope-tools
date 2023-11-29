@@ -16,7 +16,7 @@ ISP_CFLAGS       += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 ISP_INCLUDES     += -I$(ISP_PREFIX)/include
 ISP_INCLUDES     += -I$(ISP_PREFIX)/local/include
-ISP_INCLUDES     += -I$(ISP_PREFIX)/bsp/iveia/ap/include
+ISP_INCLUDES     += -I$(ISP_PREFIX)/bsp/ssith-p2/ap/include
 ISP_INCLUDES     += -I$(ISP_RUNTIME)
 
 RISCV_PATH       ?= $(ISP_PREFIX)
@@ -44,7 +44,7 @@ BSP_BASE         := $(ISP_RUNTIME)/bsp
 LIBISP           := $(ISP_RUNTIME)/libisp.a
 ISP_LIBS         := $(LIBISP)
 
-ISP_LDFLAGS      := -L$(ISP_PREFIX)/bsp/iveia/ap -T$(ISP_RUNTIME)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
+ISP_LDFLAGS      := -L$(ISP_PREFIX)/bsp/ssith-p2/ap -T$(ISP_RUNTIME)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
 ISP_LDFLAGS      += -Wl,--wrap=isatty
 ISP_LDFLAGS      += -Wl,--wrap=printf
 ISP_LDFLAGS      += -Wl,--wrap=puts
@@ -55,7 +55,7 @@ ISP_LDFLAGS      += -Wl,--wrap=free
 ISP_LDFLAGS      += -Wl,--undefined=pvPortMalloc
 ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
 
-ISP_LDFLAGS      += -lbsp -L$(ISP_PREFIX)/bsp/iveia/ap/lib
+ISP_LDFLAGS      += -lbsp -L$(ISP_PREFIX)/bsp/ssith-p2/ap/lib
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
 ISP_LDFLAGS      += -L$(ISP_PREFIX)/local/lib/$(RISCV_ARCH)/$(RISCV_ABI)
 

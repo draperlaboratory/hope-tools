@@ -1,5 +1,5 @@
 ISP_PREFIX       ?= $(HOME)/.local/isp/
-ARCH             ?= rv64
+ARCH             ?= rv32
 ARCH_XLEN         = $(subst rv,,$(ARCH))
 
 ISP_RUNTIME      := $(basename $(shell echo $(abspath $(MAKEFILE_LIST)) | grep -o " /.*/isp-runtime-bare\.mk"))
@@ -16,22 +16,20 @@ ISP_CFLAGS       += -ffunction-sections -fdata-sections -fno-builtin-printf
 ISP_INCLUDES     += -I$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf/include
 ISP_INCLUDES     += -I$(ISP_PREFIX)/include
 ISP_INCLUDES     += -I$(ISP_PREFIX)/local/include
-ISP_INCLUDES     += -I$(ISP_PREFIX)/bsp/iveia/ap/include
+ISP_INCLUDES     += -I$(ISP_PREFIX)/bsp/ssith-p1/ap/include
 ISP_INCLUDES     += -I$(ISP_RUNTIME)
 
 RISCV_PATH       ?= $(ISP_PREFIX)
 RISCV_CLANG      ?= $(abspath $(RISCV_PATH)/bin/clang)
 RISCV_GXX        ?= $(RISCV_CLANG)
-RISCV_OBJDUMP    ?= $(abspath  $(RISCV_PATH)/bin/llvm-objdump)
+RISCV_OBJDUMP    ?= $(abspath $(RISCV_PATH)/bin/llvm-objdump)
 RISCV_GDB        ?= $(abspath $(RISCV_PATH)/bin/riscv64-unknown-elf-gdb)
-RISCV_AR         ?= $(abspath  $(RISCV_PATH)/bin/llvm-ar)
+RISCV_AR         ?= $(abspath $(RISCV_PATH)/bin/llvm-ar)
 
-RISCV_ARCH       ?= rv64imafd
-RISCV_ABI        ?= lp64d
-RISCV_TARGET     ?= riscv64-unknown-elf
-
-ISP_CFLAGS       += -DRV64 -mcmodel=medany
-ISP_LDFLAGS      += -mcmodel=medany
+RISCV_ARCH       ?= rv32ima
+RISCV_ABI        ?= ilp32
+RISCV_TARGET     ?= riscv32-unknown-elf
+ISP_CFLAGS       += -DRV32
 
 CC               := $(RISCV_CLANG)
 
@@ -42,9 +40,10 @@ ISP_ASMFLAGS     := $(ISP_CFLAGS)
 BSP_BASE         := $(ISP_RUNTIME)/bsp
 
 LIBISP           := $(ISP_RUNTIME)/libisp.a
+
 ISP_LIBS         := $(LIBISP)
 
-ISP_LDFLAGS      := -L$(ISP_PREFIX)/bsp/iveia/ap -T$(ISP_RUNTIME)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
+ISP_LDFLAGS      := -L$(ISP_PREFIX)/bsp/ssith-p1/ap -T$(ISP_RUNTIME)/link.ld -nostartfiles -defsym=_STACK_SIZE=4K -fuse-ld=lld
 ISP_LDFLAGS      += -Wl,--wrap=isatty
 ISP_LDFLAGS      += -Wl,--wrap=printf
 ISP_LDFLAGS      += -Wl,--wrap=puts
@@ -55,9 +54,8 @@ ISP_LDFLAGS      += -Wl,--wrap=free
 ISP_LDFLAGS      += -Wl,--undefined=pvPortMalloc
 ISP_LDFLAGS      += -Wl,--undefined=pvPortFree
 
-ISP_LDFLAGS      += -lbsp -L$(ISP_PREFIX)/bsp/iveia/ap/lib
+ISP_LDFLAGS      += -lbsp -L$(ISP_PREFIX)/bsp/ssith-p1/ap/lib
 ISP_LDFLAGS      += -lisp -L$(ISP_RUNTIME)
-ISP_LDFLAGS      += -L$(ISP_PREFIX)/local/lib/$(RISCV_ARCH)/$(RISCV_ABI)
 
 debug:
 	echo $(CC)

@@ -45,19 +45,20 @@ def doEntitiesFile(run_dir, name):
         open(filename, "a").close()
 
 
-def compileMissingPex(policy_dir, pex_path, sim, arch, extra):
+def compileMissingPex(design, policy_dir, pex_path, sim, arch, extra):
     logger.info("Attempting to compile missing PEX binary")
     install_path = os.path.dirname(pex_path)
     args = ["isp_install_policy",
              "-p", policy_dir,
              "-s", sim,
+             "--soc", design,
              "--arch", arch,
              "-o", install_path]
 
     if extra:
         args += ["-e"] + extra
 
-    logger.debug("Building PEX kernel with command: {}".format(" ".join(args)))
+    logger.debug(f"Building PEX kernel with command: {' '.join(args)}")
     result = subprocess.call(args)
 
     if result != 0:
@@ -79,7 +80,7 @@ def compileMissingPolicy(policies, global_policies, output_dir, debug):
     if debug:
         args += ["-D"]
 
-    logger.debug("Building policy with command: {}".format(" ".join(args)))
+    logger.debug(f"Building policy with command: {' '.join(args)}")
     result = subprocess.call(args)
 
     if result != 0:
@@ -94,6 +95,9 @@ def main():
     parser = argparse.ArgumentParser(description="Run standalone ISP applications")
     parser.add_argument("exe_path", type=str, help='''
     Path of the executable to run
+    ''')
+    parser.add_argument("soc", type=str, help='''
+    SOC configuration YAML file
     ''')
     parser.add_argument("-p", "--policies", nargs='+', default=["none"], help='''
     List of policies to apply to run, or path to a policy directory
@@ -144,9 +148,6 @@ def main():
     parser.add_argument("-S", "--suffix", type=str, help='''
     Extra suffix to add to the test directory name
     ''')
-    parser.add_argument("--soc", type=str, help='''
-    SOC configuration YAML file
-    ''')
     parser.add_argument("-N", "--no_validator", action="store_true", help='''
     Do not use the validator and run the stock version of the simulator (which
     must be located at ISP_PREFIX/stock-tools/bin/qemu-system-riscv32.
@@ -183,10 +184,10 @@ def main():
 
     arch = isp_utils.getArch(args.exe_path)
     if not arch:
-        logger.error("Invalid choice of architecture. Valid choices: {}".format(isp_utils.supportedArchs))
+        logger.error(f"Invalid choice of architecture. Valid choices: {isp_utils.supportedArchs}")
         return
 
-    logger.debug("Executable has architecture {}".format(arch))
+    logger.debug(f"Executable has architecture {arch}")
 
     if args.rule_cache_name not in ["", "finite", "infinite", "dmhc"]:
         logger.error("Invalid choice of rule cache name. Valid choices: finite, infinite, dmhc")
@@ -213,11 +214,11 @@ def main():
 
     args.exe_path = os.path.realpath(args.exe_path)
     exe_name = os.path.basename(args.exe_path)
-    run_dir = os.path.join(output_dir, "isp-run-{}-{}".format(exe_name, policy_name))
+    run_dir = os.path.join(output_dir, f"isp-run-{exe_name}-{policy_name}")
     if args.rule_cache_name != "":
-        run_dir = run_dir + "-{}-{}".format(args.rule_cache_name, args.rule_cache_size)
+        run_dir = f"{run_dir}-{args.rule_cache_name}-{args.rule_cache_size}"
     if args.suffix:
-        run_dir = run_dir + "-" + args.suffix
+        run_dir = f"{run_dir}-{args.suffix}"
     
     # set policy_dir based on run_dir if it's not an existing directory
     if (not (len(policies) == 1 and  "/" in args.policies[0] and os.path.isdir(policies[0]))):
@@ -230,7 +231,7 @@ def main():
 
     pex_path = args.pex
     if not pex_path:
-        pex_path = os.path.join(run_dir, os.path.basename(sim_module.defaultPexPath(policy_name, "rv", args.extra)))
+        pex_path = os.path.join(run_dir, os.path.basename(sim_module.defaultPexPath(policy_name, args.soc)))
     else:
         pex_path = os.path.realpath(args.pex)
 
@@ -241,16 +242,19 @@ def main():
                 sys.exit(1)
 
         if not os.path.isfile(pex_path):
-            if compileMissingPex(policy_dir, pex_path, args.simulator, arch, args.extra) is False:
+            if compileMissingPex(args.soc, policy_dir, pex_path, args.simulator, arch, args.extra) is False:
                 logger.error("Failed to compile missing PEX binary")
                 sys.exit(1)
 
-        logger.debug("Using PEX at path: {}".format(pex_path))
+        logger.debug(f"Using PEX at path: {pex_path}")
 
         doEntitiesFile(run_dir, exe_name)
 
     logger.debug("Starting simulator...")
+    soc_cfg = os.path.join(isp_prefix, "bsp", args.soc, "config", f"soc_{args.soc}.yml")
+    logger.debug(f"Using SOC config {soc_cfg}")
     result = sim_module.runSim(args.exe_path,
+                               args.soc,
                                run_dir,
                                policy_dir,
                                pex_path,
@@ -258,7 +262,7 @@ def main():
                                (args.rule_cache_name, args.rule_cache_size),
                                args.gdb,
                                args.tagfile,
-                               args.soc,
+                               soc_cfg,
                                arch,
                                args.extra,
                                use_validator,
@@ -275,10 +279,10 @@ def main():
         printUartOutput(run_dir)
 
     process_exit_code = getProcessExitCode(run_dir, args.runtime)
-    logger.debug("Process exited with code {}".format(process_exit_code))
+    logger.debug(f"Process exited with code {process_exit_code}")
 
     if result is not isp_utils.retVals.SUCCESS:
-        logger.error("Failed to run application: {}".format(result))
+        logger.error(f"Failed to run application: {result}")
 
 
 if __name__ == "__main__":

@@ -30,16 +30,6 @@ class retVals:
 #  $(ISP_CLEAN) removed in the clean target
 #  main() renamed to isp_main()
 
-bare_bsp = {
-    "qemu": "hifive_bsp",
-    "vcu118": "vcu118_bsp",
-    "iveia": "iveia_bsp"
-}
-
-sim_aliases = {
-    "vcs": "vcu118"
-}
-
 def getTemplatesDir():
     isp_prefix = isp_utils.getIspPrefix()
     return os.path.join(isp_prefix, "sources",
@@ -58,7 +48,7 @@ def sel4_setup_source(build_dir, template_dir):
         logging.warn("WARNING - seL4 copy failed with message: {}".format(e))
 
 
-def doInstall(build_dir, template_dir, runtime, sim, stock):
+def doInstall(build_dir, template_dir, runtime, soc, stock):
     if not os.path.isdir(build_dir):
         return retVals.NO_TEST
 
@@ -74,9 +64,12 @@ def doInstall(build_dir, template_dir, runtime, sim, stock):
                 os.path.join(runtime_dir, "isp_utils.h"))
 
     runtime_main_c = os.path.join(template_dir, (runtime + "_main.c"))   
-    sim_utils_c = os.path.join(template_dir, sim, "isp_utils.c")
+    sim_utils_c = os.path.join(template_dir, soc, "isp_utils.c")
+    sim_init_c = os.path.join(template_dir, soc, "init.c")
+    sim_boot_S = os.path.join(template_dir, soc, "boot.S")
+    sim_link_ld = os.path.join(template_dir, soc, "link.ld")
     
-    makefile_path = os.path.join(template_dir, sim)
+    makefile_path = os.path.join(template_dir, soc)
     if stock:
         makefile_path = os.path.join(makefile_path, "stock")
 
@@ -84,11 +77,13 @@ def doInstall(build_dir, template_dir, runtime, sim, stock):
     try:
         shutil.copy(runtime_main_c, runtime_dir)
         shutil.copy(sim_utils_c, runtime_dir)
+        if os.path.exists(sim_init_c):
+            shutil.copy(sim_init_c, runtime_dir)
+        if os.path.exists(sim_boot_S):
+            shutil.copy(sim_boot_S, runtime_dir)
+        if os.path.exists(sim_link_ld):
+            shutil.copy(sim_link_ld, runtime_dir)
         shutil.copy(makefile, os.path.join(build_dir, ("isp-runtime-" + runtime + ".mk")))
-
-        if "bare" == runtime:
-            shutil.copytree(os.path.join(isp_utils.getIspPrefix(), bare_bsp[sim]),
-                            os.path.join(runtime_dir, "bsp"))
 
         if "sel4" == runtime:
             sel4_setup_source(build_dir, template_dir)
@@ -96,8 +91,8 @@ def doInstall(build_dir, template_dir, runtime, sim, stock):
             if stock:
                 sel4_dir = os.path.join(runtime_dir, "stock_sel4")
             isp_utils.doMkDir(sel4_dir)
-    except:
-        logging.error("Runtime {} is incompatible with sim {}".format(runtime, sim))
+    except Exception as e:
+        logging.error(f"Runtime {runtime} is incompatible with soc {soc}: {e}")
         return retVals.NO_RUNTIME
 
     return retVals.SUCCESS
@@ -110,8 +105,8 @@ def main():
     parser.add_argument("runtime", type=str, help='''
     Currently supported: frtos, sel4, bare
     ''')
-    parser.add_argument("sim", type=str, help='''
-    Currently supported: qemu, vcu118, vcs
+    parser.add_argument("soc", type=str, help='''
+    Currently supported: hifive, ssith-p2
     ''')
     parser.add_argument("-b", "--build-dir", type=str, default=".", help='''
     Directory containing the Makefile for the main executable.
@@ -131,14 +126,10 @@ def main():
 
     build_dir_full = os.path.abspath(args.build_dir)
 
-    sim = args.sim
-    if args.sim in sim_aliases:
-        sim = sim_aliases[args.sim]
-
     result = doInstall(build_dir_full,
                        getTemplatesDir(),
                        args.runtime,
-                       sim,
+                       args.soc,
                        args.stock)
 
     if result is not retVals.SUCCESS:

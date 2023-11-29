@@ -32,19 +32,15 @@ fpga = "gfe"
 # Invoked by isp_install_policy
 #################################
 
-def defaultPexPath(policy_name, arch, extra):
-    extra_args = parseExtra(extra)
-    return os.path.join(isp_prefix, "pex-kernel", isp_pex_kernel.pexKernelName(policy_name, fpga,
-                        extra_args.processor))
+def defaultPexPath(policy_name, soc):
+    return os.path.join(isp_prefix, "pex-kernel", isp_pex_kernel.pexKernelName(policy_name, soc))
 
 
-def installPex(policy_dir, output_dir, arch, extra):
+def installPex(soc, policy_dir, output_dir):
     logger.info("Installing pex kernel for iveia")
     pex_kernel_source_dir = os.path.join(isp_prefix, "sources", "pex-kernel")
     pex_firmware_source_dir = os.path.join(isp_prefix, "sources", "pex-firmware")
     policy_name = os.path.basename(policy_dir)
-
-    extra_args = parseExtra(extra)
 
     if not isp_utils.checkDependency(pex_kernel_source_dir, logger):
         return False
@@ -52,13 +48,13 @@ def installPex(policy_dir, output_dir, arch, extra):
     if not isp_pex_kernel.copyPexKernelSources(pex_kernel_source_dir, output_dir):
         return False
 
-    if not isp_pex_kernel.copyPolicySources(policy_dir, output_dir, fpga, extra_args.processor):
+    if not isp_pex_kernel.copyPolicySources(policy_dir, output_dir, soc):
         return False
 
-    if not isp_pex_kernel.buildPexKernel(policy_name, output_dir, fpga, extra_args.processor):
+    if not isp_pex_kernel.buildPexKernel(soc, policy_name, output_dir, "gfe"):
         return False
 
-    if not isp_pex_kernel.movePexKernel(policy_name, output_dir, fpga, extra_args.processor):
+    if not isp_pex_kernel.movePexKernel(policy_name, output_dir, soc):
         return False
 
     return True
@@ -85,7 +81,6 @@ def parseExtra(extra):
     parser.add_argument("--bitstream", type=str,
                         help="Re-program the FPGA with the specified bitstream")
     parser.add_argument("--no-reset", action="store_true", help="Skip resetting the FPGA")
-    parser.add_argument("--processor", type=str, default="P2", help="GFE processor configuration (P1/P2/P3)")
     parser.add_argument("--board", type=str, default="iveia", help="Target board: iveia or iwave")
     parser.add_argument("--pex-br", type=str, default="115200", help="pex uart baud rate")
     parser.add_argument("--ap-br", type=str, default="115200", help="ap uart baud rate")
@@ -121,7 +116,7 @@ def detectTTY(symlink):
 
 
 
-def ap_thread(ap_tty, ap_baud_rate, ap_log, runtime, processor):
+def ap_thread(ap_tty, ap_baud_rate, ap_log, runtime):
 
     ap_serial = serial.Serial(ap_tty, ap_baud_rate, timeout=3000000, bytesize=serial.EIGHTBITS,
                                parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
@@ -242,17 +237,11 @@ def runPipe(exe_path, ap, pex_tty, pex_baud_rate, pex_log, run_dir, pex_kernel_p
 
     return isp_utils.retVals.SUCCESS
 
-def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
+def runSim(exe_path, soc, run_dir, policy_dir, pex_path, runtime, rule_cache,
            gdb_port, tagfile, soc_cfg, arch, extra, use_validator=False, tag_only=True):
     extra_args = parseExtra(extra)
     ap_log_file = os.path.join(run_dir, "uart.log")
     pex_log_file = os.path.join(run_dir, "pex.log")
-
-    if not soc_cfg:
-        soc_cfg = os.path.join(isp_prefix, "soc_cfg", "soc_iveia.yml")
-    else:
-        soc_cfg = os.path.realpath(soc_cfg)
-    logger.debug("Using SOC config {}".format(soc_cfg))
 
     flash_init_image_path = os.path.join(run_dir, "full.init")
     if extra_args.flash_init:
@@ -279,7 +268,7 @@ def runSim(exe_path, run_dir, policy_dir, pex_path, runtime, rule_cache,
         logger.error("Failed to autodetect PEX TTY file. If you know the symlink, re-run with the +pex_tty option")
         return isp_utils.retVals.FAILURE
 
-    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, extra_args.ap_br, ap_log, runtime, extra_args.processor))
+    ap = multiprocessing.Process(target=ap_thread, args=(ap_tty, extra_args.ap_br, ap_log, runtime))
     if not extra_args.no_log:
         logger.debug("Connecting AP uart to {}, baud rate {}".format(ap_tty, extra_args.ap_br))
         ap.start()
