@@ -64,8 +64,8 @@ def getPolicyFullName(policies, global_policies, debug):
         return composed_policies
 
 
-def getPolicyModuleName(policy):
-    return ".".join(["osv", policy, (policy + "Pol")])
+def getPolicyModuleName(module, policy):
+    return ".".join([module, policy, (policy + "Pol")])
 
 
 def setupLogger(level, colors=True):

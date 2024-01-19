@@ -159,7 +159,7 @@ def qemuOptions(exe_path, run_dir, extra, runtime, use_validator=True, gdb_port=
     if "sel4" in runtime:
         opts += ["-m", "size=2000M"]
 
-    if gdb_port is not 0:
+    if gdb_port != 0:
         opts += ["-S", "-gdb", "tcp::{}".format(gdb_port)]
 
     if extra is not None:
@@ -298,7 +298,7 @@ def runSim(exe_path, soc, run_dir, policy_dir, pex_path, runtime, rule_cache,
 
     try:
         logger.debug("Begin QEMU test... (timeout: {})".format(timeout_seconds))
-        if gdb_port is not 0:
+        if gdb_port != 0:
             launchQEMUDebug(run_dir, env, options)
         else:
             wd = threading.Thread(target=watchdog)
