@@ -46,7 +46,7 @@ INSTALLED_ISP_SCRIPTS := $(patsubst %,$(BIN_DIR)/%,$(ISP_SCRIPTS))
 PYTHON_SCRIPTS := $(patsubst %,%.py,$(ISP_SCRIPTS))
 PYTHON_SCRIPTS += $(ISP_BACKEND)
 
-.PHONY: all install clean uninstall install-isp-scripts install-gdb-scripts install-runtime install-sources
+.PHONY: all install clean uninstall install-isp-scripts install-gdb-scripts install-runtime install-sources $(SOURCES:%=$(ISP_PREFIX)/sources/%)
 all: $(ISP_SCRIPTS)
 
 install: install-runtime install-isp-scripts install-gdb-scripts install-modules install-sources $(VENV_DONE)
@@ -71,7 +71,7 @@ install-modules: $(MODULES)
 $(SOURCES:%=$(ISP_PREFIX)/sources/%): $(ISP_PREFIX)/sources/%: $(HOPE_SRC)/%
 	if [ -f "$^/Makefile.isp" ]; then $(MAKE) -C $^ -f Makefile.isp clean; fi
 	mkdir -p $(@D)
-	rsync -av --exclude=".*" $^ $(@D)
+	rsync -auv --exclude=".*" $^ $(@D)
 
 install-sources: $(ISP_PREFIX) $(SOURCES:%=$(ISP_PREFIX)/sources/%)
 

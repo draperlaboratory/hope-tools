@@ -29,6 +29,10 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
+
+/* ISP header */
+#include "isp_utils.h"
+
 /* Prototypes for the standard FreeRTOS callback/hook functions implemented
 within this file.  See https://www.freertos.org/a00016.html */
 void vApplicationMallocFailedHook( void );
@@ -36,10 +40,6 @@ void vApplicationIdleHook( void );
 void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName );
 void vApplicationTickHook( void );
 
-/* Exits QEMU on failure conditions */
-void isp_test_device_fail(void);
-
-extern int isp_main(void);
 
 xTaskHandle xIspTask;
 
@@ -57,7 +57,8 @@ void vApplicationMallocFailedHook( void )
 	provide information on how the remaining heap might be fragmented). */
 	isp_test_device_fail();
 	taskDISABLE_INTERRUPTS();
-	for( ;; );
+	for( ;; )
+            ;
 }
 /*-----------------------------------------------------------*/
 
@@ -85,7 +86,8 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
 	taskDISABLE_INTERRUPTS();
-	for( ;; );
+	for( ;; )
+            ;
 }
 /*-----------------------------------------------------------*/
 
@@ -115,7 +117,8 @@ void isp_main_task(void *argument)
 
   t_printf("\nMain task has completed with code: 0x%08x\n", result);
 
-  for( ;; );
+  for( ;; )
+      ;
 
   // this may need changes to portable layer
   vTaskEndScheduler();
@@ -131,6 +134,7 @@ int main(void)
 
 	vTaskStartScheduler();
 
-	for( ;; );
+	for( ;; )
+            ;
   return 0;
 }
