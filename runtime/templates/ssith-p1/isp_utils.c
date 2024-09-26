@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
-#include "bsp.h"
 #include "isp_utils.h"
+#include "memory_map.h"
 
 extern volatile uint64_t tohost;
 

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "bsp.h"
+#include "memory_map.h"
 
 extern int main(void);
 
