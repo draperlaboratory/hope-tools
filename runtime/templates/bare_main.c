@@ -4,7 +4,5 @@ extern int isp_main(void);
 
 int main(void)
 {
-  isp_main();
-
-  return 0;
+  return isp_main();
 }
