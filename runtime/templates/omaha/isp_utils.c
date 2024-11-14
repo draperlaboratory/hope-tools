@@ -38,7 +38,12 @@ uint64_t isp_get_cycle_count(uint32_t *result_hi, uint32_t *result_lo)
 		"csrr %0, mcycle\n\t"
 		: "=r"(cycle));
 
-  return cycle;
+
+        if(result_lo != NULL)
+            *result_lo = (uint32_t) cycle & 0xFFFFFFFFFUL;
+        if(result_hi != NULL)
+            *result_hi = (uint32_t) ((cycle>>32) & 0xFFFFFFFFUL);
+        return cycle;
 #else
 	uint32_t cycle_lo, cycle_hi, temp_hi;
         // Loop outside of the inline assembly to avoid issues with LLVM
